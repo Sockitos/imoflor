@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TicketPriority } from '@/types';
+	import type { TicketPriority } from '@/types/types';
 	import { priorityMap } from './ticket-priority-map';
 
 	export let priority: TicketPriority;

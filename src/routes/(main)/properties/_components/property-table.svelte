@@ -7,7 +7,8 @@
 	} from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Property, PropertyType } from '@/types';
+	import { currencyFormatter } from '@/formatters';
+	import type { Property, PropertyType } from '@/types/types';
 	import { Cross2 } from 'radix-icons-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
@@ -17,14 +18,16 @@
 		addTableFilter,
 	} from 'svelte-headless-table/plugins';
 	import type { Writable } from 'svelte/store';
-	import { get, readable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import PropertyActions from './property-actions.svelte';
 	import PropertyTypeCell from './property-type-cell.svelte';
 	import { typeMap } from './property-type-map';
 
 	export let properties: Property[];
+	let data = writable(properties);
+	$: data.set(properties);
 
-	const table = createTable(readable(properties), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],
@@ -97,10 +100,7 @@
 			accessor: 'patrimonial_value',
 			header: 'Patrimonial Value',
 			cell: ({ value }) => {
-				const formatted = new Intl.NumberFormat('pt-PT', {
-					style: 'currency',
-					currency: 'EUR',
-				}).format(value ?? 0);
+				const formatted = currencyFormatter.format(value ?? 0);
 				return formatted;
 			},
 		}),
@@ -108,10 +108,7 @@
 			accessor: 'market_value',
 			header: 'Market Value',
 			cell: ({ value }) => {
-				const formatted = new Intl.NumberFormat('pt-PT', {
-					style: 'currency',
-					currency: 'EUR',
-				}).format(value ?? 0);
+				const formatted = currencyFormatter.format(value ?? 0);
 				return formatted;
 			},
 		}),

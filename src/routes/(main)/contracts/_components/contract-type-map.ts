@@ -1,4 +1,4 @@
-import type { ContractType } from '@/types';
+import type { ContractType } from '@/types/types';
 import { FileClock, FileKey2, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 

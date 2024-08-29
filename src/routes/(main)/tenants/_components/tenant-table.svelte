@@ -2,22 +2,36 @@
 	import { DataTableCheckbox, DataTableColumnHeader } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Tenant } from '@/types';
+	import type { Tenant } from '@/types/types';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import { addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
-	import { readable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	import TenantActions from './tenant-actions.svelte';
 	import TenantEmailCell from './tenant-email-cell.svelte';
 	import TenantPhoneCell from './tenant-phone-cell.svelte';
 
 	export let tenants: Tenant[];
+	let data = writable(tenants);
+	$: data.set(tenants);
 
-	const table = createTable(readable(tenants), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],
 		}),
-		filter: addTableFilter<string>(),
+		filter: addTableFilter<string>({
+			fn: ({ filterValue, value }) =>
+				value
+					.toLowerCase()
+					.normalize('NFD')
+					.replace(/\p{Diacritic}/gu, '')
+					.includes(
+						filterValue
+							.toLowerCase()
+							.normalize('NFD')
+							.replace(/\p{Diacritic}/gu, '')
+					),
+		}),
 	});
 
 	const columns = table.createColumns([

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { InterventionType } from '@/types';
+	import type { InterventionType } from '@/types/types';
 	import { typeMap } from './intervention-type-map';
 
 	export let type: InterventionType;

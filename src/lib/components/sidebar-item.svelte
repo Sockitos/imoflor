@@ -8,7 +8,7 @@
 	export let label: string;
 	export let href: string;
 
-	$: isSelected = $page.url.pathname === href;
+	$: isSelected = $page.url.pathname.startsWith(href);
 </script>
 
 <Button
@@ -16,7 +16,7 @@
 	variant={isSelected ? 'secondary' : 'ghost'}
 	class="flex w-full justify-start md:hidden lg:flex"
 >
-	<svelte:component this={icon} class="mr-2 h-4 w-4" />
+	<svelte:component this={icon} class="mr-2 h-4 w-4 text-muted-foreground" />
 	{label}
 </Button>
 <Button

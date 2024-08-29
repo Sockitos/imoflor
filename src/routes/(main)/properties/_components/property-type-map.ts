@@ -1,4 +1,4 @@
-import type { PropertyType } from '@/types';
+import type { PropertyType } from '@/types/types';
 import { Building2, Home, LandPlot, Warehouse, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 

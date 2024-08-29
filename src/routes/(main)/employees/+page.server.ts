@@ -5,10 +5,12 @@ import {
 } from '@/schemas/employee';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms/server';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const session = await event.locals.getSession();
+	const { session } = await event.locals.safeGetSession();
 	if (!session) {
 		return redirect(302, handleLoginRedirect(event));
 	}
@@ -19,20 +21,22 @@ export const load = async (event) => {
 			.select('*');
 
 		if (employeesError) {
-			return error(500, 'Error fetching employees, please try again later.');
+			const errorMessage = 'Error fetching employees, please try again later.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(500, errorMessage);
 		}
 		return employees;
 	}
 
 	return {
 		employees: await getEmployees(),
-		createForm: await superValidate(createEmployeeSchema, {
+		createForm: await superValidate(zod(createEmployeeSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(updateEmployeeSchema, {
+		updateForm: await superValidate(zod(updateEmployeeSchema), {
 			id: 'update',
 		}),
-		deleteForm: await superValidate(deleteEmployeeSchema, {
+		deleteForm: await superValidate(zod(deleteEmployeeSchema), {
 			id: 'delete',
 		}),
 	};
@@ -40,15 +44,19 @@ export const load = async (event) => {
 
 export const actions = {
 	create: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, createEmployeeSchema, { id: 'create' });
+		const form = await superValidate(event.request, zod(createEmployeeSchema), { id: 'create' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -56,21 +64,26 @@ export const actions = {
 			.insert(form.data);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/employees');
+		return { success: true, form };
 	},
 	update: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, updateEmployeeSchema, { id: 'update' });
+		const form = await superValidate(event.request, zod(updateEmployeeSchema), { id: 'update' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -79,21 +92,26 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/employees');
+		return { success: true, form };
 	},
 	delete: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, deleteEmployeeSchema, { id: 'delete' });
+		const form = await superValidate(event.request, zod(deleteEmployeeSchema), { id: 'delete' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -102,9 +120,10 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/employees');
+		return { success: true, form };
 	},
 };

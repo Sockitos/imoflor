@@ -8,7 +8,8 @@
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
 	import Toggle from '@/components/ui/toggle/toggle.svelte';
-	import type { Contract, ContractType } from '@/types';
+	import { currencyFormatter } from '@/formatters';
+	import type { Contract, ContractType } from '@/types/types';
 	import { Cross2 } from 'radix-icons-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
@@ -17,15 +18,17 @@
 		addSortBy,
 		addTableFilter,
 	} from 'svelte-headless-table/plugins';
-	import { readable, type Writable } from 'svelte/store';
+	import { writable, type Writable } from 'svelte/store';
 	import ContractActions from './contract-actions.svelte';
 	import ContractBalanceCell from './contract-balance-cell.svelte';
 	import ContractTypeCell from './contract-type-cell.svelte';
 	import { typeMap } from './contract-type-map';
 
 	export let contracts: Contract[];
+	let data = writable(contracts);
+	$: data.set(contracts);
 
-	const table = createTable(readable(contracts), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],
@@ -77,6 +80,7 @@
 			header: 'Tenants',
 			cell: ({ value }) => {
 				const count = value.length;
+				if (count === 0) return '';
 				return count === 1 ? value[0].label : `${value[0].label} +${count - 1}`;
 			},
 		}),
@@ -89,10 +93,7 @@
 			},
 			header: 'Payment',
 			cell: ({ value }) => {
-				const formatted = new Intl.NumberFormat('pt-PT', {
-					style: 'currency',
-					currency: 'EUR',
-				}).format(value);
+				const formatted = currencyFormatter.format(value);
 				return formatted;
 			},
 		}),

@@ -7,7 +7,7 @@
 	} from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Intervention, InterventionStatus, InterventionType } from '@/types';
+	import type { Intervention, InterventionStatus, InterventionType } from '@/types/types';
 	import { Cross2 } from 'radix-icons-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
@@ -17,7 +17,7 @@
 		addTableFilter,
 	} from 'svelte-headless-table/plugins';
 	import type { Writable } from 'svelte/store';
-	import { get, readable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import InterventionActions from './intervention-actions.svelte';
 	import InterventionStatusCell from './intervention-status-cell.svelte';
 	import { statusMap } from './intervention-status-map';
@@ -25,8 +25,10 @@
 	import { typeMap } from './intervention-type-map';
 
 	export let interventions: Intervention[];
+	let data = writable(interventions);
+	$: data.set(interventions);
 
-	const table = createTable(readable(interventions), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],

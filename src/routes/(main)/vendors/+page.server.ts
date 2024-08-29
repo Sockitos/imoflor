@@ -1,10 +1,12 @@
 import { createVendorSchema, deleteVendorSchema, updateVendorSchema } from '@/schemas/vendor';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms/server';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const session = await event.locals.getSession();
+	const { session } = await event.locals.safeGetSession();
 	if (!session) {
 		return redirect(302, handleLoginRedirect(event));
 	}
@@ -15,6 +17,8 @@ export const load = async (event) => {
 			.select('*');
 
 		if (vendorsError) {
+			const errorMessage = 'Error fetching vendors, please try again later.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
 			return error(500, 'Error fetching vendors, please try again later.');
 		}
 		return vendors;
@@ -22,13 +26,13 @@ export const load = async (event) => {
 
 	return {
 		vendors: await getVendors(),
-		createForm: await superValidate(createVendorSchema, {
+		createForm: await superValidate(zod(createVendorSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(updateVendorSchema, {
+		updateForm: await superValidate(zod(updateVendorSchema), {
 			id: 'update',
 		}),
-		deleteForm: await superValidate(deleteVendorSchema, {
+		deleteForm: await superValidate(zod(deleteVendorSchema), {
 			id: 'delete',
 		}),
 	};
@@ -36,35 +40,44 @@ export const load = async (event) => {
 
 export const actions = {
 	create: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, createVendorSchema, { id: 'create' });
+		const form = await superValidate(event.request, zod(createVendorSchema), { id: 'create' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase.from('vendors').insert(form.data);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/vendors');
+		return { success: true, form };
 	},
 	update: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, updateVendorSchema, { id: 'update' });
+		const form = await superValidate(event.request, zod(updateVendorSchema), { id: 'update' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -73,21 +86,26 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/vendors');
+		return { success: true, form };
 	},
 	delete: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, deleteVendorSchema, { id: 'delete' });
+		const form = await superValidate(event.request, zod(deleteVendorSchema), { id: 'delete' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -96,9 +114,10 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/vendors');
+		return { success: true, form };
 	},
 };

@@ -1,19 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
-	import { Separator } from '@/components/ui/separator';
-	import * as Sheet from '@/components/ui/sheet';
-	import type { Ticket } from '@/types';
+	import type { Ticket } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
+	import TicketDeleteDialog from './ticket-delete-dialog.svelte';
 	import TicketForm from './ticket-form.svelte';
 	import { priorityMap } from './ticket-priority-map';
 	import { statusMap } from './ticket-status-map';
 
 	export let ticket: Ticket;
 	let openSheet = false;
-	let openAlertDialog = false;
+	let openDeleteDialog = false;
 </script>
 
 <DropdownMenu.Root>
@@ -52,33 +50,10 @@
 		</DropdownMenu.Sub>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
-		<DropdownMenu.Item on:click={() => (openAlertDialog = true)}>Delete</DropdownMenu.Item>
+		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<Sheet.Root bind:open={openSheet}>
-	<Sheet.Content class="sm:max-w-[40rem]">
-		<Sheet.Header>
-			<Sheet.Title>Add new ticket</Sheet.Title>
-			<Sheet.Description>Fill the form below to add a new ticket.</Sheet.Description>
-		</Sheet.Header>
-		<Separator class="my-5" />
-		<TicketForm form={$page.data.updateForm} />
-	</Sheet.Content>
-</Sheet.Root>
+<TicketForm data={$page.data.updateForm} bind:open={openSheet} />
 
-<AlertDialog.Root bind:open={openAlertDialog}>
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete this ticket and remove their data
-				from our servers.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action>Continue</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+<TicketDeleteDialog {ticket} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

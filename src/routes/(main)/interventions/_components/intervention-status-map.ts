@@ -1,4 +1,4 @@
-import type { InterventionStatus } from '@/types';
+import type { InterventionStatus } from '@/types/types';
 import { CheckCircle2, CircleDashed, CircleDot, XCircle, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 
@@ -11,8 +11,8 @@ export const statusMap: Record<InterventionStatus, { label: string; icon: Compon
 		label: 'In Progress',
 		icon: CircleDot,
 	},
-	finished: {
-		label: 'Finished',
+	completed: {
+		label: 'Completed',
 		icon: CheckCircle2,
 	},
 	cancelled: {

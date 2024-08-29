@@ -7,7 +7,7 @@
 	} from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Ticket, TicketPriority, TicketStatus } from '@/types';
+	import type { Ticket, TicketPriority, TicketStatus } from '@/types/types';
 	import { Cross2 } from 'radix-icons-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
@@ -17,7 +17,7 @@
 		addTableFilter,
 	} from 'svelte-headless-table/plugins';
 	import type { Writable } from 'svelte/store';
-	import { get, readable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import TicketActions from './ticket-actions.svelte';
 	import TicketPriorityCell from './ticket-priority-cell.svelte';
 	import { priorityMap } from './ticket-priority-map';
@@ -25,8 +25,10 @@
 	import { statusMap } from './ticket-status-map';
 
 	export let tickets: Ticket[];
+	let data = writable(tickets);
+	$: data.set(tickets);
 
-	const table = createTable(readable(tickets), {
+	const table = createTable(data, {
 		select: addSelectedRows<Ticket>(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],

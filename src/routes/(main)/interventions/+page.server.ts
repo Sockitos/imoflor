@@ -5,10 +5,12 @@ import {
 } from '@/schemas/intervention';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms/server';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const session = await event.locals.getSession();
+	const { session } = await event.locals.safeGetSession();
 	if (!session) {
 		return redirect(302, handleLoginRedirect(event));
 	}
@@ -21,21 +23,56 @@ export const load = async (event) => {
 			);
 
 		if (interventionsError) {
-			console.log(interventionsError);
 			return error(500, 'Error fetching interventions, please try again later.');
 		}
 		return interventions;
 	}
 
+	async function getPropertyOptions() {
+		const { data: properties, error: propertiesError } = await event.locals.supabase
+			.from('properties')
+			.select('id, label:address');
+
+		if (propertiesError) {
+			return error(500, 'Error fetching properties, please try again later.');
+		}
+		return properties;
+	}
+
+	async function getFractionOptions() {
+		const { data: fractions, error: fractionsError } = await event.locals.supabase
+			.from('fractions')
+			.select('id, label:address');
+
+		if (fractionsError) {
+			return error(500, 'Error fetching fractions, please try again later.');
+		}
+		return fractions;
+	}
+
+	async function getTicketOptions() {
+		const { data: tickets, error: ticketsError } = await event.locals.supabase
+			.from('tickets')
+			.select('id, label:title');
+
+		if (ticketsError) {
+			return error(500, 'Error fetching tickets, please try again later.');
+		}
+		return tickets;
+	}
+
 	return {
 		interventions: await getInterventions(),
-		createForm: await superValidate(createInterventionSchema, {
+		propertyOptions: await getPropertyOptions(),
+		fractionOptions: await getFractionOptions(),
+		ticketOptions: await getTicketOptions(),
+		createForm: await superValidate(zod(createInterventionSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(updateInterventionSchema, {
+		updateForm: await superValidate(zod(updateInterventionSchema), {
 			id: 'update',
 		}),
-		deleteForm: await superValidate(deleteInterventionSchema, {
+		deleteForm: await superValidate(zod(deleteInterventionSchema), {
 			id: 'delete',
 		}),
 	};
@@ -43,15 +80,21 @@ export const load = async (event) => {
 
 export const actions = {
 	create: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, createInterventionSchema, { id: 'create' });
+		const form = await superValidate(event.request, zod(createInterventionSchema), {
+			id: 'create',
+		});
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -59,21 +102,28 @@ export const actions = {
 			.insert(form.data);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/tenants');
+		return { success: true, form };
 	},
 	update: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, updateInterventionSchema, { id: 'update' });
+		const form = await superValidate(event.request, zod(updateInterventionSchema), {
+			id: 'update',
+		});
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -82,21 +132,28 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/interventions');
+		return { success: true, form };
 	},
 	delete: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, deleteInterventionSchema, { id: 'delete' });
+		const form = await superValidate(event.request, zod(deleteInterventionSchema), {
+			id: 'delete',
+		});
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -105,9 +162,10 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/interventions');
+		return { success: true, form };
 	},
 };

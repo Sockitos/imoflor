@@ -8,8 +8,8 @@
 	<h1 class="py-4 text-center text-4xl font-bold md:hidden lg:block">IMOFLOR</h1>
 	<SidebarGroup label="Comercial">
 		<SidebarItem icon={Users} label="Tenants" href="/tenants" />
-		<SidebarItem icon={Building2} label="Propriedades" href="/properties" />
-		<SidebarItem icon={ScrollText} label="Contratos" href="/contracts" />
+		<SidebarItem icon={Building2} label="Properties" href="/properties" />
+		<SidebarItem icon={ScrollText} label="Contracts" href="/contracts" />
 	</SidebarGroup>
 	<SidebarGroup label="What">
 		<SidebarItem icon={Tag} label="Tickets" href="/tickets" />

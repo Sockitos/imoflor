@@ -1,21 +1,19 @@
 <script lang="ts">
 	import * as Card from '@/components/ui/card';
 	import * as Form from '@/components/ui/form';
-	import { signInSchema, type SignInSchema } from '@/schemas/sign-in';
+	import { Input } from '@/components/ui/input';
+	import { signInSchema } from '@/schemas/sign-in';
 	import { Loader2 } from 'lucide-svelte';
-	import { toast } from 'svelte-sonner';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
-	import type { ActionData } from './$types';
 
-	export let form: SuperValidated<SignInSchema> & ActionData;
 	export let data;
-	const sForm = superForm(data.form);
-	$: submitting = sForm.submitting;
 
-	$: if (form?.success === false) {
-		toast.error(form?.message ?? 'Something went wrong');
-	}
+	const form = superForm(data.form, {
+		validators: zodClient(signInSchema),
+	});
+
+	const { form: formData, enhance, submitting } = form;
 </script>
 
 <div class="container flex h-screen w-screen flex-col items-center justify-center">
@@ -25,20 +23,20 @@
 			<Card.Description>Login to enter the dashboard</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<Form.Root method="POST" controlled form={sForm} schema={signInSchema} let:config>
-				<Form.Field {config} name="email">
-					<Form.Item>
+			<form method="POST" use:enhance>
+				<Form.Field {form} name="email">
+					<Form.Control let:attrs>
 						<Form.Label>Email</Form.Label>
-						<Form.Input />
-						<Form.Validation />
-					</Form.Item>
+						<Input {...attrs} bind:value={$formData.email} />
+						<Form.FieldErrors />
+					</Form.Control>
 				</Form.Field>
-				<Form.Field {config} name="password">
-					<Form.Item>
+				<Form.Field {form} name="password">
+					<Form.Control let:attrs>
 						<Form.Label>Password</Form.Label>
-						<Form.Input type="password" />
-						<Form.Validation />
-					</Form.Item>
+						<Input type="password" {...attrs} bind:value={$formData.password} />
+						<Form.FieldErrors />
+					</Form.Control>
 				</Form.Field>
 				<Form.Button class="mt-5" disabled={$submitting}>
 					{#if $submitting}
@@ -46,7 +44,7 @@
 					{/if}
 					Submit
 				</Form.Button>
-			</Form.Root>
+			</form>
 		</Card.Content>
 	</Card.Root>
 </div>

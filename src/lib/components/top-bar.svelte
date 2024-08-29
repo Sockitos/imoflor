@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '@/components/ui/breadcrumb';
 	import * as Sheet from '@/components/ui/sheet';
-	import { Menu } from 'lucide-svelte';
+	import { Home, Menu } from 'lucide-svelte';
 	import ModeToggle from './mode-toggle.svelte';
 	import ProfileButton from './profile-button.svelte';
 	import Sidebar from './sidebar.svelte';
@@ -25,10 +25,21 @@
 		</Sheet.Root>
 	</div>
 	<Breadcrumb.Root>
-		<Breadcrumb.Item href="/" />
-		{#each pathParts as part, i}
-			<Breadcrumb.Item href="/" />
-		{/each}
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/">
+					<Home class="h-4 w-4" />
+				</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			{#each pathParts as part, i}
+				<Breadcrumb.Separator />
+				<Breadcrumb.Item>
+					<Breadcrumb.Link href={`/${pathParts.slice(0, i + 1).join('/')}`}
+						>{part.charAt(0).toUpperCase() + part.substring(1)}
+					</Breadcrumb.Link>
+				</Breadcrumb.Item>
+			{/each}
+		</Breadcrumb.List>
 	</Breadcrumb.Root>
 	<div class="flex-1" />
 	<ProfileButton />

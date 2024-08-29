@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { PropertyType } from '@/types';
+	import type { PropertyType } from '@/types/types';
 	import { typeMap } from './property-type-map';
 
 	export let type: PropertyType;

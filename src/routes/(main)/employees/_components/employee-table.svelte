@@ -2,18 +2,20 @@
 	import { DataTableCheckbox, DataTableColumnHeader } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Employee } from '@/types';
+	import type { Employee } from '@/types/types';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import { addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
-	import { readable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	import EmployeeActions from './employee-actions.svelte';
 	import EmployeeEmailCell from './employee-email-cell.svelte';
 	import EmployeePhoneCell from './employee-phone-cell.svelte';
 	import EmployeeSalaryCell from './employee-salary-cell.svelte';
 
 	export let employees: Employee[];
+	let data = writable(employees);
+	$: data.set(employees);
 
-	const table = createTable(readable(employees), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],

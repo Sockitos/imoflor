@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ContractType } from '@/types';
+	import type { ContractType } from '@/types/types';
 	import { typeMap } from './contract-type-map';
 
 	export let type: ContractType;

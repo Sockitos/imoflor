@@ -2,10 +2,10 @@
 	import { DataTableCheckbox, DataTableColumnHeader } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Vendor } from '@/types';
+	import type { Vendor } from '@/types/types';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import { addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
-	import { readable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	import VendorActions from './vendor-actions.svelte';
 	import VendorEmailCell from './vendor-email-cell.svelte';
 	import VendorPhoneCell from './vendor-phone-cell.svelte';
@@ -13,8 +13,10 @@
 	import VendorWebsiteCell from './vendor-website-cell.svelte';
 
 	export let vendors: Vendor[];
+	let data = writable(vendors);
+	$: data.set(vendors);
 
-	const table = createTable(readable(vendors), {
+	const table = createTable(data, {
 		select: addSelectedRows(),
 		sort: addSortBy({
 			toggleOrder: ['asc', 'desc'],

@@ -1,4 +1,4 @@
-import type { InterventionType } from '@/types';
+import type { InterventionType } from '@/types/types';
 import { Drill, HardHat, Wrench, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 

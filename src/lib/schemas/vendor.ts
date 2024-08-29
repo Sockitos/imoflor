@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
 export const createVendorSchema = z.object({
-	id: z.string().optional(),
-	name: z.string(),
-	nif: z.string(),
+	name: z.string().min(1, 'Name is required.'),
+	nif: z.string().min(1, 'NIF is required.'),
 	description: z.string().optional(),
-	tags: z.array(z.string()),
+	tags: z.string().array(),
 	country: z.string().optional(),
 	region: z.string().optional(),
 	address: z.string().optional(),
@@ -20,11 +19,11 @@ export const createVendorSchema = z.object({
 export type CreateVendorSchema = typeof createVendorSchema;
 
 export const updateVendorSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	nif: z.string(),
+	id: z.number(),
+	name: z.string().min(1, 'Name is required.'),
+	nif: z.string().min(1, 'NIF is required.'),
 	description: z.string().optional(),
-	tags: z.array(z.string()).optional(),
+	tags: z.string().array(),
 	country: z.string().optional(),
 	region: z.string().optional(),
 	address: z.string().optional(),
@@ -39,7 +38,7 @@ export const updateVendorSchema = z.object({
 export type UpdateVendorSchema = typeof updateVendorSchema;
 
 export const deleteVendorSchema = z.object({
-	id: z.string(),
+	id: z.number(),
 });
 
 export type DeleteVendorSchema = typeof deleteVendorSchema;

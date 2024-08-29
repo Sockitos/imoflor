@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
-	import { Separator } from '@/components/ui/separator';
-	import * as Sheet from '@/components/ui/sheet';
-	import type { Contract } from '@/types';
+	import type { Contract } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
+	import ContractDeleteDialog from './contract-delete-dialog.svelte';
 	import ContractForm from './contract-form.svelte';
 
 	export let contract: Contract;
 	let openSheet = false;
-	let openAlertDialog = false;
+	let openDeleteDialog = false;
 </script>
 
 <DropdownMenu.Root>
@@ -22,36 +20,13 @@
 		</Button>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
-		<DropdownMenu.Item href={`/properties/${contract.id}`}>Open</DropdownMenu.Item>
+		<DropdownMenu.Item href={`/contracts/${contract.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
-		<DropdownMenu.Item on:click={() => (openAlertDialog = true)}>Delete</DropdownMenu.Item>
+		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<Sheet.Root bind:open={openSheet}>
-	<Sheet.Content class="sm:max-w-[40rem]">
-		<Sheet.Header>
-			<Sheet.Title>Add new contract</Sheet.Title>
-			<Sheet.Description>Fill the form below to add a new contract.</Sheet.Description>
-		</Sheet.Header>
-		<Separator class="my-5" />
-		<ContractForm form={$page.data.updateForm} />
-	</Sheet.Content>
-</Sheet.Root>
+<ContractForm data={$page.data.updateForm} bind:open={openSheet} />
 
-<AlertDialog.Root bind:open={openAlertDialog}>
-	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete this contract and remove their
-				data from our servers.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action>Continue</AlertDialog.Action>
-		</AlertDialog.Footer>
-	</AlertDialog.Content>
-</AlertDialog.Root>
+<ContractDeleteDialog {contract} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

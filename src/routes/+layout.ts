@@ -1,26 +1,32 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import type { Database } from '@/supabase.js';
-import { createBrowserClient, isBrowser, parse } from '@supabase/ssr';
+import type { Database } from '@/types/supabase-types';
+import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 
 export const load = async ({ fetch, data, depends }) => {
 	depends('supabase:auth');
 
-	const supabase = createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-		global: {
-			fetch,
-		},
-		cookies: {
-			get(key) {
-				if (!isBrowser()) {
-					return JSON.stringify(data.session);
-				}
+	const supabase = isBrowser()
+		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+				global: {
+					fetch,
+				},
+			})
+		: createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+				global: {
+					fetch,
+				},
+				cookies: {
+					getAll() {
+						return data.cookies;
+					},
+				},
+			});
 
-				const cookie = parse(document.cookie);
-				return cookie[key];
-			},
-		},
-	});
-
+	/**
+	 * It's fine to use `getSession` here, because on the client, `getSession` is
+	 * safe, and on the server, it reads `session` from the `LayoutData`, which
+	 * safely checked the session using `safeGetSession`.
+	 */
 	const {
 		data: { session },
 	} = await supabase.auth.getSession();

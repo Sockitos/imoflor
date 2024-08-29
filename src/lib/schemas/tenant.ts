@@ -1,15 +1,22 @@
 import { z } from 'zod';
 
 export const createTenantSchema = z.object({
-	id: z.string().optional(),
-	name: z.string(),
-	nif: z.string(),
-	gender: z.enum(['male', 'female', 'other']),
-	marital_status: z.enum(['single', 'married', 'union', 'divorced', 'widowed']),
-	nationality: z.string(),
-	birth_date: z.date().optional(),
+	name: z.string().min(1, 'Name is required.'),
+	nif: z.string().min(1, 'NIF is required.'),
+	gender: z
+		.enum(['male', 'female', 'other'], {
+			errorMap: () => ({ message: 'Gender is required' }),
+		})
+		.default('' as 'male'),
+	marital_status: z
+		.enum(['single', 'married', 'union', 'divorced', 'widowed'], {
+			errorMap: (e) => ({ message: e.message ?? 'Marital Status is required' }),
+		})
+		.default('' as 'single'),
+	nationality: z.string().min(1, 'Nationality is required.'),
+	birth_date: z.string().optional(),
 	id_type: z.string().optional(),
-	id_expiration_date: z.date().optional(),
+	id_expiration_date: z.string().optional(),
 	id_number: z.string().optional(),
 	ss_number: z.string().optional().optional(),
 	country: z.string().optional(),
@@ -25,15 +32,24 @@ export const createTenantSchema = z.object({
 export type CreateTenantSchema = typeof createTenantSchema;
 
 export const updateTenantSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	nif: z.string(),
-	gender: z.enum(['male', 'female', 'other']),
-	marital_status: z.enum(['single', 'married', 'union', 'divorced', 'widowed']),
-	nationality: z.string(),
-	birth_date: z.date().optional(),
+	id: z.number(),
+	name: z.string().min(1, 'Name is required.'),
+	nif: z.string().min(1, 'NIF is required.'),
+	gender: z
+		.enum(['male', 'female', 'other'], {
+			errorMap: () => ({ message: 'Gender is required' }),
+		})
+		.default('' as 'male'),
+	marital_status: z
+		.enum(['single', 'married', 'union', 'divorced', 'widowed'], {
+			errorMap: (e) => ({ message: e.message ?? 'Marital Status is required' }),
+		})
+		.default('' as 'single'),
+	nationality: z.string().min(1, 'Nationality is required.'),
+
+	birth_date: z.string().optional(),
 	id_type: z.string().optional(),
-	id_expiration_date: z.date().optional(),
+	id_expiration_date: z.string().optional(),
 	id_number: z.string().optional(),
 	ss_number: z.string().optional().optional(),
 	country: z.string().optional(),
@@ -49,7 +65,7 @@ export const updateTenantSchema = z.object({
 export type UpdateTenantSchema = typeof updateTenantSchema;
 
 export const deleteTenantSchema = z.object({
-	id: z.string(),
+	id: z.number(),
 });
 
 export type DeleteTenantSchema = typeof deleteTenantSchema;

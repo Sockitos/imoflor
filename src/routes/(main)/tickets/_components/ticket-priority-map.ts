@@ -1,4 +1,4 @@
-import type { TicketPriority } from '@/types';
+import type { TicketPriority } from '@/types/types';
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 

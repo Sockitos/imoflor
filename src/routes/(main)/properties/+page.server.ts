@@ -5,10 +5,12 @@ import {
 } from '@/schemas/property';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { superValidate } from 'sveltekit-superforms/server';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const session = await event.locals.getSession();
+	const { session } = await event.locals.safeGetSession();
 	if (!session) {
 		return redirect(302, handleLoginRedirect(event));
 	}
@@ -26,13 +28,13 @@ export const load = async (event) => {
 
 	return {
 		properties: await getProperties(),
-		createForm: await superValidate(createPropertySchema, {
+		createForm: await superValidate(zod(createPropertySchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(updatePropertySchema, {
+		updateForm: await superValidate(zod(updatePropertySchema), {
 			id: 'update',
 		}),
-		deleteForm: await superValidate(deletePropertySchema, {
+		deleteForm: await superValidate(zod(deletePropertySchema), {
 			id: 'delete',
 		}),
 	};
@@ -40,15 +42,19 @@ export const load = async (event) => {
 
 export const actions = {
 	create: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, createPropertySchema, { id: 'create' });
+		const form = await superValidate(event.request, zod(createPropertySchema), { id: 'create' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -56,21 +62,26 @@ export const actions = {
 			.insert(form.data);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/tenants');
+		return { success: true, form };
 	},
 	update: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, updatePropertySchema, { id: 'update' });
+		const form = await superValidate(event.request, zod(updatePropertySchema), { id: 'update' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -79,21 +90,26 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/properties');
+		return { success: true, form };
 	},
 	delete: async (event) => {
-		const session = await event.locals.getSession();
+		const { session } = await event.locals.safeGetSession();
 		if (!session) {
-			return error(401, 'Unauthorized');
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, deletePropertySchema, { id: 'delete' });
+		const form = await superValidate(event.request, zod(deletePropertySchema), { id: 'delete' });
 
 		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
 		}
 
 		const { error: supabaseError } = await event.locals.supabase
@@ -102,9 +118,10 @@ export const actions = {
 			.eq('id', form.data.id);
 
 		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
 		}
 
-		return redirect(302, '/properties');
+		return { success: true, form };
 	},
 };

@@ -1,12 +1,10 @@
 <script lang="ts">
+	import { currencyFormatter } from '@/formatters';
 	import { AlertTriangle } from 'lucide-svelte';
 
 	export let balance: number;
 
-	$: formatted = new Intl.NumberFormat('pt-PT', {
-		style: 'currency',
-		currency: 'EUR',
-	}).format(balance);
+	$: formatted = currencyFormatter.format(balance);
 </script>
 
 <div class="flex flex-row items-center">

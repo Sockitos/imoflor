@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { InterventionStatus } from '@/types';
+	import type { InterventionStatus } from '@/types/types';
 	import { statusMap } from './intervention-status-map';
 
 	export let status: InterventionStatus;

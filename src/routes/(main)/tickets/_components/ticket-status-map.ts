@@ -1,4 +1,4 @@
-import type { TicketStatus } from '@/types';
+import type { TicketStatus } from '@/types/types';
 import { CheckCircle2, CircleDashed, CircleDot, XCircle, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 

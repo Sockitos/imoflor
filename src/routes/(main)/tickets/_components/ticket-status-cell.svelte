@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TicketStatus } from '@/types';
+	import type { TicketStatus } from '@/types/types';
 	import { statusMap } from './ticket-status-map';
 
 	export let status: TicketStatus;
