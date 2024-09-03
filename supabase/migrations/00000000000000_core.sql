@@ -20,9 +20,14 @@ create type public.fraction_type as enum (
 );
 create type public.contract_type as enum ('renting', 'lending');
 create type public.ticket_priority as enum ('low', 'medium', 'high');
-create type public.ticket_status as enum ('open', 'in_progress', 'resolved');
+create type public.ticket_status as enum ('open', 'in_progress', 'resolved', 'cancelled');
 create type public.intervention_type as enum ('new', 'renovation', 'maintenance');
-create type public.intervention_status as enum ('not_started', 'in_progress', 'finished');
+create type public.intervention_status as enum (
+	'not_started',
+	'in_progress',
+	'completed',
+	'cancelled'
+);
 create type public.salary_type as enum ('hourly', 'monthly');
 create type public.movement_type as enum (
 	'rent',
@@ -134,11 +139,11 @@ create table public.properties (
 	conservatory text,
 	patrimonial_value double precision,
 	market_value double precision,
-	country text,
-	region text,
-	address text,
+	country text not null,
+	region text not null,
+	address text not null,
 	postal_code text,
-	city text
+	city text not null
 );
 /* FRACTIONS */
 create table public.fractions (
@@ -269,7 +274,7 @@ create table public.interventions (
 	status intervention_status not null,
 	start_date timestamp with time zone not null,
 	end_date timestamp with time zone,
-	description text,
+	description text not null,
 	property_id bigint not null references properties(id) on
     delete cascade,
 	fraction_id bigint references fractions(id),

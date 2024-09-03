@@ -69,7 +69,7 @@
 		table.column({
 			accessor: 'type',
 			header: 'Type',
-			cell: ({ value, row }) => {
+			cell: ({ value }) => {
 				return createRender(ContractAccountTypeCell, {
 					type: value,
 				});

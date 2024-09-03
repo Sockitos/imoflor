@@ -1,4 +1,5 @@
 import { createTicketSchema, deleteTicketSchema, updateTicketSchema } from '@/schemas/ticket';
+import type { IdWithLabel, Ticket } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,10 +11,12 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getTickets() {
+	async function getTickets(): Promise<Ticket[]> {
 		const { data: tickets, error: ticketsError } = await event.locals.supabase
 			.from('tickets')
-			.select('*, property:properties (id, label:address), fraction:fractions (id, label:address)');
+			.select(
+				'*, property:properties!inner (id, label:address), fraction:fractions!inner (id, label:address)'
+			);
 
 		if (ticketsError) {
 			return error(500, 'Error fetching tickets, please try again later.');
@@ -21,7 +24,7 @@ export const load = async (event) => {
 		return tickets;
 	}
 
-	async function getPropertyOptions() {
+	async function getPropertyOptions(): Promise<IdWithLabel[]> {
 		const { data: properties, error: propertiesError } = await event.locals.supabase
 			.from('properties')
 			.select('id, label:address');
@@ -32,7 +35,7 @@ export const load = async (event) => {
 		return properties;
 	}
 
-	async function getFractionOptions() {
+	async function getFractionOptions(): Promise<IdWithLabel[]> {
 		const { data: fractions, error: fractionsError } = await event.locals.supabase
 			.from('fractions')
 			.select('id, label:address');

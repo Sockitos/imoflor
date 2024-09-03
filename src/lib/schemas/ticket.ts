@@ -11,7 +11,7 @@ export const createTicketSchema = z.object({
 		.enum(['open', 'in_progress', 'resolved', 'cancelled'], {
 			errorMap: () => ({ message: 'Status is required' }),
 		})
-		.default('open'),
+		.default('' as 'open'),
 	title: z.string().min(1, 'Title is required.'),
 	description: z.string().min(1, 'Description is required.'),
 	property_id: z.number().min(1, 'Property is required.'),
@@ -29,10 +29,10 @@ export const updateTicketSchema = z.object({
 		})
 		.default('' as 'low'),
 	status: z
-		.enum(['pending', 'in_progress', 'completed', 'canceled'], {
+		.enum(['open', 'in_progress', 'resolved', 'cancelled'], {
 			errorMap: () => ({ message: 'Status is required' }),
 		})
-		.default('' as 'pending'),
+		.default('' as 'open'),
 	title: z.string().min(1, 'Title is required.'),
 	description: z.string().min(1, 'Description is required.'),
 	property_id: z.number().min(1, 'Property is required.'),

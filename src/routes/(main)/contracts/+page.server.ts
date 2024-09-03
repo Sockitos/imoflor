@@ -3,6 +3,7 @@ import {
 	deleteContractSchema,
 	updateContractSchema,
 } from '@/schemas/contract';
+import type { Contract, IdWithLabel } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -15,12 +16,13 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getContracts() {
+	async function getContracts(): Promise<Contract[]> {
 		const { data: contracts, error: contractsError } = await event.locals.supabase
 			.from('contracts_view')
 			.select(
-				'*, tenants:tenants (id, label:name), fraction:fractions_view (id, label:address_full)'
-			);
+				'*, tenants:tenants!inner (id, label:name), fraction:fractions_view!inner (id, label:address_full)'
+			)
+			.returns<Contract[]>(); // TODO: try not to use returns
 
 		if (contractsError) {
 			return error(500, 'Error fetching contracts, please try again later.');
@@ -28,7 +30,7 @@ export const load = async (event) => {
 		return contracts;
 	}
 
-	async function getFractionOptions() {
+	async function getFractionOptions(): Promise<IdWithLabel[]> {
 		const { data: fractions, error: fractionsError } = await event.locals.supabase
 			.from('fractions_view')
 			.select('id, label:address_full');

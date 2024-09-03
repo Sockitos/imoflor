@@ -65,7 +65,7 @@
 		table.column({
 			accessor: 'type',
 			header: 'Type',
-			cell: ({ value, row }) => {
+			cell: ({ value }) => {
 				return createRender(ContractTypeCell, {
 					type: value,
 				});
@@ -100,7 +100,7 @@
 		table.column({
 			accessor: 'balance',
 			header: 'Balance',
-			cell: ({ value, row }) => {
+			cell: ({ value }) => {
 				return createRender(ContractBalanceCell, {
 					balance: value,
 				});

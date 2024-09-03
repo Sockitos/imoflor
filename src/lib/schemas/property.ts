@@ -14,11 +14,11 @@ export const createPropertySchema = z.object({
 	conservatory: z.string().optional(),
 	patrimonial_value: z.coerce.number().optional(),
 	market_value: z.coerce.number().optional(),
-	country: z.string().optional(),
-	region: z.string().optional(),
-	address: z.string().optional(),
+	country: z.string().min(1, 'Country is required.'),
+	region: z.string().min(1, 'Region is required.'),
+	address: z.string().min(1, 'Address is required.'),
 	postal_code: z.string().optional(),
-	city: z.string().optional(),
+	city: z.string().min(1, 'City is required.'),
 });
 
 export type CreatePropertySchema = typeof createPropertySchema;
@@ -38,11 +38,11 @@ export const updatePropertySchema = z.object({
 	conservatory: z.string().optional(),
 	patrimonial_value: z.coerce.number().optional(),
 	market_value: z.coerce.number().optional(),
-	country: z.string().optional(),
-	region: z.string().optional(),
-	address: z.string().optional(),
+	country: z.string().min(1, 'Country is required.'),
+	region: z.string().min(1, 'Region is required.'),
+	address: z.string().min(1, 'Address is required.'),
 	postal_code: z.string().optional(),
-	city: z.string().optional(),
+	city: z.string().min(1, 'City is required.'),
 });
 
 export type UpdatePropertySchema = typeof updatePropertySchema;

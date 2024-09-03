@@ -3,6 +3,7 @@ import {
 	deleteInterventionSchema,
 	updateInterventionSchema,
 } from '@/schemas/intervention';
+import type { IdWithLabel, Intervention } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -15,11 +16,11 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getInterventions() {
+	async function getInterventions(): Promise<Intervention[]> {
 		const { data: interventions, error: interventionsError } = await event.locals.supabase
 			.from('interventions')
 			.select(
-				'*, ticket:tickets (id, label:title), property:properties (id, label:address), fraction:fractions_view (id, label:address)'
+				'*, ticket:tickets!inner (id, label:title), property:properties!inner (id, label:address), fraction:fractions_view!inner (id, label:address)'
 			);
 
 		if (interventionsError) {
@@ -28,7 +29,7 @@ export const load = async (event) => {
 		return interventions;
 	}
 
-	async function getPropertyOptions() {
+	async function getPropertyOptions(): Promise<IdWithLabel[]> {
 		const { data: properties, error: propertiesError } = await event.locals.supabase
 			.from('properties')
 			.select('id, label:address');
@@ -39,7 +40,7 @@ export const load = async (event) => {
 		return properties;
 	}
 
-	async function getFractionOptions() {
+	async function getFractionOptions(): Promise<IdWithLabel[]> {
 		const { data: fractions, error: fractionsError } = await event.locals.supabase
 			.from('fractions')
 			.select('id, label:address');
@@ -50,7 +51,7 @@ export const load = async (event) => {
 		return fractions;
 	}
 
-	async function getTicketOptions() {
+	async function getTicketOptions(): Promise<IdWithLabel[]> {
 		const { data: tickets, error: ticketsError } = await event.locals.supabase
 			.from('tickets')
 			.select('id, label:title');

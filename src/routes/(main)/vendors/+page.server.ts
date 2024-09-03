@@ -1,4 +1,5 @@
 import { createVendorSchema, deleteVendorSchema, updateVendorSchema } from '@/schemas/vendor';
+import type { Vendor } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -11,7 +12,7 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getVendors() {
+	async function getVendors(): Promise<Vendor[]> {
 		const { data: vendors, error: vendorsError } = await event.locals.supabase
 			.from('vendors')
 			.select('*');

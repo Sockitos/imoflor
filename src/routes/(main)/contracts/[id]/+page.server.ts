@@ -12,9 +12,10 @@ export const load = async (event) => {
 		const { data: contract, error: contractError } = await event.locals.supabase
 			.from('contracts_view')
 			.select(
-				'*, tenants:tenants (id, label:name), fraction:fractions_view (id, label:address_full)'
+				'*, tenants:tenants!inner (id, label:name), fraction:fractions_view!inner (id, label:address_full)'
 			)
 			.eq('id', event.params.id)
+			.returns<Contract[]>() // TODO: try not to use returns
 			.single();
 
 		if (contractError) {

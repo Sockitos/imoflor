@@ -9,28 +9,28 @@ export const load = async (event) => {
 	}
 
 	async function getVendor(): Promise<Vendor> {
-		const { data: contract, error: contractError } = await event.locals.supabase
+		const { data: vendor, error: vendorError } = await event.locals.supabase
 			.from('vendors')
 			.select('*')
 			.eq('id', event.params.id)
 			.single();
 
-		if (contractError) {
+		if (vendorError) {
 			return error(500, 'Error fetching vendor, please try again later.');
 		}
-		return contract;
+		return vendor;
 	}
 
 	async function getMovements(nif: string): Promise<Movement[]> {
-		const { data: contractAccount, error: contractAccountError } = await event.locals.supabase
+		const { data: movements, error: movementsError } = await event.locals.supabase
 			.from('movements')
 			.select('*')
 			.eq('nif', nif);
 
-		if (contractAccountError) {
+		if (movementsError) {
 			return error(500, 'Error fetching movements, please try again later.');
 		}
-		return contractAccount;
+		return movements;
 	}
 
 	const vendor = await getVendor();

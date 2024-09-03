@@ -11,7 +11,7 @@ export type Database = MergeDeep<
 						contract_id: number;
 						date: string;
 						id: number;
-						type: string;
+						type: 'due_note' | 'rent_payment' | 'installment_payment';
 						value: number;
 					};
 				};
@@ -32,6 +32,21 @@ export type Database = MergeDeep<
 						is_active: boolean;
 						start_date: string;
 						type: Database['public']['Enums']['contract_type'];
+					};
+					Insert: {
+						data: Json;
+						end_date?: string | null;
+						fraction_id: number;
+						start_date: string;
+						type: Database['public']['Enums']['contract_type'];
+					};
+					Update: {
+						data?: Json;
+						end_date?: string | null;
+						fraction_id?: number;
+						is_active?: boolean;
+						start_date?: string;
+						type?: Database['public']['Enums']['contract_type'];
 					};
 				};
 				fractions_view: {

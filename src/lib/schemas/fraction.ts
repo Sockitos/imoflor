@@ -14,7 +14,7 @@ export const createFractionSchema = z.object({
 	conservatory: z.string().optional(),
 	patrimonial_value: z.coerce.number().optional(),
 	market_value: z.coerce.number().optional(),
-	address: z.string().optional(),
+	address: z.string().min(1, 'Address is required.'),
 });
 
 export type CreateFractionSchema = typeof createFractionSchema;

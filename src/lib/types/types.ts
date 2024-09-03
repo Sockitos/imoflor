@@ -70,11 +70,11 @@ export interface Property {
 	conservatory?: string | null;
 	patrimonial_value?: number | null;
 	market_value?: number | null;
-	country?: string | null;
-	region?: string | null;
-	address?: string | null;
+	country: string;
+	region: string;
+	address: string;
 	postal_code?: string | null;
-	city?: string | null;
+	city: string;
 }
 
 export interface Fraction {

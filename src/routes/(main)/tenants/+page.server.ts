@@ -1,4 +1,5 @@
 import { createTenantSchema, deleteTenantSchema, updateTenantSchema } from '@/schemas/tenant';
+import type { Tenant } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -11,7 +12,7 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getTenants() {
+	async function getTenants(): Promise<Tenant[]> {
 		const { data: tenants, error: tenantsError } = await event.locals.supabase
 			.from('tenants')
 			.select('*');

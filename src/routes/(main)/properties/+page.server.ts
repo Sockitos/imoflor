@@ -3,6 +3,7 @@ import {
 	deletePropertySchema,
 	updatePropertySchema,
 } from '@/schemas/property';
+import type { Property } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -15,7 +16,7 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getProperties() {
+	async function getProperties(): Promise<Property[]> {
 		const { data: properties, error: propertiesError } = await event.locals.supabase
 			.from('properties')
 			.select('*');

@@ -1,9 +1,10 @@
-import type { LoadEvent, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { ActionFailure, LoadEvent, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { clsx, type ClassValue } from 'clsx';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { fail, superValidate } from 'sveltekit-superforms';
+import { fail, superValidate, type Infer, type SuperValidated } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
 import type { ZodTypeAny } from 'zod';
@@ -65,10 +66,11 @@ export function handleLoginRedirect(event: LoadEvent | ServerLoadEvent) {
 	return `/login?redirectTo=${redirectTo}`;
 }
 
+type MaybePromise<T> = T | Promise<T>;
+
 export type FormAction<
 	Schema extends ZodTypeAny,
 	Params extends Partial<Record<string, string>> = Partial<Record<string, string>>,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	OutputData extends Record<string, any> | void = Record<string, any> | void,
 	RouteId extends string | null = string | null,
 	RequireAuth extends boolean = true,

@@ -3,6 +3,7 @@ import {
 	deleteEmployeeSchema,
 	updateEmployeeSchema,
 } from '@/schemas/employee';
+import type { Employee } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -15,7 +16,7 @@ export const load = async (event) => {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	async function getEmployees() {
+	async function getEmployees(): Promise<Employee[]> {
 		const { data: employees, error: employeesError } = await event.locals.supabase
 			.from('employees')
 			.select('*');
