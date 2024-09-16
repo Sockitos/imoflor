@@ -5,7 +5,6 @@
 	import type { Vendor } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import VendorDeleteDialog from './vendor-delete-dialog.svelte';
-	import VendorForm from './vendor-form.svelte';
 
 	export let vendor: Vendor;
 	let openSheet = false;
@@ -22,11 +21,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item href={`/vendors/${vendor.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/vendors/{vendor.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<VendorForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <VendorDeleteDialog {vendor} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

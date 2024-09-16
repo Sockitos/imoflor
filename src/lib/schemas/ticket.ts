@@ -1,45 +1,45 @@
 import { z } from 'zod';
 
+export const priorityOptions = {
+	low: 'Low',
+	medium: 'Medium',
+	high: 'High',
+};
+
+type Priority = keyof typeof priorityOptions;
+
+export const prioritySchema = z
+	.enum(['', ...(Object.keys(priorityOptions) as [Priority, ...Priority[]])])
+	.refine((value) => value !== '', {
+		message: 'Priority is required',
+	});
+
+export const statusOptions = {
+	open: 'Open',
+	in_progress: 'In Progress',
+	resolved: 'Resolved',
+	cancelled: 'Cancelled',
+};
+
+type Status = keyof typeof statusOptions;
+
+export const statusSchema = z
+	.enum(['', ...(Object.keys(statusOptions) as [Status, ...Status[]])])
+	.refine((value) => value !== '', {
+		message: 'Status is required',
+	});
+
 export const createTicketSchema = z.object({
 	date: z.string().min(1, 'Date is required.'),
-	priority: z
-		.enum(['low', 'medium', 'high'], {
-			errorMap: () => ({ message: 'Priority is required' }),
-		})
-		.default('' as 'low'),
-	status: z
-		.enum(['open', 'in_progress', 'resolved', 'cancelled'], {
-			errorMap: () => ({ message: 'Status is required' }),
-		})
-		.default('' as 'open'),
+	priority: prioritySchema,
+	status: statusSchema,
 	title: z.string().min(1, 'Title is required.'),
 	description: z.string().min(1, 'Description is required.'),
 	property_id: z.number().min(1, 'Property is required.'),
-	fraction_id: z.number().optional(),
+	fraction_id: z.number().nullish(),
 });
 
 export type CreateTicketSchema = typeof createTicketSchema;
-
-export const updateTicketSchema = z.object({
-	id: z.number(),
-	date: z.string().min(1, 'Date is required.'),
-	priority: z
-		.enum(['low', 'medium', 'high'], {
-			errorMap: () => ({ message: 'Priority is required' }),
-		})
-		.default('' as 'low'),
-	status: z
-		.enum(['open', 'in_progress', 'resolved', 'cancelled'], {
-			errorMap: () => ({ message: 'Status is required' }),
-		})
-		.default('' as 'open'),
-	title: z.string().min(1, 'Title is required.'),
-	description: z.string().min(1, 'Description is required.'),
-	property_id: z.number().min(1, 'Property is required.'),
-	fraction_id: z.number().optional(),
-});
-
-export type UpdateTicketSchema = typeof updateTicketSchema;
 
 export const deleteTicketSchema = z.object({
 	id: z.number(),

@@ -7,16 +7,20 @@
 	import * as Popover from '@/components/ui/popover';
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
-	import { createEmployeeSchema, type CreateEmployeeSchema } from '@/schemas/employee';
-	import type { Gender, MaritalStatus, SalaryType } from '@/types/types';
+	import {
+		createEmployeeSchema,
+		salaryTypeOptions,
+		type CreateEmployeeSchema,
+	} from '@/schemas/employee';
+	import { genderOptions } from '@/schemas/gender';
+	import { maritalStatusOptions } from '@/schemas/marital-status';
 	import { cn } from '@/utils';
 	import {
 		DateFormatter,
 		getLocalTimeZone,
-		parseDate,
+		parseAbsolute,
 		type DateValue,
 	} from '@internationalized/date';
-	import type { Selected } from 'bits-ui';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -24,6 +28,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateEmployeeSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createEmployeeSchema),
@@ -36,42 +41,50 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: editing = false;
+	$: selectedGender = $formData.gender
+		? {
+				value: $formData.gender,
+				label: genderOptions[$formData.gender],
+			}
+		: undefined;
 
-	function getGenderFromValue(v: Selected<unknown>): Gender {
-		return v.value as Gender;
-	}
+	$: selectedMaritalStatus = $formData.marital_status
+		? {
+				value: $formData.marital_status,
+				label: maritalStatusOptions[$formData.marital_status],
+			}
+		: undefined;
 
-	function getMaritalStatusFromValue(v: Selected<unknown>): MaritalStatus {
-		return v.value as MaritalStatus;
-	}
-
-	function getSalaryTypeFromValue(v: Selected<unknown>): SalaryType {
-		return v.value as SalaryType;
-	}
+	$: selectedSalaryType = $formData.salary_type
+		? {
+				value: $formData.salary_type,
+				label: salaryTypeOptions[$formData.salary_type],
+			}
+		: undefined;
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
 	});
 
 	let birthDate: DateValue | undefined;
-	$: birthDate = $formData.birth_date ? parseDate($formData.birth_date) : undefined;
+	$: birthDate = $formData.birth_date
+		? parseAbsolute($formData.birth_date, getLocalTimeZone())
+		: undefined;
 
 	let idExpirationDate: DateValue | undefined;
 	$: idExpirationDate = $formData.id_expiration_date
-		? parseDate($formData.id_expiration_date)
+		? parseAbsolute($formData.id_expiration_date, getLocalTimeZone())
 		: undefined;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new employee</Sheet.Title>
 			<Sheet.Description>Fill the form below to add a new employee.</Sheet.Description>
 		</Sheet.Header>
 		<Separator class="my-5" />
-		<form method="POST" use:enhance action={editing ? '/employees?/update' : '/employees?/create'}>
+		<form method="POST" use:enhance {action}>
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Position</h3>
 				<Form.Field {form} name="position">
@@ -87,9 +100,10 @@
 							<Form.Label>Type</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedSalaryType}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.salary_type = getSalaryTypeFromValue(v);
+										$formData.salary_type = v.value;
 									}
 								}}
 							>
@@ -129,9 +143,10 @@
 							<Form.Label>Gender</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedGender}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.gender = getGenderFromValue(v);
+										$formData.gender = v.value;
 									}
 								}}
 							>
@@ -139,9 +154,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="male">Male</Select.Item>
-									<Select.Item value="female">Female</Select.Item>
-									<Select.Item value="other">Other</Select.Item>
+									{#each Object.entries(genderOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.gender} name={attrs.name} />
@@ -153,9 +168,10 @@
 							<Form.Label>Marital Status</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedMaritalStatus}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.marital_status = getMaritalStatusFromValue(v);
+										$formData.marital_status = v.value;
 									}
 								}}
 							>
@@ -163,11 +179,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="single">Single</Select.Item>
-									<Select.Item value="married">Married</Select.Item>
-									<Select.Item value="union">Union</Select.Item>
-									<Select.Item value="divorced">Divorced</Select.Item>
-									<Select.Item value="widowed">Widowed</Select.Item>
+									{#each Object.entries(maritalStatusOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.marital_status} name={attrs.name} />
@@ -195,7 +209,7 @@
 										!birthDate && 'text-muted-foreground'
 									)}
 								>
-									{birthDate ? df.format(birthDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{birthDate ? df.format(birthDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -204,7 +218,7 @@
 										value={birthDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.birth_date = v.toString();
+												$formData.birth_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.birth_date = '';
 											}
@@ -237,9 +251,7 @@
 										!idExpirationDate && 'text-muted-foreground'
 									)}
 								>
-									{idExpirationDate
-										? df.format(idExpirationDate.toDate(getLocalTimeZone()))
-										: 'Pick a date'}
+									{idExpirationDate ? df.format(idExpirationDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -248,7 +260,7 @@
 										value={idExpirationDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.id_expiration_date = v.toString();
+												$formData.id_expiration_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.id_expiration_date = '';
 											}
@@ -269,6 +281,13 @@
 							<Form.FieldErrors />
 						</Form.Control>
 					</Form.Field>
+					<Form.Field {form} name="tax_id_number">
+						<Form.Control let:attrs>
+							<Form.Label>Tax ID Number</Form.Label>
+							<Input {...attrs} bind:value={$formData.tax_id_number} />
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
 					<Form.Field {form} name="ss_number">
 						<Form.Control let:attrs>
 							<Form.Label>SS Number</Form.Label>
@@ -276,10 +295,12 @@
 							<Form.FieldErrors />
 						</Form.Control>
 					</Form.Field>
-					<Form.Field {form} name="nif">
+				</div>
+				<div class="grid grid-cols-2 items-start gap-x-4">
+					<Form.Field {form} name="ss_number">
 						<Form.Control let:attrs>
-							<Form.Label>F Number</Form.Label>
-							<Input {...attrs} bind:value={$formData.nif} />
+							<Form.Label>SS Number</Form.Label>
+							<Input {...attrs} bind:value={$formData.ss_number} />
 							<Form.FieldErrors />
 						</Form.Control>
 					</Form.Field>

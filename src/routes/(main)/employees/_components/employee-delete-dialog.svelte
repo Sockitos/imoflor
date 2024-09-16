@@ -18,7 +18,7 @@
 </script>
 
 <AlertDialog.Root bind:open>
-	<form method="POST" action="?/delete" use:enhance>
+	<form method="POST" action="/employees/{employee.id}?/delete" use:enhance>
 		<input type="hidden" name="id" value={employee.id} />
 	</form>
 	<AlertDialog.Content>

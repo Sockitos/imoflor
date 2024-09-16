@@ -1,6 +1,10 @@
+import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
 import type { Movement, Tenant } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -21,11 +25,11 @@ export const load = async (event) => {
 		return contract;
 	}
 
-	async function getMovements(nif: string): Promise<Movement[]> {
+	async function getMovements(tax_id_number: string): Promise<Movement[]> {
 		const { data: contractAccount, error: contractAccountError } = await event.locals.supabase
 			.from('movements')
 			.select('*')
-			.eq('nif', nif);
+			.eq('tax_id_number', tax_id_number);
 
 		if (contractAccountError) {
 			return error(500, 'Error fetching movements, please try again later.');
@@ -37,6 +41,69 @@ export const load = async (event) => {
 
 	return {
 		tenant: tenant,
-		movements: await getMovements(tenant.nif),
+		movements: await getMovements(tenant.tax_id_number),
+		updateForm: await superValidate(tenant, zod(createTenantSchema), {
+			id: 'update',
+		}),
+		deleteForm: await superValidate(zod(deleteTenantSchema), {
+			id: 'delete',
+		}),
 	};
+};
+
+export const actions = {
+	update: async (event) => {
+		const { session } = await event.locals.safeGetSession();
+		if (!session) {
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
+		}
+
+		const form = await superValidate(event.request, zod(createTenantSchema), { id: 'update' });
+
+		if (!form.valid) {
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
+		}
+		const { error: supabaseError } = await event.locals.supabase
+			.from('tenants')
+			.update(form.data)
+			.eq('id', event.params.id);
+
+		if (supabaseError) {
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
+		}
+
+		return { success: true, form };
+	},
+	delete: async (event) => {
+		const { session } = await event.locals.safeGetSession();
+		if (!session) {
+			const errorMessage = 'Unauthorized.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return error(401, errorMessage);
+		}
+
+		const form = await superValidate(event.request, zod(deleteTenantSchema), { id: 'delete' });
+
+		if (!form.valid) {
+			const errorMessage = 'Invalid form.';
+			setFlash({ type: 'error', message: errorMessage }, event.cookies);
+			return fail(400, { message: errorMessage, form });
+		}
+		const { error: supabaseError } = await event.locals.supabase
+			.from('tenants')
+			.delete()
+			.eq('id', form.data.id);
+
+		if (supabaseError) {
+			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+			return fail(500, { message: supabaseError.message, form });
+		}
+
+		return { success: true, form };
+	},
 };

@@ -5,7 +5,6 @@
 	import type { Contract } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import ContractDeleteDialog from './contract-delete-dialog.svelte';
-	import ContractForm from './contract-form.svelte';
 
 	export let contract: Contract;
 	let openSheet = false;
@@ -22,11 +21,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item href={`/contracts/${contract.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/contracts/{contract.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<ContractForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <ContractDeleteDialog {contract} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

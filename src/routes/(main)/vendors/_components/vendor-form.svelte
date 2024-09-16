@@ -14,6 +14,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateVendorSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createVendorSchema),
@@ -25,19 +26,16 @@
 	});
 
 	const { form: formData, enhance, submitting } = form;
-
-	$: editing = false;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new vendor</Sheet.Title>
 			<Sheet.Description>Fill the form below to add a new vendor.</Sheet.Description>
 		</Sheet.Header>
 		<Separator class="my-5" />
-		<form method="POST" use:enhance action={editing ? '/vendors?/update' : '/vendors?/create'}>
+		<form method="POST" use:enhance {action}>
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Identification</h3>
 				<Form.Field {form} name="name">
@@ -47,10 +45,10 @@
 						<Form.FieldErrors />
 					</Form.Control>
 				</Form.Field>
-				<Form.Field {form} name="nif">
+				<Form.Field {form} name="tax_id_number">
 					<Form.Control let:attrs>
-						<Form.Label>NIF</Form.Label>
-						<Input {...attrs} bind:value={$formData.nif} />
+						<Form.Label>Tax ID Number</Form.Label>
+						<Input {...attrs} bind:value={$formData.tax_id_number} />
 						<Form.FieldErrors />
 					</Form.Control>
 				</Form.Field>

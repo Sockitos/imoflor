@@ -5,10 +5,8 @@
 	import type { Tenant } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import TenantDeleteDialog from './tenant-delete-dialog.svelte';
-	import TenantForm from './tenant-form.svelte';
 
 	export let tenant: Tenant;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -22,11 +20,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item href={`/tenants/${tenant.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/tenants/{tenant.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<TenantForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <TenantDeleteDialog {tenant} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

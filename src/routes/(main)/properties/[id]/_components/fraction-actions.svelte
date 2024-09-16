@@ -5,10 +5,8 @@
 	import type { Fraction } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import FractionDeleteDialog from './fraction-delete-dialog.svelte';
-	import FractionForm from './fraction-form.svelte';
 
 	export let fraction: Fraction;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -20,14 +18,18 @@
 		</Button>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
-		<DropdownMenu.Item href={`/fractions/${fraction.id}`}>Open</DropdownMenu.Item>
+		<DropdownMenu.Item href={`/properties/${fraction.property_id}/fractions/${fraction.id}`}>
+			Open
+		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item
+			href="/properties/{fraction.property_id}/fractions/{fraction.id}?action=edit"
+		>
+			Edit
+		</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<FractionForm data={$page.data.updateFractionForm} bind:open={openSheet} />
 
 <FractionDeleteDialog
 	{fraction}

@@ -18,7 +18,7 @@
 </script>
 
 <AlertDialog.Root bind:open>
-	<form method="POST" action="?/delete" use:enhance>
+	<form method="POST" action="/tickets/{ticket.id}?/delete" use:enhance>
 		<input type="hidden" name="id" value={ticket.id} />
 	</form>
 	<AlertDialog.Content>

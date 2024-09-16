@@ -14,7 +14,7 @@
 	import {
 		DateFormatter,
 		getLocalTimeZone,
-		parseDate,
+		parseAbsolute,
 		type DateValue,
 	} from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
@@ -24,6 +24,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateContractSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createContractSchema),
@@ -44,13 +45,16 @@
 	});
 
 	let startDate: DateValue | undefined;
-	$: startDate = $formData.start_date ? parseDate($formData.start_date) : undefined;
+	$: startDate = $formData.start_date
+		? parseAbsolute($formData.start_date, getLocalTimeZone())
+		: undefined;
 	let endDate: DateValue | undefined;
-	$: endDate = $formData.end_date ? parseDate($formData.end_date) : undefined;
+	$: endDate = $formData.end_date
+		? parseAbsolute($formData.end_date, getLocalTimeZone())
+		: undefined;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new contract</Sheet.Title>
@@ -63,7 +67,7 @@
 				<Tabs.Trigger value="lending">Lending</Tabs.Trigger>
 			</Tabs.List>
 		</Tabs.Root>
-		<form method="POST" use:enhance action={editing ? '/contracts?/update' : '/contracts?/create'}>
+		<form method="POST" use:enhance {action}>
 			<input hidden value={$formData.type} name="type" />
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Information</h3>
@@ -99,7 +103,7 @@
 										!startDate && 'text-muted-foreground'
 									)}
 								>
-									{startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -108,7 +112,7 @@
 										value={startDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.start_date = v.toString();
+												$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.start_date = '';
 											}
@@ -132,7 +136,7 @@
 										!endDate && 'text-muted-foreground'
 									)}
 								>
-									{endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -141,7 +145,7 @@
 										value={endDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.end_date = v.toString();
+												$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.end_date = '';
 											}
@@ -194,10 +198,10 @@
 								<Form.FieldErrors />
 							</Form.Control>
 						</Form.Field>
-						<Form.Field {form} name="tax">
+						<Form.Field {form} name="interest">
 							<Form.Control let:attrs>
-								<Form.Label>Tax</Form.Label>
-								<Input type="number" step="any" {...attrs} bind:value={$formData.tax} />
+								<Form.Label>Interest</Form.Label>
+								<Input type="number" step="any" {...attrs} bind:value={$formData.interest} />
 								<Form.FieldErrors />
 							</Form.Control>
 						</Form.Field>

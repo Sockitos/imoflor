@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 export const load = async ({ parent }) => {
 	const { session } = await parent();
 	if (session) {
-		redirect(302, '/tenants');
+		redirect(302, '/dashboard');
 	}
 
 	return redirect(302, '/login');

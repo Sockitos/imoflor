@@ -184,38 +184,33 @@
 </script>
 
 <div class="flex flex-col gap-y-4">
-	<div class="flex flex-row items-center justify-between">
-		<div class="flex flex-row items-center gap-x-2">
-			<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
-			<DataTableFilter
-				bind:filterValues={$filterValues.status}
-				counts={counts.status}
-				title="Status"
-				options={statusOptions}
-			/>
-			<DataTableFilter
-				bind:filterValues={$filterValues.priority}
-				counts={counts.priority}
-				title="Priority"
-				options={priorityOptions}
-			/>
-			{#if showReset}
-				<Button
-					on:click={() => {
-						$filterValues.status = [];
-						$filterValues.priority = [];
-					}}
-					variant="ghost"
-					size="sm"
-				>
-					Reset
-					<Cross2 class="ml-2 h-4 w-4" />
-				</Button>
-			{/if}
-		</div>
-		<div>
-			<slot />
-		</div>
+	<div class="flex flex-row items-center gap-x-2">
+		<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
+		<DataTableFilter
+			bind:filterValues={$filterValues.status}
+			counts={counts.status}
+			title="Status"
+			options={statusOptions}
+		/>
+		<DataTableFilter
+			bind:filterValues={$filterValues.priority}
+			counts={counts.priority}
+			title="Priority"
+			options={priorityOptions}
+		/>
+		{#if showReset}
+			<Button
+				on:click={() => {
+					$filterValues.status = [];
+					$filterValues.priority = [];
+				}}
+				variant="ghost"
+				size="sm"
+			>
+				Reset
+				<Cross2 class="ml-2 h-4 w-4" />
+			</Button>
+		{/if}
 	</div>
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>

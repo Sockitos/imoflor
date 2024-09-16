@@ -5,10 +5,8 @@
 	import type { Employee } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import EmployeeDeleteDialog from './employee-delete-dialog.svelte';
-	import EmployeeForm from './employee-form.svelte';
 
 	export let employee: Employee;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -22,11 +20,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item href={`/employees/${employee.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/employees/{employee.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<EmployeeForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <EmployeeDeleteDialog {employee} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

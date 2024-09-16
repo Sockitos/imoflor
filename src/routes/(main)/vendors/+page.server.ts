@@ -1,4 +1,4 @@
-import { createVendorSchema, deleteVendorSchema, updateVendorSchema } from '@/schemas/vendor';
+import { createVendorSchema, deleteVendorSchema } from '@/schemas/vendor';
 import type { Vendor } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -30,9 +30,6 @@ export const load = async (event) => {
 		createForm: await superValidate(zod(createVendorSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(zod(updateVendorSchema), {
-			id: 'update',
-		}),
 		deleteForm: await superValidate(zod(deleteVendorSchema), {
 			id: 'delete',
 		}),
@@ -57,62 +54,6 @@ export const actions = {
 		}
 
 		const { error: supabaseError } = await event.locals.supabase.from('vendors').insert(form.data);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(updateVendorSchema), { id: 'update' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('vendors')
-			.update(form.data)
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteVendorSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('vendors')
-			.delete()
-			.eq('id', form.data.id);
 
 		if (supabaseError) {
 			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);

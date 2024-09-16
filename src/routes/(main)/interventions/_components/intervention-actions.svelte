@@ -5,11 +5,9 @@
 	import type { Intervention } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import InterventionDeleteDialog from './intervention-delete-dialog.svelte';
-	import InterventionForm from './intervention-form.svelte';
 	import { statusMap } from './intervention-status-map';
 
 	export let intervention: Intervention;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -36,12 +34,10 @@
 			</DropdownMenu.SubContent>
 		</DropdownMenu.Sub>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/interventions/{intervention.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<InterventionForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <InterventionDeleteDialog
 	{intervention}

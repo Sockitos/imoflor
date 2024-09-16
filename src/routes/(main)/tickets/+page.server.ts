@@ -1,4 +1,4 @@
-import { createTicketSchema, deleteTicketSchema, updateTicketSchema } from '@/schemas/ticket';
+import { createTicketSchema, deleteTicketSchema } from '@/schemas/ticket';
 import type { IdWithLabel, Ticket } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -53,9 +53,6 @@ export const load = async (event) => {
 		createForm: await superValidate(zod(createTicketSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(zod(updateTicketSchema), {
-			id: 'update',
-		}),
 		deleteForm: await superValidate(zod(deleteTicketSchema), {
 			id: 'delete',
 		}),
@@ -76,52 +73,6 @@ export const actions = {
 		}
 
 		const { error: supabaseError } = await event.locals.supabase.from('tickets').insert(form.data);
-
-		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
-		}
-
-		return { success: true, form };
-	},
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			return error(401, 'Unauthorized');
-		}
-
-		const form = await superValidate(event.request, zod(updateTicketSchema), { id: 'update' });
-
-		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('tickets')
-			.update(form.data)
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			return error(401, 'Unauthorized');
-		}
-
-		const form = await superValidate(event.request, zod(deleteTicketSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('tickets')
-			.delete()
-			.eq('id', form.data.id);
 
 		if (supabaseError) {
 			return fail(500, { message: supabaseError.message, success: false, form });

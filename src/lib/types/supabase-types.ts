@@ -55,7 +55,7 @@ export type Database = MergeDeep<
 						address_full: string;
 						area: number | null;
 						city: string | null;
-						conservatory: string | null;
+						conservatory: string;
 						country: string | null;
 						description: string | null;
 						id: number;

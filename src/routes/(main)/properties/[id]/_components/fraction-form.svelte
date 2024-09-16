@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { Button } from '@/components/ui/button';
 	import * as Form from '@/components/ui/form';
 	import { Input } from '@/components/ui/input';
@@ -7,9 +6,7 @@
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
-	import { createFractionSchema, type CreateFractionSchema } from '@/schemas/fraction';
-	import type { FractionType } from '@/types/types';
-	import type { Selected } from 'bits-ui';
+	import { createFractionSchema, typeOptions, type CreateFractionSchema } from '@/schemas/fraction';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -17,6 +14,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateFractionSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createFractionSchema),
@@ -29,30 +27,22 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: editing = false;
-
-	function getTypeFromValue(v: Selected<unknown>): FractionType {
-		return v.value as FractionType;
-	}
-
-	$: propertyId = $page.params.id;
+	$: selectedType = $formData.type
+		? {
+				value: $formData.type,
+				label: typeOptions[$formData.type],
+			}
+		: undefined;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new fraction</Sheet.Title>
 			<Sheet.Description>Fill the form below to add a new fraction.</Sheet.Description>
 		</Sheet.Header>
 		<Separator class="my-5" />
-		<form
-			method="POST"
-			use:enhance
-			action={editing
-				? `/properties/${propertyId}/fractions?/update`
-				: `/properties/${propertyId}/fractions?/create`}
-		>
+		<form method="POST" use:enhance {action}>
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
@@ -61,9 +51,10 @@
 							<Form.Label>Type</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedType}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.type = getTypeFromValue(v);
+										$formData.type = v.value;
 									}
 								}}
 							>

@@ -5,10 +5,8 @@
 	import type { Property } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import PropertyDeleteDialog from './property-delete-dialog.svelte';
-	import PropertyForm from './property-form.svelte';
 
 	export let property: Property;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -22,11 +20,9 @@
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item href={`/properties/${property.id}`}>Open</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/properties/{property.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<PropertyForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <PropertyDeleteDialog {property} data={$page.data.deleteForm} bind:open={openDeleteDialog} />

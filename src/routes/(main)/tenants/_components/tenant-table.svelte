@@ -110,13 +110,8 @@
 </script>
 
 <div class="flex flex-col gap-y-4">
-	<div class="flex flex-row items-center justify-between">
-		<div class="flex flex-row items-center">
-			<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
-		</div>
-		<div>
-			<slot />
-		</div>
+	<div class="flex flex-row items-center">
+		<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
 	</div>
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>

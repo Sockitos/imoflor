@@ -9,16 +9,19 @@
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
-	import { createInterventionSchema, type CreateInterventionSchema } from '@/schemas/intervention';
-	import type { InterventionStatus, InterventionType } from '@/types/types';
+	import {
+		createInterventionSchema,
+		statusOptions,
+		typeOptions,
+		type CreateInterventionSchema,
+	} from '@/schemas/intervention';
 	import { cn } from '@/utils';
 	import {
 		DateFormatter,
 		getLocalTimeZone,
-		parseDate,
+		parseAbsolute,
 		type DateValue,
 	} from '@internationalized/date';
-	import type { Selected } from 'bits-ui';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -26,6 +29,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateInterventionSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createInterventionSchema),
@@ -38,39 +42,42 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: editing = false;
+	$: selectedType = $formData.type
+		? {
+				value: $formData.type,
+				label: typeOptions[$formData.type],
+			}
+		: undefined;
 
-	function getTypeFromValue(v: Selected<unknown>): InterventionType {
-		return v.value as InterventionType;
-	}
-
-	function getStatusFromValue(v: Selected<unknown>): InterventionStatus {
-		return v.value as InterventionStatus;
-	}
+	$: selectedStatus = $formData.status
+		? {
+				value: $formData.status,
+				label: statusOptions[$formData.status],
+			}
+		: undefined;
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
 	});
 
 	let startDate: DateValue | undefined;
-	$: startDate = $formData.start_date ? parseDate($formData.start_date) : undefined;
+	$: startDate = $formData.start_date
+		? parseAbsolute($formData.start_date, getLocalTimeZone())
+		: undefined;
 	let endDate: DateValue | undefined;
-	$: endDate = $formData.end_date ? parseDate($formData.end_date) : undefined;
+	$: endDate = $formData.end_date
+		? parseAbsolute($formData.end_date, getLocalTimeZone())
+		: undefined;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new intervention</Sheet.Title>
 			<Sheet.Description>Fill the form below to add a new intervention.</Sheet.Description>
 		</Sheet.Header>
 		<Separator class="my-5" />
-		<form
-			method="POST"
-			use:enhance
-			action={editing ? '/interventions?/update' : '/interventions?/create'}
-		>
+		<form method="POST" use:enhance {action}>
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
@@ -79,9 +86,10 @@
 							<Form.Label>Type</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedType}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.type = getTypeFromValue(v);
+										$formData.type = v.value;
 									}
 								}}
 							>
@@ -89,9 +97,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="new">New</Select.Item>
-									<Select.Item value="renovation">Renovation</Select.Item>
-									<Select.Item value="maintenance">Maintenance</Select.Item>
+									{#each Object.entries(typeOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.type} name={attrs.name} />
@@ -103,9 +111,10 @@
 							<Form.Label>Status</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedStatus}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.status = getStatusFromValue(v);
+										$formData.status = v.value;
 									}
 								}}
 							>
@@ -137,7 +146,7 @@
 										!startDate && 'text-muted-foreground'
 									)}
 								>
-									{startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -146,7 +155,7 @@
 										value={startDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.start_date = v.toString();
+												$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.start_date = '';
 											}
@@ -170,7 +179,7 @@
 										!endDate && 'text-muted-foreground'
 									)}
 								>
-									{endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -179,7 +188,7 @@
 										value={endDate}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.end_date = v.toString();
+												$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.end_date = '';
 											}

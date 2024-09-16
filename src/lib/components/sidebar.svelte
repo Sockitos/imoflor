@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { Building2, Construction, ScrollText, Tag, Truck, Users } from 'lucide-svelte';
-	import SidebarGroup from './sidebar-group.svelte';
+	import { Building2, Construction, Home, ScrollText, Tag, Truck, Users } from 'lucide-svelte';
 	import SidebarItem from './sidebar-item.svelte';
+	import { Separator } from './ui/separator';
 </script>
 
-<aside class="h-screen space-y-4 py-4 md:border-r md:pt-12 lg:pt-4">
-	<h1 class="py-4 text-center text-4xl font-bold md:hidden lg:block">IMOFLOR</h1>
-	<SidebarGroup label="Comercial">
+<aside class="h-screen bg-card py-4 md:border-r">
+	<h1 class="py-8 text-center text-4xl font-bold text-primary md:hidden lg:block">IMOFLOR</h1>
+	<nav class="flex flex-col gap-y-2 px-4">
+		<SidebarItem icon={Home} label="Dashboard" href="/dashboard" />
+		<Separator class="my-2" />
 		<SidebarItem icon={Users} label="Tenants" href="/tenants" />
 		<SidebarItem icon={Building2} label="Properties" href="/properties" />
 		<SidebarItem icon={ScrollText} label="Contracts" href="/contracts" />
-	</SidebarGroup>
-	<SidebarGroup label="What">
+		<Separator class="my-2" />
 		<SidebarItem icon={Tag} label="Tickets" href="/tickets" />
 		<SidebarItem icon={Construction} label="Interventions" href="/interventions" />
-	</SidebarGroup>
-	<SidebarGroup label="Resources">
+		<Separator class="my-2" />
 		<SidebarItem icon={Users} label="Employees" href="/employees" />
 		<SidebarItem icon={Truck} label="Vendors" href="/vendors" />
-	</SidebarGroup>
+	</nav>
 </aside>

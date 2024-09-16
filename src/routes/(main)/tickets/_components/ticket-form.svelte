@@ -10,16 +10,19 @@
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
-	import { createTicketSchema, type CreateTicketSchema } from '@/schemas/ticket';
-	import type { TicketPriority, TicketStatus } from '@/types/types';
+	import {
+		createTicketSchema,
+		priorityOptions,
+		statusOptions,
+		type CreateTicketSchema,
+	} from '@/schemas/ticket';
 	import { cn } from '@/utils';
 	import {
 		DateFormatter,
 		getLocalTimeZone,
-		parseDate,
+		parseAbsolute,
 		type DateValue,
 	} from '@internationalized/date';
-	import type { Selected } from 'bits-ui';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -27,6 +30,7 @@
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreateTicketSchema>>;
+	export let action: string;
 
 	const form = superForm(data, {
 		validators: zodClient(createTicketSchema),
@@ -39,33 +43,36 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: editing = false;
+	$: selectedPriority = $formData.priority
+		? {
+				value: $formData.priority,
+				label: priorityOptions[$formData.priority],
+			}
+		: undefined;
 
-	function getPriorityFromValue(v: Selected<unknown>): TicketPriority {
-		return v.value as TicketPriority;
-	}
-
-	function getStatusFromValue(v: Selected<unknown>): TicketStatus {
-		return v.value as TicketStatus;
-	}
+	$: selectedStatus = $formData.status
+		? {
+				value: $formData.status,
+				label: statusOptions[$formData.status],
+			}
+		: undefined;
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
 	});
 
 	let date: DateValue | undefined;
-	$: date = $formData.date ? parseDate($formData.date) : undefined;
+	$: date = $formData.date ? parseAbsolute($formData.date, getLocalTimeZone()) : undefined;
 </script>
 
 <Sheet.Root bind:open>
-	<slot />
 	<Sheet.Content class="overflow-y-auto sm:max-w-[40rem]">
 		<Sheet.Header>
 			<Sheet.Title>Add new ticket</Sheet.Title>
 			<Sheet.Description>Fill the form below to add a new ticket.</Sheet.Description>
 		</Sheet.Header>
 		<Separator class="my-5" />
-		<form method="POST" use:enhance action={editing ? '/tickets?/update' : '/tickets?/create'}>
+		<form method="POST" use:enhance {action}>
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
@@ -81,7 +88,7 @@
 										!date && 'text-muted-foreground'
 									)}
 								>
-									{date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{date ? df.format(date.toDate()) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -90,7 +97,7 @@
 										value={date}
 										onValueChange={(v) => {
 											if (v) {
-												$formData.date = v.toString();
+												$formData.date = v.toDate(getLocalTimeZone()).toISOString();
 											} else {
 												$formData.date = '';
 											}
@@ -123,9 +130,10 @@
 							<Form.Label>Priority</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedPriority}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.priority = getPriorityFromValue(v);
+										$formData.priority = v.value;
 									}
 								}}
 							>
@@ -133,9 +141,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="low">Low</Select.Item>
-									<Select.Item value="medium">Medium</Select.Item>
-									<Select.Item value="high">High</Select.Item>
+									{#each Object.entries(priorityOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.priority} name={attrs.name} />
@@ -147,9 +155,10 @@
 							<Form.Label>Status</Form.Label>
 							<Select.Root
 								{...attrs}
+								selected={selectedStatus}
 								onSelectedChange={(v) => {
 									if (v) {
-										$formData.status = getStatusFromValue(v);
+										$formData.status = v.value;
 									}
 								}}
 							>
@@ -157,10 +166,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="open">Building</Select.Item>
-									<Select.Item value="in_progress">Terrain</Select.Item>
-									<Select.Item value="resolved">House</Select.Item>
-									<Select.Item value="cancelled">Garages</Select.Item>
+									{#each Object.entries(statusOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.status} name={attrs.name} />

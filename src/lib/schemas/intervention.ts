@@ -1,47 +1,46 @@
 import { z } from 'zod';
 
+export const typeOptions = {
+	new: 'New',
+	renovation: 'Renovation',
+	maintenance: 'Maintenance',
+};
+
+type Type = keyof typeof typeOptions;
+
+export const typeSchema = z
+	.enum(['', ...(Object.keys(typeOptions) as [Type, ...Type[]])])
+	.refine((value) => value !== '', {
+		message: 'Type is required',
+	});
+
+export const statusOptions = {
+	not_started: 'Not Started',
+	in_progress: 'In Progress',
+	completed: 'Completed',
+	cancelled: 'Cancelled',
+};
+
+type Status = keyof typeof statusOptions;
+
+export const statusSchema = z
+	.enum(['', ...(Object.keys(statusOptions) as [Status, ...Status[]])])
+	.refine((value) => value !== '', {
+		message: 'Status is required',
+	});
+
 export const createInterventionSchema = z.object({
-	type: z
-		.enum(['new', 'renovation', 'maintenance'], {
-			errorMap: () => ({ message: 'Type is required' }),
-		})
-		.default('' as 'new'),
-	status: z
-		.enum(['not_started', 'in_progress', 'completed', 'cancelled'], {
-			errorMap: () => ({ message: 'Status is required' }),
-		})
-		.default('' as 'not_started'),
-	start_date: z.string().min(1, 'Start Date is required.'),
-	end_date: z.string().optional(),
+	type: typeSchema,
+	status: statusSchema,
+	start_date: z.string().nullish(),
+	end_date: z.string().nullish(),
 	description: z.string().min(1, 'Description is required.'),
 	property_id: z.number().min(1, 'Property is required.'),
-	fraction_id: z.number().optional(),
-	ticket_id: z.number().optional(),
+	fraction_id: z.number().nullish(),
+	ticket_id: z.number().nullish(),
 });
 
 export type CreateInterventionSchema = typeof createInterventionSchema;
-
-export const updateInterventionSchema = z.object({
-	id: z.number(),
-	type: z
-		.enum(['new', 'renovation', 'maintenance'], {
-			errorMap: () => ({ message: 'Type is required' }),
-		})
-		.default('' as 'new'),
-	status: z
-		.enum(['not_started', 'in_progress', 'completed', 'cancelled'], {
-			errorMap: () => ({ message: 'Status is required' }),
-		})
-		.default('' as 'not_started'),
-	start_date: z.string().min(1, 'Start Date is required.'),
-	end_date: z.string().optional(),
-	description: z.string().min(1, 'Description is required.'),
-	property_id: z.number().min(1, 'Property is required.'),
-	fraction_id: z.number().optional(),
-	ticket_id: z.number().optional(),
-});
-
-export type UpdateInterventionSchema = typeof updateInterventionSchema;
 
 export const deleteInterventionSchema = z.object({
 	id: z.number(),

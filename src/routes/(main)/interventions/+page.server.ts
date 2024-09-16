@@ -1,8 +1,4 @@
-import {
-	createInterventionSchema,
-	deleteInterventionSchema,
-	updateInterventionSchema,
-} from '@/schemas/intervention';
+import { createInterventionSchema, deleteInterventionSchema } from '@/schemas/intervention';
 import type { IdWithLabel, Intervention } from '@/types/types';
 import { handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -70,9 +66,6 @@ export const load = async (event) => {
 		createForm: await superValidate(zod(createInterventionSchema), {
 			id: 'create',
 		}),
-		updateForm: await superValidate(zod(updateInterventionSchema), {
-			id: 'update',
-		}),
 		deleteForm: await superValidate(zod(deleteInterventionSchema), {
 			id: 'delete',
 		}),
@@ -101,66 +94,6 @@ export const actions = {
 		const { error: supabaseError } = await event.locals.supabase
 			.from('interventions')
 			.insert(form.data);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(updateInterventionSchema), {
-			id: 'update',
-		});
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('interventions')
-			.update(form.data)
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteInterventionSchema), {
-			id: 'delete',
-		});
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('interventions')
-			.delete()
-			.eq('id', form.data.id);
 
 		if (supabaseError) {
 			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);

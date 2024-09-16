@@ -10,7 +10,6 @@
 	import { currencyFormatter } from '@/formatters';
 	import type { Movement, MovementType } from '@/types/types';
 	import dayjs from 'dayjs';
-	import { PlusCircle } from 'lucide-svelte';
 	import { Cross2 } from 'radix-icons-svelte';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
@@ -170,10 +169,6 @@
 				</Button>
 			{/if}
 		</div>
-		<Button>
-			<PlusCircle class="mr-2 h-4 w-4" />
-			Movement
-		</Button>
 	</div>
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>

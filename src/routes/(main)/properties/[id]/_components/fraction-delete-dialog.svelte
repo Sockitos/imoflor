@@ -18,7 +18,11 @@
 </script>
 
 <AlertDialog.Root bind:open>
-	<form method="POST" action="?/delete" use:enhance>
+	<form
+		method="POST"
+		action="/properties/{fraction.property_id}/fractions/{fraction.id}?/delete"
+		use:enhance
+	>
 		<input type="hidden" name="id" value={fraction.id} />
 	</form>
 	<AlertDialog.Content>

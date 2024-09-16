@@ -5,12 +5,10 @@
 	import type { Ticket } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import TicketDeleteDialog from './ticket-delete-dialog.svelte';
-	import TicketForm from './ticket-form.svelte';
 	import { priorityMap } from './ticket-priority-map';
 	import { statusMap } from './ticket-status-map';
 
 	export let ticket: Ticket;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
@@ -49,11 +47,9 @@
 			</DropdownMenu.SubContent>
 		</DropdownMenu.Sub>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item on:click={() => (openSheet = true)}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item href="/tickets/{ticket.id}?action=edit">Edit</DropdownMenu.Item>
 		<DropdownMenu.Item on:click={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
-
-<TicketForm data={$page.data.updateForm} bind:open={openSheet} />
 
 <TicketDeleteDialog {ticket} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
