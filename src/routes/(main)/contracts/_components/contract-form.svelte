@@ -38,8 +38,6 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: editing = false;
-
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
 	});

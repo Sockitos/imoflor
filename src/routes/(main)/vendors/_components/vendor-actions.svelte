@@ -7,7 +7,6 @@
 	import VendorDeleteDialog from './vendor-delete-dialog.svelte';
 
 	export let vendor: Vendor;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 

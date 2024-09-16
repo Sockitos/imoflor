@@ -7,7 +7,6 @@
 	import ContractDeleteDialog from './contract-delete-dialog.svelte';
 
 	export let contract: Contract;
-	let openSheet = false;
 	let openDeleteDialog = false;
 </script>
 
