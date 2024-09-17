@@ -8,7 +8,7 @@
 	import EmployeeTable from './_components/employee-table.svelte';
 
 	export let data;
-	$: ({ employees, createForm } = data);
+	$: ({ employees, createEmployeeForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<EmployeeTable {employees} />
 </div>
 
-<EmployeeForm data={createForm} action="?/create" bind:open={openForm} />
+<EmployeeForm data={createEmployeeForm} action="?/create" bind:open={openForm} />

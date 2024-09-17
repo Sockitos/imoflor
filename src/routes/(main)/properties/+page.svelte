@@ -8,7 +8,7 @@
 	import PropertyTable from './_components/property-table.svelte';
 
 	export let data;
-	$: ({ properties, createForm } = data);
+	$: ({ properties, createPropertyForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<PropertyTable {properties} />
 </div>
 
-<PropertyForm data={createForm} action="?/create" bind:open={openForm} />
+<PropertyForm data={createPropertyForm} action="?/create" bind:open={openForm} />

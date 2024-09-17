@@ -8,7 +8,7 @@
 	import InterventionTable from './_components/intervention-table.svelte';
 
 	export let data;
-	$: ({ interventions, createForm } = data);
+	$: ({ interventions, createInterventionForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<InterventionTable {interventions} />
 </div>
 
-<InterventionForm data={createForm} action="?/create" bind:open={openForm} />
+<InterventionForm data={createInterventionForm} action="?/create" bind:open={openForm} />

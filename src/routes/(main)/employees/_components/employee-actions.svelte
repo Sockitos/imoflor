@@ -25,4 +25,8 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<EmployeeDeleteDialog {employee} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<EmployeeDeleteDialog
+	{employee}
+	data={$page.data.deleteEmployeeForm}
+	bind:open={openDeleteDialog}
+/>

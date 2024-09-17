@@ -8,7 +8,7 @@
 	import VendorTable from './_components/vendor-table.svelte';
 
 	export let data;
-	$: ({ vendors, createForm } = data);
+	$: ({ vendors, createVendorForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<VendorTable {vendors} />
 </div>
 
-<VendorForm data={createForm} action="?/create" bind:open={openForm} />
+<VendorForm data={createVendorForm} action="?/create" bind:open={openForm} />

@@ -10,7 +10,7 @@
 	import VendorForm from '../_components/vendor-form.svelte';
 
 	export let data;
-	$: ({ vendor, movements, updateForm, deleteForm } = data);
+	$: ({ vendor, movements, updateVendorForm, deleteVendorForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -115,6 +115,6 @@
 	</div>
 </div>
 
-<VendorForm data={updateForm} action="?/update" bind:open={openForm} />
+<VendorForm data={updateVendorForm} action="?/update" bind:open={openForm} />
 
-<VendorDeleteDialog {vendor} data={deleteForm} bind:open={openDeleteDialog} />
+<VendorDeleteDialog {vendor} data={deleteVendorForm} bind:open={openDeleteDialog} />

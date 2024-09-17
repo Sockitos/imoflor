@@ -25,4 +25,8 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<ContractDeleteDialog {contract} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<ContractDeleteDialog
+	{contract}
+	data={$page.data.deleteContractForm}
+	bind:open={openDeleteDialog}
+/>

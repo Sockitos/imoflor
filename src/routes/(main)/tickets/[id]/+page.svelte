@@ -10,7 +10,7 @@
 	import TicketForm from '../_components/ticket-form.svelte';
 
 	export let data;
-	$: ({ ticket, updateForm, deleteForm } = data);
+	$: ({ ticket, updateTicketForm, deleteTicketForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -78,6 +78,6 @@
 	</div>
 </div>
 
-<TicketForm data={updateForm} action="?/update" bind:open={openForm} />
+<TicketForm data={updateTicketForm} action="?/update" bind:open={openForm} />
 
-<TicketDeleteDialog {ticket} data={deleteForm} bind:open={openDeleteDialog} />
+<TicketDeleteDialog {ticket} data={deleteTicketForm} bind:open={openDeleteDialog} />

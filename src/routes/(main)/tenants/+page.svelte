@@ -8,7 +8,7 @@
 	import TenantTable from './_components/tenant-table.svelte';
 
 	export let data;
-	$: ({ tenants, createForm } = data);
+	$: ({ tenants, createTenantForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<TenantTable {tenants} />
 </div>
 
-<TenantForm data={createForm} action="?/create" bind:open={openForm} />
+<TenantForm data={createTenantForm} action="?/create" bind:open={openForm} />

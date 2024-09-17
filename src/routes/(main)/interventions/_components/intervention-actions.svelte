@@ -41,6 +41,6 @@
 
 <InterventionDeleteDialog
 	{intervention}
-	data={$page.data.deleteForm}
+	data={$page.data.deleteInterventionForm}
 	bind:open={openDeleteDialog}
 />

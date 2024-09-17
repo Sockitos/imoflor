@@ -1,6 +1,6 @@
 import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
 import type { Contract, IdWithLabel } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -52,45 +52,36 @@ export const load = async (event) => {
 		contracts: await getContracts(),
 		fractionOptions: await getFractionOptions(),
 		tenantOptions: await getTenantOptions(),
-		createForm: await superValidate(zod(createContractSchema), {
-			id: 'create',
+		createContractForm: await superValidate(zod(createContractSchema), {
+			id: 'create-contract',
 		}),
-		deleteForm: await superValidate(zod(deleteContractSchema), {
-			id: 'delete',
+		deleteContractForm: await superValidate(zod(deleteContractSchema), {
+			id: 'delete-contract',
 		}),
 	};
 };
 
 export const actions = {
-	create: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	create: async (event) =>
+		handleFormAction(
+			event,
+			createContractSchema,
+			'create-contract',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase.from('contracts_view').insert({
+					fraction_id: form.data.fraction_id,
+					start_date: form.data.start_date,
+					end_date: form.data.end_date,
+					type: form.data.type,
+					data: form.data,
+				});
 
-		const form = await superValidate(event.request, zod(createContractSchema), { id: 'create' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase.from('contracts_view').insert({
-			fraction_id: form.data.fraction_id,
-			start_date: form.data.start_date,
-			end_date: form.data.end_date,
-			type: form.data.type,
-			data: form.data,
-		});
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

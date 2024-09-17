@@ -1,6 +1,6 @@
 import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
 import type { Contract, ContractAccountItem, IdWithLabel } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -69,7 +69,7 @@ export const load = async (event) => {
 		contractAccount: await getContractAccount(),
 		fractionOptions: await getFractionOptions(),
 		tenantOptions: await getTenantOptions(),
-		updateForm: await superValidate(
+		updateContractForm: await superValidate(
 			{
 				type: contract.type,
 				fraction_id: contract.fraction.id,
@@ -80,70 +80,58 @@ export const load = async (event) => {
 			},
 			zod(createContractSchema),
 			{
-				id: 'update',
+				id: 'update-contract',
 			}
 		),
-		deleteForm: await superValidate(zod(deleteContractSchema), {
-			id: 'delete',
+		deleteContractForm: await superValidate(zod(deleteContractSchema), {
+			id: 'delete-contract',
 		}),
 	};
 };
 
 export const actions = {
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	update: async (event) =>
+		handleFormAction(
+			event,
+			createContractSchema,
+			'update-contract',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('contracts_view')
+					.update({
+						fraction_id: form.data.fraction_id,
+						start_date: form.data.start_date,
+						end_date: form.data.end_date,
+						type: form.data.type,
+						data: form.data,
+					})
+					.eq('id', event.params.id);
 
-		const form = await superValidate(event.request, zod(createContractSchema), { id: 'update' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
+				return { success: true, form };
+			}
+		),
+	delete: async (event) =>
+		handleFormAction(
+			event,
+			deleteContractSchema,
+			'delete-contract',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('contracts')
+					.delete()
+					.eq('id', form.data.id);
 
-		const { error: supabaseError } = await event.locals.supabase
-			.from('contracts_view')
-			.update(form.data)
-			.eq('id', event.params.id);
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteContractSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('contracts')
-			.delete()
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

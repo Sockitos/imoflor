@@ -25,4 +25,4 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<VendorDeleteDialog {vendor} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<VendorDeleteDialog {vendor} data={$page.data.deleteVendorForm} bind:open={openDeleteDialog} />

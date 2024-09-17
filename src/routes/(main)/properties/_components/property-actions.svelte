@@ -25,4 +25,8 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<PropertyDeleteDialog {property} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<PropertyDeleteDialog
+	{property}
+	data={$page.data.deletePropertyForm}
+	bind:open={openDeleteDialog}
+/>

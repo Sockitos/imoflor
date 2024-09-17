@@ -12,7 +12,7 @@
 	import EmployeeForm from '../_components/employee-form.svelte';
 
 	export let data;
-	$: ({ employee, movements, updateForm, deleteForm } = data);
+	$: ({ employee, movements, updateEmployeeForm, deleteEmployeeForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -169,6 +169,6 @@
 	</div>
 </div>
 
-<EmployeeForm data={updateForm} action="?/update" bind:open={openForm} />
+<EmployeeForm data={updateEmployeeForm} action="?/update" bind:open={openForm} />
 
-<EmployeeDeleteDialog {employee} data={deleteForm} bind:open={openDeleteDialog} />
+<EmployeeDeleteDialog {employee} data={deleteEmployeeForm} bind:open={openDeleteDialog} />

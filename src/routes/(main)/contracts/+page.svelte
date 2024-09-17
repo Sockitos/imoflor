@@ -8,7 +8,7 @@
 	import ContractTable from './_components/contract-table.svelte';
 
 	export let data;
-	$: ({ contracts, createForm } = data);
+	$: ({ contracts, createContractForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<ContractTable {contracts} />
 </div>
 
-<ContractForm data={createForm} action="?/create" bind:open={openForm} />
+<ContractForm data={createContractForm} action="?/create" bind:open={openForm} />

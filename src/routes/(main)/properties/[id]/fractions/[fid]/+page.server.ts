@@ -1,6 +1,6 @@
 import { createFractionSchema, deleteFractionSchema } from '@/schemas/fraction';
 import type { Fraction, Property } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -43,70 +43,52 @@ export const load = async (event) => {
 	return {
 		property: await getProperty(),
 		fraction: fraction,
-		updateForm: await superValidate(fraction, zod(createFractionSchema), {
-			id: 'update',
+		updateFractionForm: await superValidate(fraction, zod(createFractionSchema), {
+			id: 'update-fraction',
 		}),
-		deleteForm: await superValidate(zod(deleteFractionSchema), {
-			id: 'delete',
+		deleteFractionForm: await superValidate(zod(deleteFractionSchema), {
+			id: 'delete-fraction',
 		}),
 	};
 };
 
 export const actions = {
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	update: async (event) =>
+		handleFormAction(
+			event,
+			createFractionSchema,
+			'update-fraction',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('fractions')
+					.update({ property_id: Number(event.params.id), ...form.data })
+					.eq('id', event.params.fid);
 
-		const form = await superValidate(event.request, zod(createFractionSchema), { id: 'update' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
+				return { success: true, form };
+			}
+		),
+	delete: async (event) =>
+		handleFormAction(
+			event,
+			deleteFractionSchema,
+			'delete-fraction',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('fractions')
+					.delete()
+					.eq('id', event.params.id);
 
-		const { error: supabaseError } = await event.locals.supabase
-			.from('fractions')
-			.update({ property_id: Number(event.params.id), ...form.data })
-			.eq('id', event.params.id);
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteFractionSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('fractions')
-			.delete()
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

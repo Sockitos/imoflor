@@ -25,4 +25,4 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<TenantDeleteDialog {tenant} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<TenantDeleteDialog {tenant} data={$page.data.deleteTenantForm} bind:open={openDeleteDialog} />

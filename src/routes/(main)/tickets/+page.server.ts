@@ -1,6 +1,6 @@
 import { createTicketSchema, deleteTicketSchema } from '@/schemas/ticket';
 import type { IdWithLabel, Ticket } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -50,34 +50,26 @@ export const load = async (event) => {
 		tickets: await getTickets(),
 		propertyOptions: await getPropertyOptions(),
 		fractionOptions: await getFractionOptions(),
-		createForm: await superValidate(zod(createTicketSchema), {
-			id: 'create',
+		createTicketForm: await superValidate(zod(createTicketSchema), {
+			id: 'create-ticket',
 		}),
-		deleteForm: await superValidate(zod(deleteTicketSchema), {
-			id: 'delete',
+		deleteTicketForm: await superValidate(zod(deleteTicketSchema), {
+			id: 'delete-ticket',
 		}),
 	};
 };
 
 export const actions = {
-	create: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			return error(401, 'Unauthorized');
-		}
+	create: async (event) =>
+		handleFormAction(event, createTicketSchema, 'create-ticket', async (event, userId, form) => {
+			const { error: supabaseError } = await event.locals.supabase
+				.from('tickets')
+				.insert(form.data);
 
-		const form = await superValidate(event.request, zod(createTicketSchema), { id: 'create' });
+			if (supabaseError) {
+				return fail(500, { message: supabaseError.message, success: false, form });
+			}
 
-		if (!form.valid) {
-			return fail(400, { message: 'Invalid form.', success: false, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase.from('tickets').insert(form.data);
-
-		if (supabaseError) {
-			return fail(500, { message: supabaseError.message, success: false, form });
-		}
-
-		return { success: true, form };
-	},
+			return { success: true, form };
+		}),
 };

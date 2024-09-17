@@ -22,7 +22,7 @@
 	import ContractAccountTable from './../_components/contract-account-table.svelte';
 
 	export let data;
-	$: ({ contract, contractAccount, updateForm, deleteForm } = data);
+	$: ({ contract, contractAccount, updateContractForm, deleteContractForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -203,6 +203,6 @@
 	</div>
 </div>
 
-<ContractForm data={updateForm} action="?/update" bind:open={openForm} />
+<ContractForm data={updateContractForm} action="?/update" bind:open={openForm} />
 
-<ContractDeleteDialog {contract} data={deleteForm} bind:open={openDeleteDialog} />
+<ContractDeleteDialog {contract} data={deleteContractForm} bind:open={openDeleteDialog} />

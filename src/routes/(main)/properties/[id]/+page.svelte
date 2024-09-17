@@ -13,7 +13,7 @@
 	import FractionTable from './_components/fraction-table.svelte';
 
 	export let data;
-	$: ({ property, fractions, updateForm, deleteForm, createFractionForm } = data);
+	$: ({ property, fractions, updatePropertyForm, deletePropertyForm, createFractionForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -142,9 +142,9 @@
 	</div>
 </div>
 
-<PropertyForm data={updateForm} action="?/update" bind:open={openForm} />
+<PropertyForm data={updatePropertyForm} action="?/update" bind:open={openForm} />
 
-<PropertyDeleteDialog {property} data={deleteForm} bind:open={openDeleteDialog} />
+<PropertyDeleteDialog {property} data={deletePropertyForm} bind:open={openDeleteDialog} />
 
 <FractionForm
 	data={createFractionForm}

@@ -8,7 +8,7 @@
 	import TicketTable from './_components/ticket-table.svelte';
 
 	export let data;
-	$: ({ tickets, createForm } = data);
+	$: ({ tickets, createTicketForm } = data);
 	let openForm = false;
 </script>
 
@@ -27,4 +27,4 @@
 	<TicketTable {tickets} />
 </div>
 
-<TicketForm data={createForm} action="?/create" bind:open={openForm} />
+<TicketForm data={createTicketForm} action="?/create" bind:open={openForm} />

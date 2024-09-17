@@ -1,6 +1,6 @@
 import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
 import type { Employee } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -27,41 +27,32 @@ export const load = async (event) => {
 
 	return {
 		employees: await getEmployees(),
-		createForm: await superValidate(zod(createEmployeeSchema), {
-			id: 'create',
+		createEmployeeForm: await superValidate(zod(createEmployeeSchema), {
+			id: 'create-employee',
 		}),
-		deleteForm: await superValidate(zod(deleteEmployeeSchema), {
-			id: 'delete',
+		deleteEmployeeForm: await superValidate(zod(deleteEmployeeSchema), {
+			id: 'delete-employee',
 		}),
 	};
 };
 
 export const actions = {
-	create: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	create: async (event) =>
+		handleFormAction(
+			event,
+			createEmployeeSchema,
+			'create-employee',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('employees')
+					.insert(form.data);
 
-		const form = await superValidate(event.request, zod(createEmployeeSchema), { id: 'create' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('employees')
-			.insert(form.data);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

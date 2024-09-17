@@ -1,7 +1,7 @@
 import { createFractionSchema, deleteFractionSchema } from '@/schemas/fraction';
 import { createPropertySchema, deletePropertySchema } from '@/schemas/property';
 import type { Fraction, Property } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -43,17 +43,17 @@ export const load = async (event) => {
 	return {
 		property: property,
 		fractions: await getFractions(),
-		updateForm: await superValidate(property, zod(createPropertySchema), {
-			id: 'update',
+		updatePropertyForm: await superValidate(property, zod(createPropertySchema), {
+			id: 'update-property',
 		}),
-		deleteForm: await superValidate(zod(deletePropertySchema), {
-			id: 'delete',
+		deletePropertyForm: await superValidate(zod(deletePropertySchema), {
+			id: 'delete-property',
 		}),
 		createFractionForm: await superValidate(zod(createFractionSchema), {
-			id: 'create',
+			id: 'create-fraction',
 		}),
 		deleteFractionForm: await superValidate(zod(deleteFractionSchema), {
-			id: 'delete',
+			id: 'delete-fraction',
 		}),
 	};
 };
@@ -67,7 +67,9 @@ export const actions = {
 			return error(401, errorMessage);
 		}
 
-		const form = await superValidate(event.request, zod(createPropertySchema), { id: 'update' });
+		const form = await superValidate(event.request, zod(createPropertySchema), {
+			id: 'update-property',
+		});
 
 		if (!form.valid) {
 			const errorMessage = 'Invalid form.';
@@ -87,32 +89,23 @@ export const actions = {
 
 		return { success: true, form };
 	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	delete: async (event) =>
+		handleFormAction(
+			event,
+			deletePropertySchema,
+			'delete-property',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('properties')
+					.delete()
+					.eq('id', form.data.id);
 
-		const form = await superValidate(event.request, zod(deletePropertySchema), { id: 'delete' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('properties')
-			.delete()
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

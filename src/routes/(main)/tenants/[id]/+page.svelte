@@ -12,7 +12,7 @@
 	import TenantForm from '../_components/tenant-form.svelte';
 
 	export let data;
-	$: ({ tenant, movements, updateForm, deleteForm } = data);
+	$: ({ tenant, movements, updateTenantForm, deleteTenantForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -165,6 +165,6 @@
 	</div>
 </div>
 
-<TenantForm data={updateForm} action="?/update" bind:open={openForm} />
+<TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
 
-<TenantDeleteDialog {tenant} data={deleteForm} bind:open={openDeleteDialog} />
+<TenantDeleteDialog {tenant} data={deleteTenantForm} bind:open={openDeleteDialog} />

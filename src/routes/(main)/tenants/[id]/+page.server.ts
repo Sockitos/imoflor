@@ -1,6 +1,6 @@
 import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
 import type { Movement, Tenant } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -42,68 +42,42 @@ export const load = async (event) => {
 	return {
 		tenant: tenant,
 		movements: await getMovements(tenant.tax_id_number),
-		updateForm: await superValidate(tenant, zod(createTenantSchema), {
-			id: 'update',
+		updateTenantForm: await superValidate(tenant, zod(createTenantSchema), {
+			id: 'update-tenant',
 		}),
-		deleteForm: await superValidate(zod(deleteTenantSchema), {
-			id: 'delete',
+		deleteTenantForm: await superValidate(zod(deleteTenantSchema), {
+			id: 'delete-tenant',
 		}),
 	};
 };
 
 export const actions = {
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	update: async (event) =>
+		handleFormAction(event, createTenantSchema, 'update-tenant', async (event, userId, form) => {
+			const { error: supabaseError } = await event.locals.supabase
+				.from('tenants')
+				.update(form.data)
+				.eq('id', event.params.id);
 
-		const form = await superValidate(event.request, zod(createTenantSchema), { id: 'update' });
+			if (supabaseError) {
+				setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+				return fail(500, { message: supabaseError.message, form });
+			}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-		const { error: supabaseError } = await event.locals.supabase
-			.from('tenants')
-			.update(form.data)
-			.eq('id', event.params.id);
+			return { success: true, form };
+		}),
+	delete: async (event) =>
+		handleFormAction(event, deleteTenantSchema, 'delete-tenant', async (event, userId, form) => {
+			const { error: supabaseError } = await event.locals.supabase
+				.from('tenants')
+				.delete()
+				.eq('id', form.data.id);
 
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
+			if (supabaseError) {
+				setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+				return fail(500, { message: supabaseError.message, form });
+			}
 
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteTenantSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-		const { error: supabaseError } = await event.locals.supabase
-			.from('tenants')
-			.delete()
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+			return { success: true, form };
+		}),
 };

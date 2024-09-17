@@ -10,7 +10,7 @@
 	import InterventionForm from '../_components/intervention-form.svelte';
 
 	export let data;
-	$: ({ intervention, updateForm, deleteForm } = data);
+	$: ({ intervention, updateInterventionForm, deleteInterventionForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -97,6 +97,10 @@
 	</div>
 </div>
 
-<InterventionForm data={updateForm} action="?/update" bind:open={openForm} />
+<InterventionForm data={updateInterventionForm} action="?/update" bind:open={openForm} />
 
-<InterventionDeleteDialog {intervention} data={deleteForm} bind:open={openDeleteDialog} />
+<InterventionDeleteDialog
+	{intervention}
+	data={deleteInterventionForm}
+	bind:open={openDeleteDialog}
+/>

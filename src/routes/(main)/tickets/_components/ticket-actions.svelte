@@ -52,4 +52,4 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<TicketDeleteDialog {ticket} data={$page.data.deleteForm} bind:open={openDeleteDialog} />
+<TicketDeleteDialog {ticket} data={$page.data.deleteTicketForm} bind:open={openDeleteDialog} />

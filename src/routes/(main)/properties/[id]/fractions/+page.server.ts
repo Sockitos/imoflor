@@ -1,36 +1,26 @@
 import { createFractionSchema } from '@/schemas/fraction';
-import { error } from '@sveltejs/kit';
+import { handleFormAction } from '@/utils';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { fail } from 'sveltekit-superforms';
 
 export const actions = {
-	create: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	create: async (event) =>
+		handleFormAction(
+			event,
+			createFractionSchema,
+			'create-fraction',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase.from('fractions').insert({
+					property_id: Number(event.params.id),
+					...form.data,
+				});
 
-		const form = await superValidate(event.request, zod(createFractionSchema), { id: 'create' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase.from('fractions').insert({
-			property_id: Number(event.params.id),
-			...form.data,
-		});
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

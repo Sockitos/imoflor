@@ -1,6 +1,6 @@
 import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
 import type { Employee, Movement } from '@/types/types';
-import { handleLoginRedirect } from '@/utils';
+import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -42,70 +42,52 @@ export const load = async (event) => {
 	return {
 		employee: employee,
 		movements: await getMovements(employee.tax_id_number),
-		updateForm: await superValidate(employee, zod(createEmployeeSchema), {
-			id: 'update',
+		updateEmployeeForm: await superValidate(employee, zod(createEmployeeSchema), {
+			id: 'update-employee',
 		}),
-		deleteForm: await superValidate(zod(deleteEmployeeSchema), {
-			id: 'delete',
+		deleteEmployeeForm: await superValidate(zod(deleteEmployeeSchema), {
+			id: 'delete-employee',
 		}),
 	};
 };
 
 export const actions = {
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	update: async (event) =>
+		handleFormAction(
+			event,
+			createEmployeeSchema,
+			'update-employee',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('employees')
+					.update(form.data)
+					.eq('id', event.params.id);
 
-		const form = await superValidate(event.request, zod(createEmployeeSchema), { id: 'update' });
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
+				return { success: true, form };
+			}
+		),
+	delete: async (event) =>
+		handleFormAction(
+			event,
+			deleteEmployeeSchema,
+			'delete-employee',
+			async (event, userId, form) => {
+				const { error: supabaseError } = await event.locals.supabase
+					.from('employees')
+					.delete()
+					.eq('id', form.data.id);
 
-		const { error: supabaseError } = await event.locals.supabase
-			.from('employees')
-			.update(form.data)
-			.eq('id', event.params.id);
+				if (supabaseError) {
+					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
+					return fail(500, { message: supabaseError.message, form });
+				}
 
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
-	delete: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
-
-		const form = await superValidate(event.request, zod(deleteEmployeeSchema), { id: 'delete' });
-
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error: supabaseError } = await event.locals.supabase
-			.from('employees')
-			.delete()
-			.eq('id', form.data.id);
-
-		if (supabaseError) {
-			setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-			return fail(500, { message: supabaseError.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 };

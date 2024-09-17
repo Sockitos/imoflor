@@ -11,7 +11,7 @@
 	import FractionForm from '../../_components/fraction-form.svelte';
 
 	export let data;
-	$: ({ property, fraction, updateForm, deleteForm } = data);
+	$: ({ property, fraction, updateFractionForm, deleteFractionForm } = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
@@ -123,6 +123,6 @@
 	</div>
 </div>
 
-<FractionForm data={updateForm} action="?/update" bind:open={openForm} />
+<FractionForm data={updateFractionForm} action="?/update" bind:open={openForm} />
 
-<FractionDeleteDialog {fraction} data={deleteForm} bind:open={openDeleteDialog} />
+<FractionDeleteDialog {fraction} data={deleteFractionForm} bind:open={openDeleteDialog} />
