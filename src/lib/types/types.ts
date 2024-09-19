@@ -30,11 +30,11 @@ export type MovementType =
 
 export type IdWithLabel = { id: number; label: string };
 
-export interface User {
+export interface Profile {
 	id: string;
-	role: UserRole;
+	email: string;
 	display_name: string;
-	imagePath: string;
+	image?: string | null;
 }
 
 export interface Tenant {

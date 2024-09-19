@@ -5,22 +5,22 @@
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 	import { Button } from './ui/button';
 
-	const { session } = $page.data;
+	const { profile } = $page.data;
 	let formEl: HTMLFormElement;
 
-	const displayName = 'Display Name';
-	$: initials = displayName
-		.split(' ')
-		.map((n) => n[0])
-		.join('')
-		.toUpperCase();
+	$: initials =
+		profile?.display_name
+			.split(' ')
+			.map((n) => n[0])
+			.join('')
+			.toUpperCase() ?? 'U';
 </script>
 
 <DropdownMenu.Root>
 	<DropdownMenu.Trigger asChild let:builder>
 		<Button variant="ghost" class="relative h-8 w-8 rounded-full" builders={[builder]}>
 			<Avatar.Root class="h-9 w-9">
-				<Avatar.Image src="/avatars/04.png" alt="@goncalo.nogueira" />
+				<Avatar.Image src={profile?.image} alt={profile?.display_name} />
 				<Avatar.Fallback>{initials}</Avatar.Fallback>
 			</Avatar.Root>
 		</Button>
@@ -28,8 +28,8 @@
 	<DropdownMenu.Content class="w-56" align="end">
 		<DropdownMenu.Label class="font-normal">
 			<div class="flex flex-col space-y-1">
-				<p class="text-sm font-medium leading-none">{displayName}</p>
-				<p class="text-xs leading-none text-muted-foreground">{session?.user.email}</p>
+				<p class="text-sm font-medium leading-none">{profile?.display_name}</p>
+				<p class="text-xs leading-none text-muted-foreground">{profile?.email}</p>
 			</div>
 		</DropdownMenu.Label>
 		<DropdownMenu.Separator />

@@ -2,6 +2,7 @@
 // for information about these interfaces
 
 import type { Database } from '@/types/supabase-types';
+import type { Profile } from '@/types/types';
 import { Session, SupabaseClient, type User } from '@supabase/supabase-js';
 
 declare global {
@@ -14,6 +15,7 @@ declare global {
 			supabase: SupabaseClient<Database>;
 			session: Session | null;
 			user: User | null;
+			profile: Profile | null;
 			flash?: { type: 'success' | 'error'; message: string };
 		}
 		// interface Error {}
