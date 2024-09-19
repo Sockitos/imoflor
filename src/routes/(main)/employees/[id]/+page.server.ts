@@ -26,15 +26,15 @@ export const load = async (event) => {
 	}
 
 	async function getMovements(tax_id_number: string): Promise<Movement[]> {
-		const { data: contractAccount, error: contractAccountError } = await event.locals.supabase
+		const { data: movements, error: movementsError } = await event.locals.supabase
 			.from('movements')
 			.select('*')
 			.eq('tax_id_number', tax_id_number);
 
-		if (contractAccountError) {
+		if (movementsError) {
 			return error(500, 'Error fetching movements, please try again later.');
 		}
-		return contractAccount;
+		return movements;
 	}
 
 	const employee = await getEmployee();

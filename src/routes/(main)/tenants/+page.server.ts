@@ -18,9 +18,7 @@ export const load = async (event) => {
 			.select('*');
 
 		if (tenantsError) {
-			const errorMessage = 'Error fetching tenants, please try again later.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(500, errorMessage);
+			return error(500, 'Error fetching tenants, please try again later.');
 		}
 		return tenants;
 	}

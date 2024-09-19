@@ -13,16 +13,16 @@ export const load = async (event) => {
 	}
 
 	async function getTenant(): Promise<Tenant> {
-		const { data: contract, error: contractError } = await event.locals.supabase
+		const { data: tenant, error: tenantError } = await event.locals.supabase
 			.from('tenants')
 			.select('*')
 			.eq('id', event.params.id)
 			.single();
 
-		if (contractError) {
+		if (tenantError) {
 			return error(500, 'Error fetching tenant, please try again later.');
 		}
-		return contract;
+		return tenant;
 	}
 
 	async function getMovements(tax_id_number: string): Promise<Movement[]> {

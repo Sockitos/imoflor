@@ -18,8 +18,6 @@ export const load = async (event) => {
 			.select('*');
 
 		if (vendorsError) {
-			const errorMessage = 'Error fetching vendors, please try again later.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
 			return error(500, 'Error fetching vendors, please try again later.');
 		}
 		return vendors;

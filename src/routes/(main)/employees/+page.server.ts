@@ -18,9 +18,7 @@ export const load = async (event) => {
 			.select('*');
 
 		if (employeesError) {
-			const errorMessage = 'Error fetching employees, please try again later.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(500, errorMessage);
+			return error(500, 'Error fetching employees, please try again later.');
 		}
 		return employees;
 	}
