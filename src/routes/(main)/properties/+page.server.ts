@@ -41,13 +41,11 @@ export const actions = {
 			createPropertySchema,
 			'create-property',
 			async (event, userId, form) => {
-				const { error: supabaseError } = await event.locals.supabase
-					.from('properties')
-					.insert(form.data);
+				const { error } = await event.locals.supabase.from('properties').insert(form.data);
 
-				if (supabaseError) {
-					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-					return fail(500, { message: supabaseError.message, form });
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };

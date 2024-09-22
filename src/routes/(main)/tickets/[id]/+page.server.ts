@@ -66,26 +66,23 @@ export const load = async (event) => {
 export const actions = {
 	update: async (event) =>
 		handleFormAction(event, createTicketSchema, 'update-ticket', async (event, userId, form) => {
-			const { error: supabaseError } = await event.locals.supabase
+			const { error } = await event.locals.supabase
 				.from('tickets')
 				.update(form.data)
 				.eq('id', event.params.id);
 
-			if (supabaseError) {
-				return fail(500, { message: supabaseError.message, form });
+			if (error) {
+				return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };
 		}),
 	delete: async (event) =>
 		handleFormAction(event, deleteTicketSchema, 'delete-ticket', async (event, userId, form) => {
-			const { error: supabaseError } = await event.locals.supabase
-				.from('tickets')
-				.delete()
-				.eq('id', form.data.id);
+			const { error } = await event.locals.supabase.from('tickets').delete().eq('id', form.data.id);
 
-			if (supabaseError) {
-				return fail(500, { message: supabaseError.message, form });
+			if (error) {
+				return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };

@@ -10,14 +10,14 @@ export const actions = {
 			createFractionSchema,
 			'create-fraction',
 			async (event, userId, form) => {
-				const { error: supabaseError } = await event.locals.supabase.from('fractions').insert({
+				const { error } = await event.locals.supabase.from('fractions').insert({
 					property_id: Number(event.params.id),
 					...form.data,
 				});
 
-				if (supabaseError) {
-					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-					return fail(500, { message: supabaseError.message, form });
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };

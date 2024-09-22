@@ -62,12 +62,10 @@ export const load = async (event) => {
 export const actions = {
 	create: async (event) =>
 		handleFormAction(event, createTicketSchema, 'create-ticket', async (event, userId, form) => {
-			const { error: supabaseError } = await event.locals.supabase
-				.from('tickets')
-				.insert(form.data);
+			const { error } = await event.locals.supabase.from('tickets').insert(form.data);
 
-			if (supabaseError) {
-				return fail(500, { message: supabaseError.message, success: false, form });
+			if (error) {
+				return fail(500, { message: error.message, success: false, form });
 			}
 
 			return { success: true, form };

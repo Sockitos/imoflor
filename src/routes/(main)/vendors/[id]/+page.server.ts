@@ -54,28 +54,25 @@ export const load = async (event) => {
 export const actions = {
 	update: async (event) =>
 		handleFormAction(event, createVendorSchema, 'update-vendor', async (event, userId, form) => {
-			const { error: supabaseError } = await event.locals.supabase
+			const { error } = await event.locals.supabase
 				.from('vendors')
 				.update(form.data)
 				.eq('id', event.params.id);
 
-			if (supabaseError) {
-				setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-				return fail(500, { message: supabaseError.message, form });
+			if (error) {
+				setFlash({ type: 'error', message: error.message }, event.cookies);
+				return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };
 		}),
 	delete: async (event) =>
 		handleFormAction(event, deleteVendorSchema, 'delete-vendor', async (event, userId, form) => {
-			const { error: supabaseError } = await event.locals.supabase
-				.from('vendors')
-				.delete()
-				.eq('id', form.data.id);
+			const { error } = await event.locals.supabase.from('vendors').delete().eq('id', form.data.id);
 
-			if (supabaseError) {
-				setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-				return fail(500, { message: supabaseError.message, form });
+			if (error) {
+				setFlash({ type: 'error', message: error.message }, event.cookies);
+				return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };
