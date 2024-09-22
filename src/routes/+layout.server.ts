@@ -12,7 +12,6 @@ export const load = async ({ locals: { supabase, safeGetSession }, cookies }) =>
 			.single();
 
 		if (profileError) {
-			console.log('Error fetching profile:', profileError.message);
 			return error(500, 'Error fetching profile, please try again later.');
 		}
 
