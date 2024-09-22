@@ -7,7 +7,7 @@ export const createContractSchema = z.discriminatedUnion('type', [
 		start_date: z.string().min(1, 'Start Date is required.'),
 		end_date: z.string().nullish(),
 		tenant_id: z.number().min(1, 'Tenant is required.'),
-		rent: z.coerce.number().min(1, 'Rent is required.'),
+		rent: z.coerce.number().min(0, 'Rent is required.'),
 	}),
 	z.object({
 		type: z.literal('lending'),
@@ -15,11 +15,11 @@ export const createContractSchema = z.discriminatedUnion('type', [
 		start_date: z.string().min(1, 'Start Date is required.'),
 		end_date: z.string().nullish(),
 		tenant_id: z.number().min(1, 'Tenant is required.'),
-		sale_value: z.coerce.number().min(1, 'Sale Value is required.'),
-		down_payment: z.coerce.number().min(1, 'Down Payment is required.'),
-		yearly_raise: z.coerce.number().min(1, 'Yearly Raise is required.'),
-		installment: z.coerce.number().min(1, 'Installment is required.'),
-		interest: z.coerce.number().min(1, 'Interest is required.'),
+		sale_value: z.coerce.number().min(0, 'Sale Value is required.'),
+		down_payment: z.coerce.number().min(0, 'Down Payment is required.'),
+		yearly_raise: z.coerce.number().min(0, 'Yearly Raise is required.'),
+		installment: z.coerce.number().min(0, 'Installment is required.'),
+		interest: z.coerce.number().min(0, 'Interest is required.'),
 	}),
 ]);
 
