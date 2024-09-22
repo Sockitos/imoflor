@@ -38,6 +38,7 @@
 				open = false;
 			}
 		},
+		invalidateAll: 'force',
 	});
 
 	const { form: formData, enhance, submitting } = form;
