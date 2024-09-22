@@ -553,6 +553,7 @@ update on properties for each row execute procedure public.update_fraction_from_
 /* INSERT CONTRACT */
 create function public.insert_contract() returns trigger as $$
 declare contract_id bigint;
+inserted_contract contracts_view %ROWTYPE;
 begin
 insert into contracts (
 		type,
@@ -574,25 +575,28 @@ insert into rent_updates (contract_id, update_date, rent)
 values (
 		contract_id,
 		new.start_date,
-		(new."data"->>'rent')::double precision
+		(new.data->>'rent')::double precision
 	);
 elsif new.type = 'lending' then
 insert into lending_contracts (id, sale_value, down_payment, yearly_raise)
 values (
 		contract_id,
-		(new."data"->>'sale_value')::double precision,
-		(new."data"->>'down_payment')::double precision,
-		(new."data"->>'yearly_raise')::double precision
+		(new.data->>'sale_value')::double precision,
+		(new.data->>'down_payment')::double precision,
+		(new.data->>'yearly_raise')::double precision
 	);
 insert into installment_updates (contract_id, update_date, installment, tax)
 values (
 		contract_id,
 		new.start_date,
-		(new."data"->>'installment')::double precision,
-		(new."data"->>'tax')::double precision
+		(new.data->>'installment')::double precision,
+		(new.data->>'tax')::double precision
 	);
 end if;
-return new;
+select * into inserted_contract
+from contracts_view
+where id = contract_id;
+return inserted_contract;
 end;
 $$ language plpgsql;
 create trigger insert_contract instead of
@@ -600,6 +604,7 @@ insert on contracts_view for each row execute procedure public.insert_contract()
 /* UPDATE CONTRACT */
 create function public.update_contract() returns trigger as $$
 declare contract_id bigint;
+updated_contract contracts_view %rowtype;
 begin contract_id := new.id;
 update contracts
 set start_date = new.start_date,
@@ -611,27 +616,39 @@ insert into rent_updates (contract_id, update_date, rent)
 values (
 		contract_id,
 		new.start_date,
-		(new."data"->>'rent')::double precision
+		(new.data->>'rent')::double precision
 	);
 elsif new.type = 'lending' then
 update lending_contracts
-set sale_value = (new."data"->>'sale_value')::double precision,
-	down_payment = (new."data"->>'down_payment')::double precision,
-	yearly_raise = (new."data"->>'yearly_raise')::double precision
+set sale_value = (new.data->>'sale_value')::double precision,
+	down_payment = (new.data->>'down_payment')::double precision,
+	yearly_raise = (new.data->>'yearly_raise')::double precision
 where id = contract_id;
 insert into installment_updates (contract_id, update_date, installment, tax)
 values (
 		contract_id,
 		new.start_date,
-		(new."data"->>'installment')::double precision,
-		(new."data"->>'tax')::double precision
+		(new.data->>'installment')::double precision,
+		(new.data->>'tax')::double precision
 	);
 end if;
-return new;
+select * into updated_contract
+from contracts_view
+where id = contract_id;
+return updated_contract;
 end;
 $$ language plpgsql;
 create trigger update_contract instead of
 update on contracts_view for each row execute procedure public.update_contract();
+/* UPDATE CONTRACT TENANTS */
+create or replace function public.update_contract_tenants(p_contract_id bigint, p_tenants bigint []) returns void as $$ begin
+delete from contracts_tenants
+where contract_id = p_contract_id;
+insert into contracts_tenants (contract_id, tenant_id)
+select p_contract_id,
+	unnest(p_tenants);
+end;
+$$ language plpgsql;
 /* INSERT RENT PAYMENT */
 create function public.insert_rent_payment() returns trigger as $$
 declare movement_id bigint;

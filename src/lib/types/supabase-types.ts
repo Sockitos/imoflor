@@ -37,6 +37,9 @@ export type Database = MergeDeep<
 						data: Json;
 						end_date?: string | null;
 						fraction_id: number;
+						id?: number;
+						inserted_at?: string;
+						is_active?: boolean;
 						start_date: string;
 						type: Database['public']['Enums']['contract_type'];
 					};
@@ -44,6 +47,8 @@ export type Database = MergeDeep<
 						data?: Json;
 						end_date?: string | null;
 						fraction_id?: number;
+						id?: number;
+						inserted_at?: string;
 						is_active?: boolean;
 						start_date?: string;
 						type?: Database['public']['Enums']['contract_type'];

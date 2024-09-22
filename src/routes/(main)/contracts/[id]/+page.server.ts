@@ -96,7 +96,7 @@ export const actions = {
 			createContractSchema,
 			'update-contract',
 			async (event, userId, form) => {
-				const { error: supabaseError } = await event.locals.supabase
+				const { error } = await event.locals.supabase
 					.from('contracts_view')
 					.update({
 						fraction_id: form.data.fraction_id,
@@ -107,9 +107,19 @@ export const actions = {
 					})
 					.eq('id', event.params.id);
 
-				if (supabaseError) {
-					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-					return fail(500, { message: supabaseError.message, form });
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				const { error: tenantError } = await event.locals.supabase.rpc('update_contract_tenants', {
+					p_contract_id: Number(event.params.id),
+					p_tenants: [form.data.tenant_id],
+				});
+
+				if (tenantError) {
+					setFlash({ type: 'error', message: tenantError.message }, event.cookies);
+					return fail(500, { message: tenantError.message, form });
 				}
 
 				return { success: true, form };
@@ -121,14 +131,14 @@ export const actions = {
 			deleteContractSchema,
 			'delete-contract',
 			async (event, userId, form) => {
-				const { error: supabaseError } = await event.locals.supabase
+				const { error } = await event.locals.supabase
 					.from('contracts')
 					.delete()
 					.eq('id', form.data.id);
 
-				if (supabaseError) {
-					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-					return fail(500, { message: supabaseError.message, form });
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };

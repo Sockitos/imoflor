@@ -68,17 +68,31 @@ export const actions = {
 			createContractSchema,
 			'create-contract',
 			async (event, userId, form) => {
-				const { error: supabaseError } = await event.locals.supabase.from('contracts_view').insert({
-					fraction_id: form.data.fraction_id,
-					start_date: form.data.start_date,
-					end_date: form.data.end_date,
-					type: form.data.type,
-					data: form.data,
+				const { data, error } = await event.locals.supabase
+					.from('contracts_view')
+					.insert({
+						fraction_id: form.data.fraction_id,
+						start_date: form.data.start_date,
+						end_date: form.data.end_date,
+						type: form.data.type,
+						data: form.data,
+					})
+					.select()
+					.single();
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				const { error: tenantError } = await event.locals.supabase.rpc('update_contract_tenants', {
+					p_contract_id: data.id,
+					p_tenants: [form.data.tenant_id],
 				});
 
-				if (supabaseError) {
-					setFlash({ type: 'error', message: supabaseError.message }, event.cookies);
-					return fail(500, { message: supabaseError.message, form });
+				if (tenantError) {
+					setFlash({ type: 'error', message: tenantError.message }, event.cookies);
+					return fail(500, { message: tenantError.message, form });
 				}
 
 				return { success: true, form };
