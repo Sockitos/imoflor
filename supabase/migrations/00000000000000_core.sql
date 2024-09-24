@@ -369,11 +369,11 @@ select ip.contract_id,
 from public.installment_payments_view ip;
 /* CONTRACTS BALANCES */
 create view public.contracts_balances_view as
-select ca.contract_id,
-	sum(ca.value) as balance
+select c.id as contract_id,
+	coalesce(sum(ca.value), 0) as balance
 from public.contracts c
 	left join public.contracts_accounts_view ca on c.id = ca.contract_id
-group by ca.contract_id;
+group by c.id;
 /* RENTING CONTRACTS */
 create view public.renting_contracts_view as
 select rc.*,
