@@ -248,7 +248,7 @@ create table public.installment_updates (
 	inserted_at timestamp with time zone default timezone('utc'::text, now()) not null,
 	update_date timestamp with time zone not null,
 	installment double precision not null,
-	tax double precision not null,
+	interest double precision not null,
 	contract_id bigint not null references public.lending_contracts(id) on
     delete cascade
 );
@@ -379,12 +379,12 @@ create view public.renting_contracts_view as
 select rc.*,
 	coalesce(active_updates.rent, 0) as rent,
 	case
-		when last_updates.update_date is null then null::json
+		when next_updates.update_date is null then null::json
 		else json_build_object(
 			'update_date',
-			last_updates.update_date,
+			next_updates.update_date,
 			'rent',
-			coalesce(last_updates.rent, 0)
+			next_updates.rent
 		)
 	end as next_update
 from public.renting_contracts rc
@@ -393,18 +393,19 @@ from public.renting_contracts rc
 			ru.rent,
 			ru.update_date
 		from public.rent_updates ru
+		where ru.update_date <= timezone('utc'::text, now())
 		order by ru.contract_id,
-			ru.inserted_at desc
-	) as last_updates on rc.id = last_updates.contract_id
+			ru.update_date desc
+	) as active_updates on rc.id = active_updates.contract_id
 	left join (
 		select distinct on (ru.contract_id) ru.contract_id,
 			ru.rent,
 			ru.update_date
 		from public.rent_updates ru
-		where ru.update_date <= timezone('utc'::text, now())
+		where ru.update_date > timezone('utc'::text, now())
 		order by ru.contract_id,
-			ru.update_date desc
-	) as active_updates on rc.id = active_updates.contract_id;
+			ru.inserted_at desc
+	) as next_updates on rc.id = next_updates.contract_id;
 /* LENDING CONTRACTS DEBTS */
 create view public.lending_contracts_debts_view as
 select lc.id,
@@ -421,7 +422,7 @@ select lc.*,
 	lcd.extra_debt,
 	lcd.last_payment_date,
 	coalesce(active_updates.installment, 0) as installment,
-	coalesce(active_updates.tax, 0) as tax,
+	coalesce(active_updates.interest, 0) as interest,
 	case
 		when last_updates.update_date is null then null::json
 		else json_build_object(
@@ -429,8 +430,8 @@ select lc.*,
 			last_updates.update_date,
 			'installment',
 			coalesce(last_updates.installment, 0),
-			'tax',
-			coalesce(last_updates.tax, 0)
+			'interest',
+			coalesce(last_updates.interest, 0)
 		)
 	end as next_update
 from public.lending_contracts lc
@@ -438,7 +439,7 @@ from public.lending_contracts lc
 	left join (
 		select distinct on (iu.contract_id) iu.contract_id,
 			iu.installment,
-			iu.tax,
+			iu.interest,
 			iu.update_date
 		from public.installment_updates iu
 		order by iu.contract_id,
@@ -447,7 +448,7 @@ from public.lending_contracts lc
 	left join (
 		select distinct on (iu.contract_id) iu.contract_id,
 			iu.installment,
-			iu.tax,
+			iu.interest,
 			iu.update_date
 		from public.installment_updates iu
 		where iu.update_date <= timezone('utc'::text, now())
@@ -474,8 +475,8 @@ select c.*,
 			lc.last_payment_date,
 			'installment',
 			lc.installment,
-			'tax',
-			lc.tax,
+			'interest',
+			lc.interest,
 			'next_update',
 			lc.next_update
 		)
@@ -585,12 +586,12 @@ values (
 		(new.data->>'down_payment')::double precision,
 		(new.data->>'yearly_raise')::double precision
 	);
-insert into installment_updates (contract_id, update_date, installment, tax)
+insert into installment_updates (contract_id, update_date, installment, interest)
 values (
 		contract_id,
 		new.start_date,
 		(new.data->>'installment')::double precision,
-		(new.data->>'tax')::double precision
+		(new.data->>'interest')::double precision
 	);
 end if;
 select * into inserted_contract
@@ -624,12 +625,12 @@ set sale_value = (new.data->>'sale_value')::double precision,
 	down_payment = (new.data->>'down_payment')::double precision,
 	yearly_raise = (new.data->>'yearly_raise')::double precision
 where id = contract_id;
-insert into installment_updates (contract_id, update_date, installment, tax)
+insert into installment_updates (contract_id, update_date, installment, interest)
 values (
 		contract_id,
 		new.start_date,
 		(new.data->>'installment')::double precision,
-		(new.data->>'tax')::double precision
+		(new.data->>'interest')::double precision
 	);
 end if;
 select * into updated_contract

@@ -55,7 +55,7 @@
 						<dt class="text-sm text-muted-foreground">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{ticket.property.label}
-							<Button size="iconsm" variant="ghost">
+							<Button size="iconsm" variant="ghost" href="/properties/{ticket.property.id}">
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -65,7 +65,7 @@
 							<dt class="text-sm text-muted-foreground">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{ticket.fraction.label}
-								<Button size="iconsm" variant="ghost">
+								<Button size="iconsm" variant="ghost" href="/fractions/{ticket.fraction.id}">
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>

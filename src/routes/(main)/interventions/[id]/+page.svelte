@@ -63,7 +63,7 @@
 						<dt class="text-sm text-muted-foreground">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{intervention.property.label}
-							<Button size="iconsm" variant="ghost">
+							<Button size="iconsm" variant="ghost" href="/properties/{intervention.property.id}">
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -73,7 +73,7 @@
 							<dt class="text-sm text-muted-foreground">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{intervention.fraction.label}
-								<Button size="iconsm" variant="ghost">
+								<Button size="iconsm" variant="ghost" href="/fractions/{intervention.fraction.id}">
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>
@@ -84,7 +84,7 @@
 							<dt class="text-sm text-muted-foreground">Ticket</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{intervention.ticket.label}
-								<Button size="iconsm" variant="ghost">
+								<Button size="iconsm" variant="ghost" href="/tickets/{intervention.ticket.id}">
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>

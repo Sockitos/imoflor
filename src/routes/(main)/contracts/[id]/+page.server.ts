@@ -1,5 +1,13 @@
 import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
-import type { Contract, ContractAccountItem, IdWithLabel } from '@/types/types';
+import { createInstallmentUpdateSchema } from '@/schemas/installment-update';
+import { createRentUpdateSchema } from '@/schemas/rent-update';
+import type {
+	Contract,
+	ContractAccountItem,
+	IdWithLabel,
+	InstallmentUpdate,
+	RentUpdate,
+} from '@/types/types';
 import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -40,6 +48,32 @@ export const load = async (event) => {
 		return contractAccount;
 	}
 
+	async function getRentUpdates(): Promise<RentUpdate[]> {
+		const { data: rentUpdates, error: rentUpdatesError } = await event.locals.supabase
+			.from('rent_updates')
+			.select('*')
+			.eq('contract_id', event.params.id)
+			.order('update_date');
+
+		if (rentUpdatesError) {
+			return error(500, 'Error fetching rent updates, please try again later.');
+		}
+		return rentUpdates;
+	}
+
+	async function getInstallmentUpdates(): Promise<InstallmentUpdate[]> {
+		const { data: installmentUpdates, error: installmentUpdatesError } = await event.locals.supabase
+			.from('installment_updates')
+			.select('*')
+			.eq('contract_id', event.params.id)
+			.order('update_date');
+
+		if (installmentUpdatesError) {
+			return error(500, 'Error fetching installment updates, please try again later.');
+		}
+		return installmentUpdates;
+	}
+
 	async function getFractionOptions(): Promise<IdWithLabel[]> {
 		const { data: fractions, error: fractionsError } = await event.locals.supabase
 			.from('fractions_view')
@@ -67,6 +101,8 @@ export const load = async (event) => {
 	return {
 		contract: contract,
 		contractAccount: await getContractAccount(),
+		rentUpdates: contract.type === 'renting' ? await getRentUpdates() : [],
+		installmentUpdates: contract.type === 'lending' ? await getInstallmentUpdates() : [],
 		fractionOptions: await getFractionOptions(),
 		tenantOptions: await getTenantOptions(),
 		updateContractForm: await superValidate(
@@ -86,6 +122,27 @@ export const load = async (event) => {
 		deleteContractForm: await superValidate(zod(deleteContractSchema), {
 			id: 'delete-contract',
 		}),
+		createRentUpdateForm: await superValidate(
+			{
+				rent: contract.type === 'renting' ? contract.data.rent : 0,
+				update_date: new Date().toISOString(),
+			},
+			zod(createRentUpdateSchema),
+			{
+				id: 'create-rent-update',
+			}
+		),
+		createInstallmentUpdateForm: await superValidate(
+			{
+				installment: contract.type === 'lending' ? contract.data.installment : 0,
+				interest: contract.type === 'lending' ? contract.data.interest : 0,
+				update_date: new Date().toISOString(),
+			},
+			zod(createInstallmentUpdateSchema),
+			{
+				id: 'create-installment-update',
+			}
+		),
 	};
 };
 
@@ -135,6 +192,47 @@ export const actions = {
 					.from('contracts')
 					.delete()
 					.eq('id', form.data.id);
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return { success: true, form };
+			}
+		),
+	createRentUpdate: async (event) =>
+		handleFormAction(
+			event,
+			createRentUpdateSchema,
+			'create-rent-update',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase.from('rent_updates').insert({
+					contract_id: Number(event.params.id),
+					rent: form.data.rent,
+					update_date: form.data.update_date,
+				});
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return { success: true, form };
+			}
+		),
+	createInstallmentUpdate: async (event) =>
+		handleFormAction(
+			event,
+			createInstallmentUpdateSchema,
+			'create-installment-update',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase.from('installment_updates').insert({
+					contract_id: Number(event.params.id),
+					installment: form.data.installment,
+					interest: form.data.interest,
+					update_date: form.data.update_date,
+				});
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

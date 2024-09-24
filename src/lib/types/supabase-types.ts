@@ -114,10 +114,10 @@ export type Database = MergeDeep<
 						id: number;
 						inserted_at: string;
 						installment: number;
+						interest: number;
 						last_payment_date: string | null;
 						next_update: Json | null;
 						sale_value: number;
-						tax: number;
 						yearly_raise: number;
 					};
 				};

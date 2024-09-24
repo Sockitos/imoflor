@@ -104,7 +104,13 @@ export interface BaseContract {
 
 export interface RentingContract {
 	type: 'renting';
-	data: { rent: number; next_update: { update_date: string; rent: number } | null };
+	data: { rent: number; next_update: RentUpdate | null };
+}
+
+export interface RentUpdate {
+	id: number;
+	rent: number;
+	update_date: string;
 }
 
 export interface LendingContract {
@@ -114,8 +120,16 @@ export interface LendingContract {
 		down_payment: number;
 		yearly_raise: number;
 		installment: number;
-		tax: number;
+		interest: number;
+		next_update: InstallmentUpdate | null;
 	};
+}
+
+export interface InstallmentUpdate {
+	id: number;
+	installment: number;
+	interest: number;
+	update_date: string;
 }
 
 export type Contract = BaseContract & (RentingContract | LendingContract);

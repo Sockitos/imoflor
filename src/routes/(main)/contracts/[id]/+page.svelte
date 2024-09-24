@@ -9,6 +9,8 @@
 	import dayjs from 'dayjs';
 	import {
 		AlertTriangle,
+		ArrowUpDown,
+		CheckCheck,
 		FileX,
 		HandCoins,
 		Link,
@@ -19,13 +21,27 @@
 	} from 'lucide-svelte';
 	import ContractDeleteDialog from '../_components/contract-delete-dialog.svelte';
 	import ContractForm from '../_components/contract-form.svelte';
-	import ContractAccountTable from './../_components/contract-account-table.svelte';
+	import InstallmentUpdateForm from '../_components/installment-update/installment-update-form.svelte';
+	import RentUpdateForm from '../_components/rent-update/rent-update-form.svelte';
+	import ContractAccountTable from './../_components/contract-account/contract-account-table.svelte';
 
 	export let data;
-	$: ({ contract, contractAccount, updateContractForm, deleteContractForm } = data);
+	$: ({
+		contract,
+		contractAccount,
+		rentUpdates,
+		installmentUpdates,
+		updateContractForm,
+		deleteContractForm,
+		createRentUpdateForm,
+		createInstallmentUpdateForm,
+	} = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
 	let openDeleteDialog = false;
+	let openRentUpdateForm = false;
+	let openInstallmentUpdateForm = false;
+	let openEndContractDialog = false;
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
@@ -39,6 +55,17 @@
 				<FileX class="mr-2 h-4 w-4" />
 				End Contract
 			</Button>
+			{#if contract.type === 'renting'}
+				<Button on:click={() => (openRentUpdateForm = true)} variant="outline">
+					<ArrowUpDown class="mr-2 h-4 w-4" />
+					Update Rent
+				</Button>
+			{:else}
+				<Button on:click={() => (openInstallmentUpdateForm = true)} variant="outline">
+					<FileX class="mr-2 h-4 w-4" />
+					Update Installment
+				</Button>
+			{/if}
 			<Button on:click={() => (openForm = true)} variant="outline">
 				<Pencil class="mr-2 h-4 w-4" />
 				Edit
@@ -54,7 +81,7 @@
 		<div class="flex flex-col gap-y-12">
 			<dl class="flex flex-col gap-y-8">
 				<div class="flex flex-col gap-y-2">
-					<div class="text-lg font-semibold tracking-tight">Identification</div>
+					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Start Date</dt>
 						<dd>{dayjs(contract.start_date).format('DD/MM/YYYY')}</dd>
@@ -70,21 +97,18 @@
 						</dd>
 					</div>
 					{#if contract.type === 'renting'}
-						<div class="flex flex-row items-center justify-between">
-							<div>
-								<dt class="text-sm text-muted-foreground">Rent</dt>
-								<dd>
-									{currencyFormatter.format(contract.data.rent)}
-									{#if contract.data.next_update}
-										<br />
-										<span class="text-sm text-muted-foreground">
-											next update: {currencyFormatter.format(contract.data.next_update.rent)}
-											({dayjs(contract.data.next_update.update_date).format('DD/MM/YYYY')})
-										</span>
-									{/if}
-								</dd>
-							</div>
-							<Button size="sm" variant="secondary">Updates</Button>
+						<div>
+							<dt class="text-sm text-muted-foreground">Rent</dt>
+							<dd>
+								{currencyFormatter.format(contract.data.rent)}
+								{#if contract.data.next_update}
+									<br />
+									<span class="text-sm text-muted-foreground">
+										next update: {currencyFormatter.format(contract.data.next_update.rent)}
+										({dayjs(contract.data.next_update.update_date).format('DD/MM/YYYY')})
+									</span>
+								{/if}
+							</dd>
 						</div>
 					{:else}
 						<div>
@@ -100,15 +124,15 @@
 							<dd>{contract.data.installment}</dd>
 						</div>
 						<div>
-							<dt class="text-sm text-muted-foreground">Tax</dt>
-							<dd>{contract.data.tax}</dd>
+							<dt class="text-sm text-muted-foreground">Interest</dt>
+							<dd>{contract.data.interest}</dd>
 						</div>
 					{/if}
 					<div>
 						<dt class="text-sm text-muted-foreground">Fraction</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{contract.fraction.label}
-							<Button size="iconsm" variant="ghost">
+							<Button size="iconsm" variant="ghost" href="/fractions/{contract.fraction.id}">
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -118,7 +142,7 @@
 						{#each contract.tenants as tenant}
 							<dd class="flex flex-row items-center gap-x-2">
 								{tenant.label}
-								<Button size="iconsm" variant="ghost">
+								<Button size="iconsm" variant="ghost" href="/tenants/{tenant.id}">
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>
@@ -139,7 +163,15 @@
 							<div class="text-2xl font-bold">
 								{currencyFormatter.format(contract.data.rent)}
 							</div>
-							<p class="text-xs text-muted-foreground">next update on the 01/01/2024</p>
+							<p class="text-xs text-muted-foreground">
+								{#if contract.data.next_update}
+									next update on the {dayjs(contract.data.next_update.update_date).format(
+										'DD/MM/YYYY'
+									)}
+								{:else}
+									no update scheduled yet
+								{/if}
+							</p>
 						</Card.Content>
 					</Card.Root>
 				{:else}
@@ -152,18 +184,36 @@
 							<div class="text-2xl font-bold">
 								{currencyFormatter.format(contract.data.installment)}
 							</div>
-							<p class="text-xs text-muted-foreground">next update on the 01/01/2024</p>
+							<p class="text-xs text-muted-foreground">
+								{#if contract.data.next_update}
+									next update on the {dayjs(contract.data.next_update.update_date).format(
+										'DD/MM/YYYY'
+									)}
+								{:else}
+									no update scheduled yet
+								{/if}
+							</p>
 						</Card.Content>
 					</Card.Root>
 				{/if}
 				<Card.Root>
 					<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 						<Card.Title class="text-sm font-medium">Current Balance</Card.Title>
-						<AlertTriangle class="h-4 w-4 text-muted-foreground" />
+						{#if contract.balance >= 0}
+							<CheckCheck class="h-4 w-4 text-muted-foreground" />
+						{:else}
+							<AlertTriangle class="h-4 w-4 text-muted-foreground" />
+						{/if}
 					</Card.Header>
 					<Card.Content>
 						<div class="text-2xl font-bold">{currencyFormatter.format(contract.balance)}</div>
-						<p class="text-xs text-muted-foreground">lorem ipsum</p>
+						<p class="text-xs text-muted-foreground">
+							{#if contract.balance >= 0}
+								no debt
+							{:else}
+								contract is in debt
+							{/if}
+						</p>
 					</Card.Content>
 				</Card.Root>
 				<Card.Root>
@@ -172,8 +222,14 @@
 						<PiggyBank class="h-4 w-4 text-muted-foreground" />
 					</Card.Header>
 					<Card.Content>
-						<div class="text-2xl font-bold">{currencyFormatter.format(200000)}</div>
-						<p class="text-xs text-muted-foreground">+20.1% from last month</p>
+						<div class="text-2xl font-bold">
+							{currencyFormatter.format(
+								contractAccount
+									.filter((item) => item.type !== 'due_note')
+									.reduce((sum, account) => sum + account.value, 0)
+							)}
+						</div>
+						<p class="text-xs text-muted-foreground">since contract start</p>
 					</Card.Content>
 				</Card.Root>
 			</div>
@@ -182,8 +238,7 @@
 					<div>
 						<h2 class="text-lg font-semibold">Account</h2>
 						<p class="text-sm text-muted-foreground">
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-							incididunt ut labore et dolore magna aliqua.
+							List of all payments and due notes for this contract
 						</p>
 					</div>
 					<div class="flex flex-row gap-x-4">
@@ -206,3 +261,17 @@
 <ContractForm data={updateContractForm} action="?/update" bind:open={openForm} />
 
 <ContractDeleteDialog {contract} data={deleteContractForm} bind:open={openDeleteDialog} />
+
+{#if contract.type === 'renting'}
+	<RentUpdateForm
+		data={createRentUpdateForm}
+		bind:open={openRentUpdateForm}
+		updates={rentUpdates}
+	/>
+{:else}
+	<InstallmentUpdateForm
+		data={createInstallmentUpdateForm}
+		bind:open={openInstallmentUpdateForm}
+		updates={installmentUpdates}
+	/>
+{/if}
