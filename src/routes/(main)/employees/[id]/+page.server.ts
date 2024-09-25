@@ -87,7 +87,7 @@ export const actions = {
 					return fail(500, { message: error.message, form });
 				}
 
-				return { success: true, form };
+				return redirect(302, '/employees');
 			}
 		),
 };

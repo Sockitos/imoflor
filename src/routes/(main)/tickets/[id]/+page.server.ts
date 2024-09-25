@@ -1,7 +1,7 @@
 import { createTicketSchema, deleteTicketSchema } from '@/schemas/ticket';
 import type { IdWithLabel, Ticket } from '@/types/types';
 import { handleFormAction } from '@/utils';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
@@ -85,6 +85,6 @@ export const actions = {
 				return fail(500, { message: error.message, form });
 			}
 
-			return { success: true, form };
+			return redirect(302, '/tickets');
 		}),
 };

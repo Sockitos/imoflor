@@ -1,7 +1,7 @@
 import { createInterventionSchema, deleteInterventionSchema } from '@/schemas/intervention';
 import type { IdWithLabel, Intervention } from '@/types/types';
 import { handleFormAction } from '@/utils';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
@@ -112,7 +112,7 @@ export const actions = {
 					return fail(500, { message: error.message, form });
 				}
 
-				return { success: true, form };
+				return redirect(302, '/interventions');
 			}
 		),
 };

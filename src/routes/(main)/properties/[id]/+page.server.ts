@@ -59,36 +59,25 @@ export const load = async (event) => {
 };
 
 export const actions = {
-	update: async (event) => {
-		const { session } = await event.locals.safeGetSession();
-		if (!session) {
-			const errorMessage = 'Unauthorized.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return error(401, errorMessage);
-		}
+	update: async (event) =>
+		handleFormAction(
+			event,
+			createPropertySchema,
+			'update-property',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase
+					.from('properties')
+					.update(form.data)
+					.eq('id', event.params.id);
 
-		const form = await superValidate(event.request, zod(createPropertySchema), {
-			id: 'update-property',
-		});
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
 
-		if (!form.valid) {
-			const errorMessage = 'Invalid form.';
-			setFlash({ type: 'error', message: errorMessage }, event.cookies);
-			return fail(400, { message: errorMessage, form });
-		}
-
-		const { error } = await event.locals.supabase
-			.from('properties')
-			.update(form.data)
-			.eq('id', event.params.id);
-
-		if (error) {
-			setFlash({ type: 'error', message: error.message }, event.cookies);
-			return fail(500, { message: error.message, form });
-		}
-
-		return { success: true, form };
-	},
+				return { success: true, form };
+			}
+		),
 	delete: async (event) =>
 		handleFormAction(
 			event,
@@ -105,7 +94,7 @@ export const actions = {
 					return fail(500, { message: error.message, form });
 				}
 
-				return { success: true, form };
+				return redirect(302, '/properties');
 			}
 		),
 };
