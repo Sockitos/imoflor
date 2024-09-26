@@ -19,7 +19,6 @@ export const typeSchema = z
 export const createFractionSchema = z.object({
 	type: typeSchema,
 	matrix: z.string().min(1, 'Matrix is required.'),
-	conservatory: z.string().min(1, 'Conservatory is required.'),
 	area: z.coerce.number().nullish(),
 	tipology: z.string().nullish(),
 	description: z.string().nullish(),

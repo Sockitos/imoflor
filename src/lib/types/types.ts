@@ -4,6 +4,8 @@ export type Gender = 'male' | 'female' | 'other';
 
 export type MaritalStatus = 'single' | 'married' | 'union' | 'divorced' | 'widowed';
 
+export type PropertyClass = 'urban' | 'rustic';
+
 export type PropertyType = 'building' | 'terrain' | 'house' | 'garages';
 
 export type FractionType = 'apartment' | 'store' | 'garage' | 'house' | 'terrain';
@@ -59,6 +61,7 @@ export interface Tenant {
 
 export interface Property {
 	id: number;
+	class: PropertyClass;
 	type: PropertyType;
 	is_multi_unit: boolean;
 	matrix: string;
@@ -81,7 +84,6 @@ export interface Fraction {
 	property_id: number;
 	type: FractionType;
 	matrix: string;
-	conservatory: string;
 	area?: number | null;
 	tipology?: string | null;
 	description?: string | null;

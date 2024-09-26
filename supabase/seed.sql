@@ -229,6 +229,7 @@ values (
 		'10'
 	);
 insert into public.properties (
+		class,
 		type,
 		is_multi_unit,
 		matrix,
@@ -245,9 +246,10 @@ insert into public.properties (
 		city
 	)
 values (
+		'urban',
 		'building',
 		true,
-		'A',
+		'U-001',
 		'Lisboa',
 		'1000',
 		'BIG',
@@ -263,7 +265,6 @@ values (
 insert into public.fractions (
 		type,
 		matrix,
-		conservatory,
 		area,
 		tipology,
 		description,
@@ -274,8 +275,7 @@ insert into public.fractions (
 	)
 values (
 		'apartment',
-		'001',
-		'Lisboa',
+		'U-001A',
 		'100',
 		'T2',
 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec odio.',

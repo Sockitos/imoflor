@@ -6,7 +6,12 @@
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
-	import { createPropertySchema, typeOptions, type CreatePropertySchema } from '@/schemas/property';
+	import {
+		classOptions,
+		createPropertySchema,
+		typeOptions,
+		type CreatePropertySchema,
+	} from '@/schemas/property';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -28,6 +33,13 @@
 
 	const { form: formData, enhance, submitting } = form;
 
+	$: selectedClass = $formData.class
+		? {
+				value: $formData.class,
+				label: classOptions[$formData.class],
+			}
+		: undefined;
+
 	$: selectedType = $formData.type
 		? {
 				value: $formData.type,
@@ -47,6 +59,31 @@
 			<div class="mb-5 space-y-3">
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
+					<Form.Field {form} name="class">
+						<Form.Control let:attrs>
+							<Form.Label>Class</Form.Label>
+							<Select.Root
+								{...attrs}
+								selected={selectedClass}
+								onSelectedChange={(v) => {
+									if (v) {
+										$formData.class = v.value;
+									}
+								}}
+							>
+								<Select.Trigger>
+									<Select.Value placeholder="Select" />
+								</Select.Trigger>
+								<Select.Content>
+									{#each Object.entries(classOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
+								</Select.Content>
+							</Select.Root>
+							<input hidden bind:value={$formData.class} name="class" />
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
 					<input hidden bind:value={$formData.is_multi_unit} name="is_multi_unit" />
 					<Form.Field {form} name="type">
 						<Form.Control let:attrs>
@@ -69,10 +106,9 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="building">Building</Select.Item>
-									<Select.Item value="terrain">Terrain</Select.Item>
-									<Select.Item value="house">House</Select.Item>
-									<Select.Item value="garages">Garages</Select.Item>
+									{#each Object.entries(typeOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.type} name={attrs.name} />

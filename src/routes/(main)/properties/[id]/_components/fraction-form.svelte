@@ -63,30 +63,19 @@
 									<Select.Value placeholder="Select" />
 								</Select.Trigger>
 								<Select.Content>
-									<Select.Item value="apartment">Apartment</Select.Item>
-									<Select.Item value="store">Store</Select.Item>
-									<Select.Item value="garage">Garage</Select.Item>
-									<Select.Item value="house">House</Select.Item>
-									<Select.Item value="terrain">Terrain</Select.Item>
+									{#each Object.entries(typeOptions) as [value, label]}
+										<Select.Item {value} {label} />
+									{/each}
 								</Select.Content>
 							</Select.Root>
 							<input hidden bind:value={$formData.type} name={attrs.name} />
 							<Form.FieldErrors />
 						</Form.Control>
 					</Form.Field>
-				</div>
-				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="matrix">
 						<Form.Control let:attrs>
 							<Form.Label>Matrix</Form.Label>
 							<Input {...attrs} bind:value={$formData.matrix} />
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="conservatory">
-						<Form.Control let:attrs>
-							<Form.Label>Conservatory</Form.Label>
-							<Input {...attrs} bind:value={$formData.conservatory} />
 							<Form.FieldErrors />
 						</Form.Control>
 					</Form.Field>

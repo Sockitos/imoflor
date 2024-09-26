@@ -43,9 +43,15 @@
 			<dl class="flex flex-col gap-y-8">
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Information</div>
-					<div>
-						<dt class="text-sm text-muted-foreground">Type</dt>
-						<dd>{property.type}</dd>
+					<div class="grid grid-cols-2 gap-y-2">
+						<div>
+							<dt class="text-sm text-muted-foreground">Class</dt>
+							<dd>{property.class}</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-muted-foreground">Type</dt>
+							<dd>{property.type}</dd>
+						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
