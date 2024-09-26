@@ -15,10 +15,6 @@ export const typeMap: Record<MovementType, { label: string; icon: ComponentType<
 		label: 'Installment Interest',
 		icon: ReceiptText,
 	},
-	installment_extra_amortization: {
-		label: 'Installment Extra Amortization',
-		icon: ReceiptText,
-	},
 	intervention: {
 		label: 'Intervention',
 		icon: ReceiptText,

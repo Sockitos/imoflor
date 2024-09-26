@@ -221,6 +221,6 @@ export interface Movement {
 	type: MovementType;
 	date: string;
 	value: number;
-	description: string;
-	tax_id_number: string;
+	description?: string | null;
+	tax_id_number?: string | null;
 }
