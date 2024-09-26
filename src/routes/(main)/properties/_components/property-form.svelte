@@ -14,8 +14,8 @@
 	} from '@/schemas/property';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { superForm } from 'sveltekit-superforms/client';
 
 	export let open = false;
 	export let data: SuperValidated<Infer<CreatePropertySchema>>;
