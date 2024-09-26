@@ -11,7 +11,7 @@ export type Database = MergeDeep<
 						contract_id: number;
 						date: string;
 						id: number;
-						type: 'due_note' | 'rent_payment' | 'installment_payment';
+						type: 'due_note' | 'payment';
 						value: number;
 					};
 				};
@@ -81,11 +81,28 @@ export type Database = MergeDeep<
 						amortization: number;
 						contract_id: number;
 						date: string;
-						description: string;
-						extra_amortization: number;
+						description: string | null;
 						extra_debt: number;
 						id: number;
 						interest: number;
+					};
+					Insert: {
+						amortization: number;
+						contract_id: number;
+						date: string;
+						description?: string | null;
+						extra_debt: number;
+						id?: number;
+						interest: number;
+					};
+					Update: {
+						amortization?: number;
+						contract_id?: number;
+						date?: string;
+						description?: string | null;
+						extra_debt?: number;
+						id?: number;
+						interest?: number;
 					};
 				};
 				intervention_payments_view: {
@@ -125,9 +142,23 @@ export type Database = MergeDeep<
 					Row: {
 						contract_id: number;
 						date: string;
-						description: string;
+						description: string | null;
 						id: number;
 						value: number;
+					};
+					Insert: {
+						contract_id: number;
+						date: string;
+						description?: string | null;
+						id?: number;
+						value: number;
+					};
+					Update: {
+						contract_id?: number;
+						date?: string;
+						description?: string | null;
+						id?: number;
+						value?: number;
 					};
 				};
 				renting_contracts_view: {

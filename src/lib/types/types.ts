@@ -24,7 +24,6 @@ export type MovementType =
 	| 'rent'
 	| 'installment_amortization'
 	| 'installment_interest'
-	| 'installment_extra_amortization'
 	| 'intervention'
 	| 'other';
 
@@ -102,7 +101,7 @@ export interface BaseContract {
 	type: ContractType;
 }
 
-export interface RentingContract {
+export interface RentingContractData {
 	type: 'renting';
 	data: { rent: number; next_update: RentUpdate | null };
 }
@@ -113,12 +112,15 @@ export interface RentUpdate {
 	update_date: string;
 }
 
-export interface LendingContract {
+export interface LendingContractData {
 	type: 'lending';
 	data: {
 		sale_value: number;
 		down_payment: number;
 		yearly_raise: number;
+		debt: number;
+		extra_debt: number;
+		last_payment_date: string | null;
 		installment: number;
 		interest: number;
 		next_update: InstallmentUpdate | null;
@@ -132,9 +134,13 @@ export interface InstallmentUpdate {
 	update_date: string;
 }
 
-export type Contract = BaseContract & (RentingContract | LendingContract);
+export type LendingContract = BaseContract & LendingContractData;
 
-export type ContractAccountType = 'due_note' | 'rent_payment' | 'installment_payment';
+export type RentingContract = BaseContract & RentingContractData;
+
+export type Contract = RentingContract | LendingContract;
+
+export type ContractAccountType = 'due_note' | 'payment';
 
 export type ContractAccountItem = {
 	id: number;

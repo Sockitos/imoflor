@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { LendingContract } from '@/types/types';
 import type { ActionFailure, LoadEvent, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { clsx, type ClassValue } from 'clsx';
+import dayjs from 'dayjs';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -133,4 +135,11 @@ export async function handleFormAction<
 	const result = await action(event, userId, form);
 
 	return result;
+}
+
+export function calculateInterest(contract: LendingContract, date: string): number {
+	const { debt, extra_debt, last_payment_date, interest } = contract.data;
+
+	const daysSinceLastPayment = dayjs(date).diff(last_payment_date ?? contract.start_date, 'day');
+	return debt * (interest / 365) * daysSinceLastPayment + extra_debt;
 }

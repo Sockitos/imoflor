@@ -1,5 +1,8 @@
 import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
+import { createDueNoteSchema } from '@/schemas/due-note';
+import { createInstallmentPaymentSchema } from '@/schemas/installment-payment';
 import { createInstallmentUpdateSchema } from '@/schemas/installment-update';
+import { createRentPaymentSchema } from '@/schemas/rent-payment';
 import { createRentUpdateSchema } from '@/schemas/rent-update';
 import type {
 	Contract,
@@ -8,7 +11,7 @@ import type {
 	InstallmentUpdate,
 	RentUpdate,
 } from '@/types/types';
-import { handleFormAction, handleLoginRedirect } from '@/utils';
+import { calculateInterest, handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -98,6 +101,9 @@ export const load = async (event) => {
 
 	const contract = await getContract();
 
+	const interest =
+		contract.type === 'lending' ? calculateInterest(contract, new Date().toISOString()) : 0;
+
 	return {
 		contract: contract,
 		contractAccount: await getContractAccount(),
@@ -141,6 +147,38 @@ export const load = async (event) => {
 			zod(createInstallmentUpdateSchema),
 			{
 				id: 'create-installment-update',
+			}
+		),
+		createDueNoteForm: await superValidate(
+			{
+				value: contract.type === 'renting' ? contract.data.rent : contract.data.installment,
+				due_date: new Date().toISOString(),
+			},
+			zod(createDueNoteSchema),
+			{
+				id: 'create-due-note',
+			}
+		),
+		createRentPaymentForm: await superValidate(
+			{
+				date: new Date().toISOString(),
+				value: contract.type === 'renting' ? contract.data.rent : 0,
+			},
+			zod(createRentPaymentSchema),
+			{
+				id: 'create-rent-payment',
+			}
+		),
+		createInstallmentPaymentForm: await superValidate(
+			{
+				date: new Date().toISOString(),
+				value: contract.type === 'lending' ? contract.data.installment : 0,
+				amortization: contract.type === 'lending' ? contract.data.installment - interest : 0,
+				interest: contract.type === 'lending' ? interest : 0,
+			},
+			zod(createInstallmentPaymentSchema),
+			{
+				id: 'create-installment-payment',
 			}
 		),
 	};
@@ -198,7 +236,7 @@ export const actions = {
 					return fail(500, { message: error.message, form });
 				}
 
-				return { success: true, form };
+				return redirect(302, '/contracts');
 			}
 		),
 	createRentUpdate: async (event) =>
@@ -232,6 +270,68 @@ export const actions = {
 					installment: form.data.installment,
 					interest: form.data.interest,
 					update_date: form.data.update_date,
+				});
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return { success: true, form };
+			}
+		),
+	createDueNote: async (event) =>
+		handleFormAction(event, createDueNoteSchema, 'create-due-note', async (event, userId, form) => {
+			const { error } = await event.locals.supabase.from('due_notes').insert({
+				contract_id: Number(event.params.id),
+				due_date: form.data.due_date,
+				value: form.data.value,
+			});
+
+			if (error) {
+				setFlash({ type: 'error', message: error.message }, event.cookies);
+				return fail(500, { message: error.message, form });
+			}
+
+			return { success: true, form };
+		}),
+	createRentPayment: async (event) =>
+		handleFormAction(
+			event,
+			createRentPaymentSchema,
+			'create-rent-payment',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase.from('rent_payments_view').insert({
+					contract_id: Number(event.params.id),
+					date: form.data.date,
+					value: form.data.value,
+					description: form.data.description,
+				});
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return { success: true, form };
+			}
+		),
+	createInstallmentPayment: async (event) =>
+		handleFormAction(
+			event,
+			createInstallmentPaymentSchema,
+			'create-installment-payment',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase.from('installment_payments_view').insert({
+					contract_id: Number(event.params.id),
+					date: form.data.date,
+					amortization: form.data.amortization < 0 ? 0 : form.data.amortization,
+					interest:
+						form.data.amortization < 0
+							? form.data.interest + form.data.amortization
+							: form.data.interest,
+					description: form.data.description,
+					extra_debt: form.data.amortization < 0 ? form.data.amortization * -1 : 0,
 				});
 
 				if (error) {

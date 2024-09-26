@@ -9,6 +9,7 @@ create type public.marital_status as enum (
 	'divorced',
 	'widowed'
 );
+create type public.property_class as enum ('urban', 'rustic');
 create type public.property_type as enum ('building', 'terrain', 'house', 'garages');
 create type public.fraction_type as enum (
 	'apartment',
@@ -32,7 +33,6 @@ create type public.movement_type as enum (
 	'rent',
 	'installment_amortization',
 	'installment_interest',
-	'installment_extra_amortization',
 	'intervention',
 	'other'
 );
@@ -134,8 +134,8 @@ create table public.movements (
 	type movement_type not null,
 	date timestamp with time zone not null,
 	value double precision not null,
-	tax_id_number text not null,
-	description text not null
+	tax_id_number text,
+	description text
 );
 /* PROPERTIES */
 create table public.properties (
@@ -262,7 +262,6 @@ create table public.installment_payments (
     delete cascade,
 	interest_movement_id bigint not null references movements(id),
 	amortization_movement_id bigint references movements(id),
-	extra_amortization_movement_id bigint references movements(id),
 	extra_debt double precision
 );
 /* TICKETS */
@@ -335,16 +334,14 @@ from public.rent_payments rp
 create view public.installment_payments_view as
 select ip.contract_id,
 	ip.id,
-	a.date,
-	a.description,
+	i.date,
 	i.value as interest,
-	a.value as amortization,
-	ea.value as extra_amortization,
-	ip.extra_debt
+	coalesce(a.value, 0) as amortization,
+	ip.extra_debt,
+	i.description
 from public.installment_payments ip
-	join public.movements i on ip.amortization_movement_id = i.id
-	join public.movements a on ip.interest_movement_id = a.id
-	join public.movements ea on ip.extra_amortization_movement_id = ea.id;
+	left join public.movements a on ip.amortization_movement_id = a.id
+	left join public.movements i on ip.interest_movement_id = i.id;
 /* CONTRACTS ACCOUNTS */
 create view public.contracts_accounts_view as
 select dn.contract_id,
@@ -356,16 +353,16 @@ from public.due_notes dn
 union
 select rp.contract_id,
 	rp.id,
-	'rent_payment' as type,
+	'payment' as type,
 	rp.date as date,
 	rp.value as value
 from public.rent_payments_view rp
 union
 select ip.contract_id,
 	ip.id,
-	'installment_payment' as type,
+	'payment' as type,
 	ip.date as date,
-	ip.interest + ip.amortization + ip.extra_amortization as value
+	ip.interest + ip.amortization as value
 from public.installment_payments_view ip;
 /* CONTRACTS BALANCES */
 create view public.contracts_balances_view as
@@ -409,8 +406,16 @@ from public.renting_contracts rc
 /* LENDING CONTRACTS DEBTS */
 create view public.lending_contracts_debts_view as
 select lc.id,
-	lc.sale_value - lc.down_payment - sum(ip.amortization) as debt,
-	sum(ip.extra_debt) as extra_debt,
+	lc.sale_value - lc.down_payment - coalesce(sum(ip.amortization), 0) as debt,
+	coalesce(
+		(
+			select ip.extra_debt
+			from public.installment_payments_view ip
+			where ip.contract_id = lc.id
+			order by ip.date desc
+			limit 1
+		), 0
+	) as extra_debt,
 	max(ip.date) as last_payment_date
 from public.lending_contracts lc
 	left join public.installment_payments_view ip on lc.id = ip.contract_id
@@ -460,38 +465,20 @@ create view public.contracts_view as
 select c.*,
 	cb.balance,
 	case
-		when c.type = 'lending'::contract_type then json_build_object(
-			'sale_value',
-			lc.sale_value,
-			'down_payment',
-			lc.down_payment,
-			'yearly_raise',
-			lc.yearly_raise,
-			'debt',
-			lc.debt,
-			'extra_debt',
-			lc.extra_debt,
-			'last_payment_date',
-			lc.last_payment_date,
-			'installment',
-			lc.installment,
-			'interest',
-			lc.interest,
-			'next_update',
-			lc.next_update
+		when c.type = 'lending'::contract_type then (
+			select to_json(lcv.*)
+			from public.lending_contracts_view lcv
+			where lcv.id = c.id
 		)
-		when c.type = 'renting'::contract_type then json_build_object(
-			'rent',
-			rc.rent,
-			'next_update',
-			rc.next_update
+		when c.type = 'renting'::contract_type then (
+			select to_json(rcv.*)
+			from public.renting_contracts_view rcv
+			where rcv.id = c.id
 		)
 		else null::json
 	end as data
 from public.contracts c
-	left join public.contracts_balances_view cb on c.id = cb.contract_id
-	left join public.lending_contracts_view lc on c.id = lc.id
-	left join public.renting_contracts_view rc on c.id = rc.id;
+	left join public.contracts_balances_view cb on c.id = cb.contract_id;
 /*
  TRIGGERS
  */
@@ -654,16 +641,15 @@ $$ language plpgsql;
 create function public.insert_rent_payment() returns trigger as $$
 declare movement_id bigint;
 begin
-insert into movements (type, tax_id_number, value, date, description)
+insert into movements (type, value, date, description)
 values (
 		'rent'::movement_type,
-		new.tax_id_number,
 		new.value,
 		new.date,
 		new.description
 	)
 returning id into movement_id;
-insert into rent_payments (contract_id, movement)
+insert into rent_payments (contract_id, movement_id)
 values (new.contract_id, movement_id);
 return new;
 end;
@@ -684,47 +670,35 @@ create trigger remove_rent_payment instead of delete on rent_payments_view for e
 create function public.insert_installment_payment() returns trigger as $$
 declare interest_movement_id bigint;
 declare amortization_movement_id bigint;
-declare extra_amortization_movement_id bigint;
 begin
-insert into movements (type, tax_id_number, value, date, description)
+insert into movements (type, value, date, description)
 values (
 		'installment_interest'::movement_type,
-		new.tax_id_number,
 		new.interest,
 		new.date,
 		new.description
 	)
 returning id into interest_movement_id;
-insert into movements (type, tax_id_number, value, date, description)
+if new.amortization > 0 then
+insert into movements (type, value, date, description)
 values (
 		'installment_amortization'::movement_type,
-		new.tax_id_number,
 		new.amortization,
 		new.date,
 		new.description
 	)
 returning id into amortization_movement_id;
-insert into movements (type, tax_id_number, value, date, description)
-values (
-		'installment_extra_amortization'::movement_type,
-		new.tax_id_number,
-		new.extra_amortization,
-		new.date,
-		new.description
-	)
-returning id into extra_amortization_movement_id;
+end if;
 insert into installment_payments (
-		contract,
+		contract_id,
 		interest_movement_id,
 		amortization_movement_id,
-		extra_amortization_movement_id,
 		extra_debt
 	)
 values (
 		new.contract_id,
 		interest_movement_id,
 		amortization_movement_id,
-		extra_amortization_movement_id,
 		new.extra_debt
 	);
 return new;
@@ -740,8 +714,6 @@ delete from movements
 where id = old.interest_movement_id;
 delete from movements
 where id = old.amortization_movement_id;
-delete from movements
-where id = old.extra_amortization_movement_id;
 return old;
 end;
 $$ language plpgsql;
@@ -750,16 +722,15 @@ create trigger remove_installment_payment instead of delete on installment_payme
 create function public.insert_intervention_payment() returns trigger as $$
 declare movement_id bigint;
 begin
-insert into movements (type, tax_id_number, value, date, description)
+insert into movements (type, value, date, description)
 values (
 		'intervention'::movement_type,
-		new.tax_id_number,
 		new.value,
 		new.date,
 		new.description
 	)
 returning id into movement_id;
-insert into intervention_payments (intervention, movement)
+insert into intervention_payments (intervention, movement_id)
 values (new.intervention_id, movement_id);
 return new;
 end;

@@ -19,6 +19,9 @@
 		PlusCircle,
 		Trash,
 	} from 'lucide-svelte';
+	import DueNoteForm from '../_components/contract-account/due-note-form.svelte';
+	import InstallmentPaymentForm from '../_components/contract-account/installment-payment-form.svelte';
+	import RentPaymentForm from '../_components/contract-account/rent-payment-form.svelte';
 	import ContractDeleteDialog from '../_components/contract-delete-dialog.svelte';
 	import ContractForm from '../_components/contract-form.svelte';
 	import InstallmentUpdateForm from '../_components/installment-update/installment-update-form.svelte';
@@ -35,6 +38,9 @@
 		deleteContractForm,
 		createRentUpdateForm,
 		createInstallmentUpdateForm,
+		createDueNoteForm,
+		createRentPaymentForm,
+		createInstallmentPaymentForm,
 	} = data);
 
 	let openForm = $page.url.searchParams.get('action') === 'edit';
@@ -42,6 +48,8 @@
 	let openRentUpdateForm = false;
 	let openInstallmentUpdateForm = false;
 	let openEndContractDialog = false;
+	let openDueNoteForm = false;
+	let openPaymentForm = false;
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
@@ -242,11 +250,11 @@
 						</p>
 					</div>
 					<div class="flex flex-row gap-x-4">
-						<Button variant="outline">
+						<Button on:click={() => (openDueNoteForm = true)} variant="outline">
 							<PlusCircle class="mr-2 h-4 w-4" />
 							Due Note
 						</Button>
-						<Button>
+						<Button on:click={() => (openPaymentForm = true)}>
 							<PlusCircle class="mr-2 h-4 w-4" />
 							Payment
 						</Button>
@@ -273,5 +281,17 @@
 		data={createInstallmentUpdateForm}
 		bind:open={openInstallmentUpdateForm}
 		updates={installmentUpdates}
+	/>
+{/if}
+
+<DueNoteForm data={createDueNoteForm} bind:open={openDueNoteForm} />
+
+{#if contract.type === 'renting'}
+	<RentPaymentForm data={createRentPaymentForm} bind:open={openPaymentForm} />
+{:else}
+	<InstallmentPaymentForm
+		data={createInstallmentPaymentForm}
+		{contract}
+		bind:open={openPaymentForm}
 	/>
 {/if}
