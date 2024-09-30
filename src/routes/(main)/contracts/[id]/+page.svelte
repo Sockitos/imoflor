@@ -47,7 +47,6 @@
 	let openDeleteDialog = false;
 	let openRentUpdateForm = false;
 	let openInstallmentUpdateForm = false;
-	let openEndContractDialog = false;
 	let openDueNoteForm = false;
 	let openPaymentForm = false;
 </script>
