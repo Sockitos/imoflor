@@ -1,218 +1,108 @@
 <script lang="ts">
 	import { Button } from '@/components/ui/button';
-	import {
-		DataTableCheckbox,
-		DataTableColumnHeader,
-		DataTableFilter,
-	} from '@/components/ui/data-table';
+	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import { currencyFormatter } from '@/formatters';
 	import type { Fraction, FractionType } from '@/types/types';
-	import { Cross2 } from 'radix-icons-svelte';
-	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-	import {
-		addColumnFilters,
-		addSelectedRows,
-		addSortBy,
-		addTableFilter,
-	} from 'svelte-headless-table/plugins';
-	import type { Writable } from 'svelte/store';
-	import { get, writable } from 'svelte/store';
-	import FractionActions from './fraction-actions.svelte';
-	import FractionTypeCell from './fraction-type-cell.svelte';
+	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import { writable } from 'svelte/store';
+	import { columns } from './fraction-columns';
 	import { typeMap } from './fraction-type-map';
 
-	export let fractions: Fraction[];
-	let data = writable(fractions);
-	$: data.set(fractions);
+	interface Props {
+		fractions: Fraction[];
+	}
 
-	const table = createTable(data, {
-		select: addSelectedRows(),
-		sort: addSortBy({
-			toggleOrder: ['asc', 'desc'],
-		}),
-		filter: addTableFilter<string>(),
-		colFilter: addColumnFilters(),
+	let { fractions }: Props = $props();
+
+	const data = $state(fractions);
+
+	const globalFilter = writable('');
+
+	const table = createSvelteTable({
+		get data() {
+			return data;
+		},
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		onGlobalFilterChange: globalFilter.set,
+		state: {
+			get globalFilter() {
+				return $globalFilter;
+			},
+		},
 	});
 
-	const columns = table.createColumns([
-		table.display({
-			id: 'select',
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected,
-					'aria-label': 'Select all',
-				});
-			},
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected,
-					'aria-label': 'Select row',
-					class: 'translate-y-[2px]',
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true,
-				},
-			},
-		}),
-		table.column({
-			accessor: 'type',
-			header: 'Type',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(FractionTypeCell, {
-						type: value,
-					});
-				}
-				return value ?? '';
-			},
-			plugins: {
-				colFilter: {
-					fn: ({ filterValue, value }) => {
-						if (filterValue.length === 0) return true;
-						if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
-						return filterValue.some((filter) => {
-							return value.includes(filter);
-						});
-					},
-					initialFilterValue: [],
-					render: ({ filterValue }) => {
-						return get(filterValue);
-					},
-				},
-			},
-		}),
-		table.column({
-			accessor: 'matrix',
-			header: 'Matrix',
-		}),
-		table.column({
-			accessor: 'address',
-			header: 'Address',
-		}),
-		table.column({
-			accessor: 'patrimonial_value',
-			header: 'Patrimonial Value',
-			cell: ({ value }) => {
-				const formatted = currencyFormatter.format(value ?? 0);
-				return formatted;
-			},
-		}),
-		table.column({
-			accessor: 'market_value',
-			header: 'Market Value',
-			cell: ({ value }) => {
-				const formatted = currencyFormatter.format(value ?? 0);
-				return formatted;
-			},
-		}),
-		table.display({
-			id: 'actions',
-			header: () => {
-				return '';
-			},
-			cell: ({ row }) => {
-				if (row.isData() && row.original) {
-					return createRender(FractionActions, {
-						fraction: row.original,
-					});
-				}
-				return '';
-			},
-		}),
-	]);
-
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-		table.createViewModel(columns);
-
-	const { filterValue } = pluginStates.filter;
-	type FractionFilters = { type?: FractionType[] };
-	const { filterValues }: { filterValues: Writable<FractionFilters> } = pluginStates.colFilter;
-
-	const typeOptions = Object.entries(typeMap).map(([value, { label, icon }]) => {
+	const _typeOptions = Object.entries(typeMap).map(([value, { label, icon }]) => {
 		return { value, label, icon };
 	});
 
-	$: counts = fractions.reduce(
-		(counts, fraction) => {
-			const type = fraction.type;
-			if (type) {
-				counts.type[type] = (counts.type[type] ?? 0) + 1;
+	const _counts = $derived(
+		fractions.reduce(
+			(counts, fraction) => {
+				const type = fraction.type;
+				if (type) {
+					counts.type[type] = (counts.type[type] ?? 0) + 1;
+				}
+				return counts;
+			},
+			{
+				type: {} as Record<FractionType, number>,
 			}
-			return counts;
-		},
-		{
-			type: {} as Record<FractionType, number>,
-		}
+		)
 	);
 
-	$: showReset = Object.values($filterValues).some((v) => v.length > 0);
+	const _showReset = $derived(Object.values($globalFilter).some((v) => v.length > 0));
 </script>
 
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center gap-x-2">
-		<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
-		<DataTableFilter
-			bind:filterValues={$filterValues.type}
-			counts={counts.type}
-			title="Type"
-			options={typeOptions}
-		/>
-		{#if showReset}
-			<Button
-				on:click={() => {
-					$filterValues.type = [];
-				}}
-				variant="ghost"
-				size="sm"
-			>
-				Reset
-				<Cross2 class="ml-2 h-4 w-4" />
-			</Button>
-		{/if}
+		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
 	</div>
 	<div class="rounded-md border">
-		<Table.Root {...$tableAttrs}>
+		<Table.Root>
 			<Table.Header>
-				{#each $headerRows as headerRow}
-					<Subscribe rowAttrs={headerRow.attrs()}>
-						<Table.Row>
-							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-									<Table.Head {...attrs}>
-										{#if cell.id !== 'select' && cell.id !== 'actions'}
-											<DataTableColumnHeader {props}>
-												<Render of={cell.render()} />
-											</DataTableColumnHeader>
-										{:else}
-											<Render of={cell.render()} />
-										{/if}
-									</Table.Head>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+					<Table.Row>
+						{#each headerGroup.headers as header (header.id)}
+							<Table.Head>
+								{#if !header.isPlaceholder}
+									<Button
+										variant="ghost"
+										onclick={() => header.column.toggleSorting()}
+										class="data-[state=open]:bg-accent -ml-3 h-8"
+									>
+										<FlexRender
+											content={header.column.columnDef.header}
+											context={header.getContext()}
+										/>
+									</Button>
+								{:else}
+									<FlexRender
+										content={header.column.columnDef.header}
+										context={header.getContext()}
+									/>
+								{/if}
+							</Table.Head>
+						{/each}
+					</Table.Row>
 				{/each}
 			</Table.Header>
-			<Table.Body {...$tableBodyAttrs}>
-				{#each $pageRows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<Table.Row {...rowAttrs}>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs}>
-										<Render of={cell.render()} />
-									</Table.Cell>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+			<Table.Body>
+				{#each table.getRowModel().rows as row (row.id)}
+					<Table.Row data-state={row.getIsSelected() && 'selected'}>
+						{#each row.getVisibleCells() as cell (cell.id)}
+							<Table.Cell>
+								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+							</Table.Cell>
+						{/each}
+					</Table.Row>
+				{:else}
+					<Table.Row>
+						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+					</Table.Row>
 				{/each}
 			</Table.Body>
 		</Table.Root>

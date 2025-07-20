@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { Mail } from 'lucide-svelte';
 
-	export let email: string | null | undefined;
+	interface Props {
+		email: string | null | undefined;
+	}
+
+	let { email }: Props = $props();
 </script>
 
 <div class="flex flex-row items-center">
-	<Mail class="mr-2 h-4 w-4 text-muted-foreground"></Mail>
+	<Mail class="text-muted-foreground mr-2 h-4 w-4"></Mail>
 	{email}
 </div>

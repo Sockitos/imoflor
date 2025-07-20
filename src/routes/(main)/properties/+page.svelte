@@ -18,7 +18,7 @@
 			<PageTitle>Properties ({properties.length})</PageTitle>
 			<PageSubtitle>Manage your properties and Lorem Ipsum</PageSubtitle>
 		</div>
-		<Button on:click={() => (openForm = true)}>
+		<Button onclick={() => (openForm = true)}>
 			<PlusCircle class="mr-2 h-4 w-4" />
 			Add Property
 		</Button>

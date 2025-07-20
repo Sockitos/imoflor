@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import EntitySelector from '@/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/components/ui/button';
 	import { Calendar } from '@/components/ui/calendar';
@@ -16,20 +16,19 @@
 		type CreateInterventionSchema,
 	} from '@/schemas/intervention';
 	import { cn } from '@/utils';
-	import {
-		DateFormatter,
-		getLocalTimeZone,
-		parseAbsolute,
-		type DateValue,
-	} from '@internationalized/date';
+	import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let open = false;
-	export let data: SuperValidated<Infer<CreateInterventionSchema>>;
-	export let action: string;
+	interface Props {
+		open?: boolean;
+		data: SuperValidated<Infer<CreateInterventionSchema>>;
+		action: string;
+	}
+
+	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
 		validators: zodClient(createInterventionSchema),
@@ -43,32 +42,13 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: selectedType = $formData.type
-		? {
-				value: $formData.type,
-				label: typeOptions[$formData.type],
-			}
-		: undefined;
-
-	$: selectedStatus = $formData.status
-		? {
-				value: $formData.status,
-				label: statusOptions[$formData.status],
-			}
-		: undefined;
-
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
 	});
 
-	let startDate: DateValue | undefined;
-	$: startDate = $formData.start_date
-		? parseAbsolute($formData.start_date, getLocalTimeZone())
-		: undefined;
-	let endDate: DateValue | undefined;
-	$: endDate = $formData.end_date
-		? parseAbsolute($formData.end_date, getLocalTimeZone())
-		: undefined;
+	let startDate = $derived($formData.start_date ? parseDate($formData.start_date) : undefined);
+
+	let endDate = $derived($formData.end_date ? parseDate($formData.end_date) : undefined);
 </script>
 
 <Sheet.Root bind:open>
@@ -83,169 +63,167 @@
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="type">
-						<Form.Control let:attrs>
-							<Form.Label>Type</Form.Label>
-							<Select.Root
-								{...attrs}
-								selected={selectedType}
-								onSelectedChange={(v) => {
-									if (v) {
-										$formData.type = v.value;
-									}
-								}}
-							>
-								<Select.Trigger {...attrs}>
-									<Select.Value placeholder="Select" />
-								</Select.Trigger>
-								<Select.Content>
-									{#each Object.entries(typeOptions) as [value, label]}
-										<Select.Item {value} {label} />
-									{/each}
-								</Select.Content>
-							</Select.Root>
-							<input hidden bind:value={$formData.type} name={attrs.name} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Type</Form.Label>
+								<Select.Root {...props} type="single" bind:value={$formData.type}>
+									<Select.Trigger {...props}>
+										{$formData.type ? typeOptions[$formData.type] : 'Select'}
+									</Select.Trigger>
+									<Select.Content>
+										{#each Object.entries(typeOptions) as [value, label] (value)}
+											<Select.Item {value} {label} />
+										{/each}
+									</Select.Content>
+								</Select.Root>
+								<input hidden bind:value={$formData.type} name={props.name} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="status">
-						<Form.Control let:attrs>
-							<Form.Label>Status</Form.Label>
-							<Select.Root
-								{...attrs}
-								selected={selectedStatus}
-								onSelectedChange={(v) => {
-									if (v) {
-										$formData.status = v.value;
-									}
-								}}
-							>
-								<Select.Trigger {...attrs}>
-									<Select.Value placeholder="Select" />
-								</Select.Trigger>
-								<Select.Content>
-									<Select.Item value="not_started">Not Started</Select.Item>
-									<Select.Item value="in_progress">In Progress</Select.Item>
-									<Select.Item value="completed">Completed</Select.Item>
-									<Select.Item value="cancelled">Cancelled</Select.Item>
-								</Select.Content>
-							</Select.Root>
-							<input hidden bind:value={$formData.status} name={attrs.name} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Status</Form.Label>
+								<Select.Root {...props} type="single" bind:value={$formData.status}>
+									<Select.Trigger {...props}>
+										{$formData.status ? statusOptions[$formData.status] : 'Select'}
+									</Select.Trigger>
+									<Select.Content>
+										<Select.Item value="not_started">Not Started</Select.Item>
+										<Select.Item value="in_progress">In Progress</Select.Item>
+										<Select.Item value="completed">Completed</Select.Item>
+										<Select.Item value="cancelled">Cancelled</Select.Item>
+									</Select.Content>
+								</Select.Root>
+								<input hidden bind:value={$formData.status} name={props.name} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="start_date">
-						<Form.Control id="date" let:attrs>
-							<Form.Label for="date">Start Date</Form.Label>
-							<Popover.Root>
-								<Popover.Trigger
-									{...attrs}
-									class={cn(
-										buttonVariants({ variant: 'outline' }),
-										'w-full justify-start pl-4 text-left font-normal',
-										!startDate && 'text-muted-foreground'
-									)}
-								>
-									{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
-									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-								</Popover.Trigger>
-								<Popover.Content class="w-auto p-0" side="top">
-									<Calendar
-										initialFocus
-										value={startDate}
-										onValueChange={(v) => {
-											if (v) {
-												$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
-											} else {
-												$formData.start_date = '';
-											}
-										}}
-									/>
-								</Popover.Content>
-							</Popover.Root>
-							<Form.FieldErrors />
-							<input hidden value={$formData.start_date} name={attrs.name} />
+						<Form.Control id="date">
+							{#snippet children({ props })}
+								<Form.Label for="date">Start Date</Form.Label>
+								<Popover.Root>
+									<Popover.Trigger
+										{...props}
+										class={cn(
+											buttonVariants({ variant: 'outline' }),
+											'w-full justify-start pl-4 text-left font-normal',
+											!startDate && 'text-muted-foreground'
+										)}
+									>
+										{startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+									</Popover.Trigger>
+									<Popover.Content class="w-auto p-0" side="top">
+										<Calendar
+											type="single"
+											initialFocus
+											value={startDate}
+											onValueChange={(v) => {
+												if (v) {
+													$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
+												}
+											}}
+										/>
+									</Popover.Content>
+								</Popover.Root>
+								<Form.FieldErrors />
+								<input hidden value={$formData.start_date} name={props.name} />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="end_date">
-						<Form.Control id="date" let:attrs>
-							<Form.Label for="date">End Date</Form.Label>
-							<Popover.Root>
-								<Popover.Trigger
-									{...attrs}
-									class={cn(
-										buttonVariants({ variant: 'outline' }),
-										'w-full justify-start pl-4 text-left font-normal',
-										!endDate && 'text-muted-foreground'
-									)}
-								>
-									{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
-									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-								</Popover.Trigger>
-								<Popover.Content class="w-auto p-0" side="top">
-									<Calendar
-										initialFocus
-										value={endDate}
-										onValueChange={(v) => {
-											if (v) {
-												$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
-											} else {
-												$formData.end_date = '';
-											}
-										}}
-									/>
-								</Popover.Content>
-							</Popover.Root>
-							<Form.FieldErrors />
-							<input hidden value={$formData.start_date} name={attrs.name} />
+						<Form.Control id="date">
+							{#snippet children({ props })}
+								<Form.Label for="date">End Date</Form.Label>
+								<Popover.Root>
+									<Popover.Trigger
+										{...props}
+										class={cn(
+											buttonVariants({ variant: 'outline' }),
+											'w-full justify-start pl-4 text-left font-normal',
+											!endDate && 'text-muted-foreground'
+										)}
+									>
+										{endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+									</Popover.Trigger>
+									<Popover.Content class="w-auto p-0" side="top">
+										<Calendar
+											type="single"
+											initialFocus
+											value={endDate}
+											onValueChange={(v) => {
+												if (v) {
+													$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
+												}
+											}}
+										/>
+									</Popover.Content>
+								</Popover.Root>
+								<Form.FieldErrors />
+								<input hidden value={$formData.end_date} name={props.name} />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<Form.Field {form} name="description">
-					<Form.Control let:attrs>
-						<Form.Label>Description</Form.Label>
-						<Textarea {...attrs} bind:value={$formData.description} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Description</Form.Label>
+							<Textarea {...props} bind:value={$formData.description} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="property_id">
-						<Form.Control let:attrs>
-							<Form.Label>Property</Form.Label>
-							<EntitySelector
-								bind:value={$formData.property_id}
-								options={$page.data.propertyOptions}
-							/>
-							<input hidden bind:value={$formData.property_id} name={attrs.name} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Property</Form.Label>
+								<EntitySelector
+									bind:value={$formData.property_id}
+									options={page.data.propertyOptions}
+								/>
+								<input hidden bind:value={$formData.property_id} name={props.name} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="fraction_id">
-						<Form.Control let:attrs>
-							<Form.Label>Fraction</Form.Label>
-							<EntitySelector
-								bind:value={$formData.fraction_id}
-								options={$page.data.fractionOptions}
-							/>
-							<input hidden bind:value={$formData.fraction_id} name={attrs.name} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Fraction</Form.Label>
+								<EntitySelector
+									bind:value={$formData.fraction_id}
+									options={page.data.fractionOptions}
+								/>
+								<input hidden bind:value={$formData.fraction_id} name={props.name} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<Form.Field {form} name="ticket_id">
-					<Form.Control let:attrs>
-						<Form.Label>Ticket</Form.Label>
-						<EntitySelector bind:value={$formData.ticket_id} options={$page.data.ticketOptions} />
-						<input hidden bind:value={$formData.ticket_id} name={attrs.name} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Ticket</Form.Label>
+							<EntitySelector bind:value={$formData.ticket_id} options={page.data.ticketOptions} />
+							<input hidden bind:value={$formData.ticket_id} name={props.name} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 			</div>
 			<div class="flex flex-row items-center justify-end gap-4">
 				<Button
-					variant={'ghost'}
-					on:click={(e) => {
+					variant="ghost"
+					onclick={(e) => {
 						e.preventDefault();
 						open = false;
 					}}

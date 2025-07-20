@@ -1,13 +1,3 @@
-import Checkbox from './data-table-checkbox.svelte';
-import ColumnHeader from './data-table-column-header.svelte';
-import Filter from './data-table-filter.svelte';
-
-export {
-	Checkbox,
-	ColumnHeader,
-	//
-	Checkbox as DataTableCheckbox,
-	ColumnHeader as DataTableColumnHeader,
-	Filter as DataTableFilter,
-	Filter,
-};
+export { default as FlexRender } from './flex-render.svelte';
+export { renderComponent, renderSnippet } from './render-helpers.js';
+export { createSvelteTable } from './data-table.svelte.js';

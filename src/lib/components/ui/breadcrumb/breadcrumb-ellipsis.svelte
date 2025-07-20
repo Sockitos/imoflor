@@ -1,31 +1,23 @@
 <script lang="ts">
-	import { cn } from '$lib/utils.js';
-	import type { HTMLAnchorAttributes } from 'svelte/elements';
+	import EllipsisIcon from '@lucide/svelte/icons/ellipsis';
+	import type { HTMLAttributes } from 'svelte/elements';
+	import { cn, type WithElementRef, type WithoutChildren } from '$lib/utils.js';
 
-	type $$Props = HTMLAnchorAttributes & {
-		el?: HTMLAnchorElement;
-		asChild?: boolean;
-	};
-
-	export let href: $$Props['href'] = undefined;
-	export let el: $$Props['el'] = undefined;
-	export let asChild: $$Props['asChild'] = false;
-	let className: $$Props['class'] = undefined;
-	export { className as class };
-
-	let attrs: Record<string, unknown>;
-
-	$: attrs = {
-		class: cn('transition-colors hover:text-foreground', className),
-		href,
-		...$$restProps,
-	};
+	let {
+		ref = $bindable(null),
+		class: className,
+		...restProps
+	}: WithoutChildren<WithElementRef<HTMLAttributes<HTMLSpanElement>>> = $props();
 </script>
 
-{#if asChild}
-	<slot {attrs} />
-{:else}
-	<a bind:this={el} {...attrs} href="/">
-		<slot {attrs} />
-	</a>
-{/if}
+<span
+	bind:this={ref}
+	data-slot="breadcrumb-ellipsis"
+	role="presentation"
+	aria-hidden="true"
+	class={cn('flex size-9 items-center justify-center', className)}
+	{...restProps}
+>
+	<EllipsisIcon class="size-4" />
+	<span class="sr-only">More</span>
+</span>

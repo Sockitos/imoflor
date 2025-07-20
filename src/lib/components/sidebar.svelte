@@ -4,8 +4,8 @@
 	import { Separator } from './ui/separator';
 </script>
 
-<aside class="h-screen bg-card py-4 md:border-r">
-	<h1 class="py-8 text-center text-4xl font-bold text-primary md:hidden lg:block">IMOFLOR</h1>
+<aside class="bg-card h-screen py-4 md:border-r">
+	<h1 class="text-primary py-8 text-center text-4xl font-bold md:hidden lg:block">IMOFLOR</h1>
 	<nav class="flex flex-col gap-y-2 px-4">
 		<SidebarItem icon={Home} label="Dashboard" href="/dashboard" />
 		<Separator class="my-2" />

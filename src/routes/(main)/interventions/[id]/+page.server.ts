@@ -18,7 +18,7 @@ export const load = async (event) => {
 			.select(
 				'*, ticket:tickets!inner (id, label:title), property:properties!inner (id, label:address), fraction:fractions_view!inner (id, label:address)'
 			)
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (interventionsError) {
@@ -86,7 +86,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('interventions')
 					.update(form.data)
-					.eq('id', event.params.id);
+					.eq('id', Number(event.params.id));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

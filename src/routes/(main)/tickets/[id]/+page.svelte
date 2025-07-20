@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import PageSubtitle from '@/components/page-subtitle.svelte';
 	import PageTitle from '@/components/page-title.svelte';
 	import { Button } from '@/components/ui/button';
@@ -9,11 +9,11 @@
 	import TicketDeleteDialog from '../_components/ticket-delete-dialog.svelte';
 	import TicketForm from '../_components/ticket-form.svelte';
 
-	export let data;
-	$: ({ ticket, updateTicketForm, deleteTicketForm } = data);
+	let { data } = $props();
+	let { ticket, updateTicketForm, deleteTicketForm } = $derived(data);
 
-	let openForm = $page.url.searchParams.get('action') === 'edit';
-	let openDeleteDialog = false;
+	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openDeleteDialog = $state(false);
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
@@ -23,11 +23,11 @@
 			<PageSubtitle>Last updated in 01/01/2024</PageSubtitle>
 		</div>
 		<div class="flex flex-row gap-x-4">
-			<Button on:click={() => (openForm = true)} variant="outline">
+			<Button onclick={() => (openForm = true)} variant="outline">
 				<Pencil class="mr-2 h-4 w-4" />
 				Edit
 			</Button>
-			<Button on:click={() => (openDeleteDialog = true)} variant="destructive">
+			<Button onclick={() => (openDeleteDialog = true)} variant="destructive">
 				<Trash class="mr-2 h-4 w-4" />
 				Delete
 			</Button>
@@ -40,32 +40,32 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
-						<dt class="text-sm text-muted-foreground">Date</dt>
+						<dt class="text-muted-foreground text-sm">Date</dt>
 						<dd>{dayjs(ticket.date).format('DD/MM/YYYY')}</dd>
 					</div>
 					<div>
-						<dt class="text-sm text-muted-foreground">Title</dt>
+						<dt class="text-muted-foreground text-sm">Title</dt>
 						<dd>{ticket.title}</dd>
 					</div>
 					<div>
-						<dt class="text-sm text-muted-foreground">Description</dt>
+						<dt class="text-muted-foreground text-sm">Description</dt>
 						<dd>{ticket.description}</dd>
 					</div>
 					<div>
-						<dt class="text-sm text-muted-foreground">Property</dt>
+						<dt class="text-muted-foreground text-sm">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{ticket.property.label}
-							<Button size="iconsm" variant="ghost" href="/properties/{ticket.property.id}">
+							<Button size="icon" variant="ghost" href="/properties/{ticket.property.id}">
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
 					</div>
 					{#if ticket.fraction}
 						<div>
-							<dt class="text-sm text-muted-foreground">Fraction</dt>
+							<dt class="text-muted-foreground text-sm">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{ticket.fraction.label}
-								<Button size="iconsm" variant="ghost" href="/fractions/{ticket.fraction.id}">
+								<Button size="icon" variant="ghost" href="/fractions/{ticket.fraction.id}">
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>

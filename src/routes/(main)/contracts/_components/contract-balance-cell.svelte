@@ -2,14 +2,18 @@
 	import { currencyFormatter } from '@/formatters';
 	import { AlertTriangle } from 'lucide-svelte';
 
-	export let balance: number;
+	interface Props {
+		balance: number;
+	}
 
-	$: formatted = currencyFormatter.format(balance);
+	let { balance }: Props = $props();
+
+	let formatted = $derived(currencyFormatter.format(balance));
 </script>
 
 <div class="flex flex-row items-center">
 	{formatted}
 	{#if balance < 0}
-		<AlertTriangle class="ml-2 h-4 w-4 text-destructive"></AlertTriangle>
+		<AlertTriangle class="text-destructive ml-2 h-4 w-4"></AlertTriangle>
 	{/if}
 </div>

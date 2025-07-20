@@ -8,6 +8,6 @@
 </script>
 
 <div class="flex items-center">
-	<svelte:component this={icon} class="mr-2 h-4 w-4 text-muted-foreground" />
+	<svelte:component this={icon} class="text-muted-foreground mr-2 h-4 w-4" />
 	<span>{label}</span>
 </div>

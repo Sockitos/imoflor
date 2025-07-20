@@ -16,7 +16,7 @@ export const load = async (event) => {
 		const { data: property, error: propertyError } = await event.locals.supabase
 			.from('properties')
 			.select('*')
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (propertyError) {
@@ -29,7 +29,7 @@ export const load = async (event) => {
 		const { data: fraction, error: fractionError } = await event.locals.supabase
 			.from('fractions_view')
 			.select('*')
-			.eq('id', event.params.fid)
+			.eq('id', Number(event.params.fid))
 			.single();
 
 		if (fractionError) {
@@ -62,7 +62,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('fractions')
 					.update({ property_id: Number(event.params.id), ...form.data })
-					.eq('id', event.params.fid);
+					.eq('id', Number(event.params.fid));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);
@@ -81,7 +81,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('fractions')
 					.delete()
-					.eq('id', event.params.id);
+					.eq('id', Number(event.params.id));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

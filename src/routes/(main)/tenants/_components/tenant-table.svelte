@@ -1,154 +1,68 @@
 <script lang="ts">
-	import { DataTableCheckbox, DataTableColumnHeader } from '@/components/ui/data-table';
+	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
 	import type { Tenant } from '@/types/types';
-	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-	import { addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
+	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { writable } from 'svelte/store';
-	import TenantActions from './tenant-actions.svelte';
-	import TenantEmailCell from './tenant-email-cell.svelte';
-	import TenantPhoneCell from './tenant-phone-cell.svelte';
+	import { columns } from './tenant-columns';
 
 	export let tenants: Tenant[];
-	let data = writable(tenants);
-	$: data.set(tenants);
 
-	const table = createTable(data, {
-		select: addSelectedRows(),
-		sort: addSortBy({
-			toggleOrder: ['asc', 'desc'],
-		}),
-		filter: addTableFilter<string>({
-			fn: ({ filterValue, value }) =>
-				value
-					.toLowerCase()
-					.normalize('NFD')
-					.replace(/\p{Diacritic}/gu, '')
-					.includes(
-						filterValue
-							.toLowerCase()
-							.normalize('NFD')
-							.replace(/\p{Diacritic}/gu, '')
-					),
-		}),
+	const globalFilter = writable('');
+
+	const table = createSvelteTable({
+		get data() {
+			return tenants;
+		},
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		onGlobalFilterChange: globalFilter.set,
+		state: {
+			get globalFilter() {
+				return $globalFilter;
+			},
+		},
 	});
-
-	const columns = table.createColumns([
-		table.display({
-			id: 'select',
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected,
-					'aria-label': 'Select all',
-				});
-			},
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected,
-					'aria-label': 'Select row',
-					class: 'translate-y-[2px]',
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true,
-				},
-			},
-		}),
-		table.column({
-			accessor: 'name',
-			header: 'Name',
-		}),
-		table.column({
-			accessor: 'email',
-			header: 'Email',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(TenantEmailCell, {
-						email: value,
-					});
-				}
-				return value ?? '';
-			},
-		}),
-		table.column({
-			accessor: 'phone',
-			header: 'Phone',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(TenantPhoneCell, {
-						phone: value,
-					});
-				}
-				return value ?? '';
-			},
-		}),
-		table.display({
-			id: 'actions',
-			header: () => {
-				return '';
-			},
-			cell: ({ row }) => {
-				if (row.isData() && row.original) {
-					return createRender(TenantActions, {
-						tenant: row.original,
-					});
-				}
-				return '';
-			},
-		}),
-	]);
-
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-		table.createViewModel(columns);
-
-	const { filterValue } = pluginStates.filter;
 </script>
 
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center">
-		<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
+		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
 	</div>
 	<div class="rounded-md border">
-		<Table.Root {...$tableAttrs}>
+		<Table.Root>
 			<Table.Header>
-				{#each $headerRows as headerRow}
-					<Subscribe rowAttrs={headerRow.attrs()}>
-						<Table.Row>
-							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-									<Table.Head {...attrs}>
-										{#if cell.id !== 'select' && cell.id !== 'actions'}
-											<DataTableColumnHeader {props}>
-												<Render of={cell.render()} />
-											</DataTableColumnHeader>
-										{:else}
-											<Render of={cell.render()} />
-										{/if}
-									</Table.Head>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+					<Table.Row>
+						{#each headerGroup.headers as header (header.id)}
+							<Table.Head>
+								{#if !header.isPlaceholder}
+									<FlexRender
+										content={header.column.columnDef.header}
+										context={header.getContext()}
+									/>
+								{/if}
+							</Table.Head>
+						{/each}
+					</Table.Row>
 				{/each}
 			</Table.Header>
-			<Table.Body {...$tableBodyAttrs}>
-				{#each $pageRows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<Table.Row {...rowAttrs}>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs}>
-										<Render of={cell.render()} />
-									</Table.Cell>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+			<Table.Body>
+				{#each table.getRowModel().rows as row (row.id)}
+					<Table.Row data-state={row.getIsSelected() && 'selected'}>
+						{#each row.getVisibleCells() as cell (cell.id)}
+							<Table.Cell>
+								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+							</Table.Cell>
+						{/each}
+					</Table.Row>
+				{:else}
+					<Table.Row>
+						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+					</Table.Row>
 				{/each}
 			</Table.Body>
 		</Table.Root>

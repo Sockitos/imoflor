@@ -5,9 +5,13 @@
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let open = false;
-	export let contract: Contract;
-	export let data: SuperValidated<Infer<DeleteContractSchema>>;
+	interface Props {
+		open?: boolean;
+		contract: Contract;
+		data: SuperValidated<Infer<DeleteContractSchema>>;
+	}
+
+	let { open = $bindable(false), contract, data }: Props = $props();
 
 	const form = superForm(data, {
 		id: contract.id.toString(),
@@ -31,7 +35,7 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action on:click={form.submit}>Continue</AlertDialog.Action>
+			<AlertDialog.Action onclick={form.submit}>Continue</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

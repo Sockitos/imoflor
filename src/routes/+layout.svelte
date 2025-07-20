@@ -1,29 +1,33 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { dev } from '$app/environment';
 	import { invalidate } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import TailwindIndicator from '@/components/tailwind-indicator.svelte';
 	import { Toaster } from '@/components/ui/sonner';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { getFlash } from 'sveltekit-flash-message';
-	import '../app.pcss';
+	import '../app.css';
 
-	export let data;
-
-	$: ({ supabase, session } = data);
+	let { data, children } = $props();
+	let { supabase, session } = $derived(data);
 
 	const flash = getFlash(page);
-	$: if ($flash) {
-		if ($flash.type === 'error') {
-			toast.error($flash.message);
-		} else {
-			toast.success($flash.message);
+
+	run(() => {
+		if ($flash) {
+			if ($flash.type === 'error') {
+				toast.error($flash.message);
+			} else {
+				toast.success($flash.message);
+			}
+
+			$flash = undefined;
 		}
-		// Clear the flash message to avoid double-toasting.
-		$flash = undefined;
-	}
+	});
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((event, newSession) => {
@@ -39,7 +43,7 @@
 <ModeWatcher />
 <Toaster />
 
-<slot />
+{@render children?.()}
 {#if dev}
 	<TailwindIndicator />
 {/if}

@@ -7,7 +7,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let data;
+	let { data } = $props();
 
 	const form = superForm(data.form, {
 		validators: zodClient(signInSchema),
@@ -25,17 +25,21 @@
 		<Card.Content>
 			<form method="POST" use:enhance>
 				<Form.Field {form} name="email">
-					<Form.Control let:attrs>
-						<Form.Label>Email</Form.Label>
-						<Input {...attrs} bind:value={$formData.email} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Email</Form.Label>
+							<Input {...props} bind:value={$formData.email} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<Form.Field {form} name="password">
-					<Form.Control let:attrs>
-						<Form.Label>Password</Form.Label>
-						<Input type="password" {...attrs} bind:value={$formData.password} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Password</Form.Label>
+							<Input type="password" {...props} bind:value={$formData.password} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<Form.Button class="mt-5" disabled={$submitting}>

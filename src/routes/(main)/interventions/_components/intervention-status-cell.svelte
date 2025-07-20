@@ -2,12 +2,18 @@
 	import type { InterventionStatus } from '@/types/types';
 	import { statusMap } from './intervention-status-map';
 
-	export let status: InterventionStatus;
+	interface Props {
+		status: InterventionStatus;
+	}
 
-	$: ({ label, icon } = statusMap[status]);
+	let { status }: Props = $props();
+
+	let { label, icon } = $derived(statusMap[status]);
+
+	const SvelteComponent = $derived(icon);
 </script>
 
 <div class="flex items-center">
-	<svelte:component this={icon} class="mr-2 h-4 w-4 text-muted-foreground" />
+	<SvelteComponent class="text-muted-foreground mr-2 h-4 w-4" />
 	<span>{label}</span>
 </div>

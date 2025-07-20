@@ -1,1 +1,1 @@
-<p class="text-sm text-muted-foreground"><slot /></p>
+<p class="text-muted-foreground text-sm"><slot /></p>

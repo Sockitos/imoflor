@@ -2,12 +2,18 @@
 	import type { TicketPriority } from '@/types/types';
 	import { priorityMap } from './ticket-priority-map';
 
-	export let priority: TicketPriority;
+	interface Props {
+		priority: TicketPriority;
+	}
 
-	$: ({ label, icon } = priorityMap[priority]);
+	let { priority }: Props = $props();
+
+	let { label, icon } = $derived(priorityMap[priority]);
+
+	const SvelteComponent = $derived(icon);
 </script>
 
 <div class="flex items-center">
-	<svelte:component this={icon} class="mr-2 h-4 w-4 text-muted-foreground" />
+	<SvelteComponent class="text-muted-foreground mr-2 h-4 w-4" />
 	<span>{label}</span>
 </div>

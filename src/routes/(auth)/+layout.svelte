@@ -1,1 +1,5 @@
-<div class="min-h-screen"><slot /></div>
+<script lang="ts">
+	let { children } = $props();
+</script>
+
+<div class="min-h-screen">{@render children?.()}</div>

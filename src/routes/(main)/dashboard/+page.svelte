@@ -1,21 +1,11 @@
 <script lang="ts">
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import Calendar from '@/components/ui/calendar/calendar.svelte';
-	import * as Popover from '@/components/ui/popover';
-	import { Separator } from '@/components/ui/separator';
-	import * as Tabs from '@/components/ui/tabs';
-	import { dateFormatter } from '@/formatters';
-	import { cn } from '@/utils';
-	import { CalendarIcon } from 'lucide-svelte';
-
-	let dateRange = {
+	let _dateRange = {
 		start: new Date(2024, 1, 1),
 		end: new Date(2024, 9, 5),
 	};
 </script>
 
-<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
+<!-- <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
 	<div class="flex flex-row items-start justify-between">
 		<div class="flex flex-col gap-y-2">
 			<PageTitle>Hi, Welcome back 👋</PageTitle>
@@ -52,4 +42,4 @@
 		</Popover.Root>
 	</div>
 	<Separator />
-</div>
+</div> -->

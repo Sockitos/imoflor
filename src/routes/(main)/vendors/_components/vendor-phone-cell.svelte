@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { Phone } from 'lucide-svelte';
 
-	export let phone: string | null | undefined;
+	interface Props {
+		phone: string | null | undefined;
+	}
+
+	let { phone }: Props = $props();
 </script>
 
 <div class="flex flex-row items-center">
-	<Phone class="mr-2 h-4 w-4 text-muted-foreground"></Phone>
+	<Phone class="text-muted-foreground mr-2 h-4 w-4"></Phone>
 	{phone}
 </div>

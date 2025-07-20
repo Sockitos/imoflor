@@ -1,168 +1,91 @@
 <script lang="ts">
-	import { DataTableCheckbox, DataTableColumnHeader } from '@/components/ui/data-table';
+	import { run } from 'svelte/legacy';
+
+	import { Button } from '@/components/ui/button';
+	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
 	import type { Vendor } from '@/types/types';
-	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-	import { addSelectedRows, addSortBy, addTableFilter } from 'svelte-headless-table/plugins';
+	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { writable } from 'svelte/store';
-	import VendorActions from './vendor-actions.svelte';
-	import VendorEmailCell from './vendor-email-cell.svelte';
-	import VendorPhoneCell from './vendor-phone-cell.svelte';
-	import VendorTagsCell from './vendor-tags-cell.svelte';
-	import VendorWebsiteCell from './vendor-website-cell.svelte';
+	import { columns } from './vendor-columns';
 
-	export let vendors: Vendor[];
-	let data = writable(vendors);
-	$: data.set(vendors);
+	interface Props {
+		vendors: Vendor[];
+	}
 
-	const table = createTable(data, {
-		select: addSelectedRows(),
-		sort: addSortBy({
-			toggleOrder: ['asc', 'desc'],
-		}),
-		filter: addTableFilter<string>(),
+	let { vendors }: Props = $props();
+
+	const data = writable(vendors);
+	run(() => {
+		data.set(vendors);
 	});
 
-	const columns = table.createColumns([
-		table.display({
-			id: 'select',
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected,
-					'aria-label': 'Select all',
-				});
-			},
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected,
-					'aria-label': 'Select row',
-					class: 'translate-y-[2px]',
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true,
-				},
-			},
-		}),
-		table.column({
-			accessor: 'name',
-			header: 'Name',
-		}),
-		table.column({
-			accessor: 'tags',
-			header: 'Tags',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(VendorTagsCell, {
-						tags: value,
-					});
-				}
-				return value.toString() ?? '';
-			},
-		}),
-		table.column({
-			accessor: 'email',
-			header: 'Email',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(VendorEmailCell, {
-						email: value,
-					});
-				}
-				return value ?? '';
-			},
-		}),
-		table.column({
-			accessor: 'mobile',
-			header: 'Phone',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(VendorPhoneCell, {
-						phone: value,
-					});
-				}
-				return value ?? '';
-			},
-		}),
-		table.column({
-			accessor: 'website',
-			header: 'Website',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(VendorWebsiteCell, {
-						website: value,
-					});
-				}
-				return value ?? '';
-			},
-		}),
-		table.display({
-			id: 'actions',
-			header: () => {
-				return '';
-			},
-			cell: ({ row }) => {
-				if (row.isData() && row.original) {
-					return createRender(VendorActions, {
-						vendor: row.original,
-					});
-				}
-				return '';
-			},
-		}),
-	]);
+	const globalFilter = writable('');
 
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates } =
-		table.createViewModel(columns);
-
-	const { filterValue } = pluginStates.filter;
+	const table = createSvelteTable({
+		get data() {
+			return $data;
+		},
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		onGlobalFilterChange: globalFilter.set,
+		state: {
+			get globalFilter() {
+				return $globalFilter;
+			},
+		},
+	});
 </script>
 
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center">
-		<Input placeholder={'Search...'} bind:value={$filterValue} class="w-[150px] lg:w-[250px]" />
+		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
 	</div>
 	<div class="rounded-md border">
-		<Table.Root {...$tableAttrs}>
+		<Table.Root>
 			<Table.Header>
-				{#each $headerRows as headerRow}
-					<Subscribe rowAttrs={headerRow.attrs()}>
-						<Table.Row>
-							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-									<Table.Head {...attrs}>
-										{#if cell.id !== 'select' && cell.id !== 'actions'}
-											<DataTableColumnHeader {props}>
-												<Render of={cell.render()} />
-											</DataTableColumnHeader>
-										{:else}
-											<Render of={cell.render()} />
-										{/if}
-									</Table.Head>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+					<Table.Row>
+						{#each headerGroup.headers as header (header.id)}
+							<Table.Head>
+								{#if !header.isPlaceholder}
+									<Button
+										variant="ghost"
+										onclick={() => header.column.toggleSorting()}
+										class="data-[state=open]:bg-accent -ml-3 h-8"
+									>
+										<FlexRender
+											content={header.column.columnDef.header}
+											context={header.getContext()}
+										/>
+									</Button>
+								{:else}
+									<FlexRender
+										content={header.column.columnDef.header}
+										context={header.getContext()}
+									/>
+								{/if}
+							</Table.Head>
+						{/each}
+					</Table.Row>
 				{/each}
 			</Table.Header>
-			<Table.Body {...$tableBodyAttrs}>
-				{#each $pageRows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<Table.Row {...rowAttrs}>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs}>
-										<Render of={cell.render()} />
-									</Table.Cell>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
+			<Table.Body>
+				{#each table.getRowModel().rows as row (row.id)}
+					<Table.Row data-state={row.getIsSelected() && 'selected'}>
+						{#each row.getVisibleCells() as cell (cell.id)}
+							<Table.Cell>
+								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+							</Table.Cell>
+						{/each}
+					</Table.Row>
+				{:else}
+					<Table.Row>
+						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+					</Table.Row>
 				{/each}
 			</Table.Body>
 		</Table.Root>

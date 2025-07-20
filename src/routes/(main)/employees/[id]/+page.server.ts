@@ -16,7 +16,7 @@ export const load = async (event) => {
 		const { data: employee, error: employeeError } = await event.locals.supabase
 			.from('employees')
 			.select('*')
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (employeeError) {
@@ -61,7 +61,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('employees')
 					.update(form.data)
-					.eq('id', event.params.id);
+					.eq('id', Number(event.params.id));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

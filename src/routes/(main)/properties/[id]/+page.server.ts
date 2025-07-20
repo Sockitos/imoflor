@@ -17,7 +17,7 @@ export const load = async (event) => {
 		const { data: property, error: propertyError } = await event.locals.supabase
 			.from('properties')
 			.select('*')
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (propertyError) {
@@ -30,7 +30,7 @@ export const load = async (event) => {
 		const { data: fractions, error: fractionsError } = await event.locals.supabase
 			.from('fractions_view')
 			.select('*')
-			.eq('property_id', event.params.id);
+			.eq('property_id', Number(event.params.id));
 
 		if (fractionsError) {
 			return error(500, 'Error fetching fractions, please try again later.');
@@ -68,7 +68,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('properties')
 					.update(form.data)
-					.eq('id', event.params.id);
+					.eq('id', Number(event.params.id));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

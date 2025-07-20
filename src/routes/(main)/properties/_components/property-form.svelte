@@ -17,9 +17,13 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let open = false;
-	export let data: SuperValidated<Infer<CreatePropertySchema>>;
-	export let action: string;
+	interface Props {
+		open?: boolean;
+		data: SuperValidated<Infer<CreatePropertySchema>>;
+		action: string;
+	}
+
+	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
 		validators: zodClient(createPropertySchema),
@@ -33,19 +37,13 @@
 
 	const { form: formData, enhance, submitting } = form;
 
-	$: selectedClass = $formData.class
-		? {
-				value: $formData.class,
-				label: classOptions[$formData.class],
-			}
-		: undefined;
-
-	$: selectedType = $formData.type
-		? {
-				value: $formData.type,
-				label: typeOptions[$formData.type],
-			}
-		: undefined;
+	$effect(() => {
+		if ($formData.type === 'building' || $formData.type === 'garages') {
+			$formData.is_multi_unit = true;
+		} else {
+			$formData.is_multi_unit = false;
+		}
+	});
 </script>
 
 <Sheet.Root bind:open>
@@ -60,114 +58,116 @@
 				<h3 class="text-lg font-medium">Information</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="class">
-						<Form.Control let:attrs>
-							<Form.Label>Class</Form.Label>
-							<Select.Root
-								{...attrs}
-								selected={selectedClass}
-								onSelectedChange={(v) => {
-									if (v) {
-										$formData.class = v.value;
-									}
-								}}
-							>
-								<Select.Trigger>
-									<Select.Value placeholder="Select" />
-								</Select.Trigger>
-								<Select.Content>
-									{#each Object.entries(classOptions) as [value, label]}
-										<Select.Item {value} {label} />
-									{/each}
-								</Select.Content>
-							</Select.Root>
-							<input hidden bind:value={$formData.class} name="class" />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Class</Form.Label>
+								<Select.Root {...props} type="single" bind:value={$formData.class}>
+									<Select.Trigger>
+										{$formData.class ? $formData.class : 'Select'}
+									</Select.Trigger>
+									<Select.Content>
+										{#each Object.entries(classOptions) as [value, label] (value)}
+											<Select.Item {value} {label} />
+										{/each}
+									</Select.Content>
+								</Select.Root>
+								<input hidden bind:value={$formData.class} name="class" />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<input hidden bind:value={$formData.is_multi_unit} name="is_multi_unit" />
 					<Form.Field {form} name="type">
-						<Form.Control let:attrs>
-							<Form.Label>Type</Form.Label>
-							<Select.Root
-								{...attrs}
-								selected={selectedType}
-								onSelectedChange={(v) => {
-									if (v) {
-										$formData.type = v.value;
-										if ($formData.type === 'building' || $formData.type === 'garages') {
-											$formData.is_multi_unit = true;
-										} else {
-											$formData.is_multi_unit = false;
-										}
-									}
-								}}
-							>
-								<Select.Trigger {...attrs}>
-									<Select.Value placeholder="Select" />
-								</Select.Trigger>
-								<Select.Content>
-									{#each Object.entries(typeOptions) as [value, label]}
-										<Select.Item {value} {label} />
-									{/each}
-								</Select.Content>
-							</Select.Root>
-							<input hidden bind:value={$formData.type} name={attrs.name} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Type</Form.Label>
+								<Select.Root {...props} type="single" bind:value={$formData.type}>
+									<Select.Trigger {...props}>
+										{$formData.type ? $formData.type : 'Select'}
+									</Select.Trigger>
+									<Select.Content>
+										{#each Object.entries(typeOptions) as [value, label] (value)}
+											<Select.Item {value} {label} />
+										{/each}
+									</Select.Content>
+								</Select.Root>
+								<input hidden bind:value={$formData.type} name={props.name} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="matrix">
-						<Form.Control let:attrs>
-							<Form.Label>Matrix</Form.Label>
-							<Input {...attrs} bind:value={$formData.matrix} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Matrix</Form.Label>
+								<Input {...props} bind:value={$formData.matrix} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="conservatory">
-						<Form.Control let:attrs>
-							<Form.Label>Conservatory</Form.Label>
-							<Input {...attrs} bind:value={$formData.conservatory} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Conservatory</Form.Label>
+								<Input {...props} bind:value={$formData.conservatory} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="area">
-						<Form.Control let:attrs>
-							<Form.Label>Area</Form.Label>
-							<Input type="number" {...attrs} bind:value={$formData.area} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Area</Form.Label>
+								<Input type="number" {...props} bind:value={$formData.area} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="tipology">
-						<Form.Control let:attrs>
-							<Form.Label>Tipology</Form.Label>
-							<Input {...attrs} bind:value={$formData.tipology} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Tipology</Form.Label>
+								<Input {...props} bind:value={$formData.tipology} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<Form.Field {form} name="description">
-					<Form.Control let:attrs>
-						<Form.Label>Description</Form.Label>
-						<Textarea {...attrs} bind:value={$formData.description} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Description</Form.Label>
+							<Textarea {...props} bind:value={$formData.description} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="patrimonial_value">
-						<Form.Control let:attrs>
-							<Form.Label>Patrimonial Value</Form.Label>
-							<Input type="number" step="any" {...attrs} bind:value={$formData.patrimonial_value} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Patrimonial Value</Form.Label>
+								<Input
+									type="number"
+									step="any"
+									{...props}
+									bind:value={$formData.patrimonial_value}
+								/>
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="market_value">
-						<Form.Control let:attrs>
-							<Form.Label>Market Value</Form.Label>
-							<Input type="number" step="any" {...attrs} bind:value={$formData.market_value} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Market Value</Form.Label>
+								<Input type="number" step="any" {...props} bind:value={$formData.market_value} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
@@ -176,48 +176,58 @@
 				<h3 class="text-lg font-medium">Address</h3>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="country">
-						<Form.Control let:attrs>
-							<Form.Label>Country</Form.Label>
-							<Input {...attrs} bind:value={$formData.country} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Country</Form.Label>
+								<Input {...props} bind:value={$formData.country} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="region">
-						<Form.Control let:attrs>
-							<Form.Label>Region</Form.Label>
-							<Input {...attrs} bind:value={$formData.region} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Region</Form.Label>
+								<Input {...props} bind:value={$formData.region} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 				<Form.Field {form} name="address">
-					<Form.Control let:attrs>
-						<Form.Label>Address</Form.Label>
-						<Input {...attrs} bind:value={$formData.address} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Address</Form.Label>
+							<Input {...props} bind:value={$formData.address} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<div class="grid grid-cols-2 items-start gap-x-4">
 					<Form.Field {form} name="postal_code">
-						<Form.Control let:attrs>
-							<Form.Label>Postal Code</Form.Label>
-							<Input {...attrs} bind:value={$formData.postal_code} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>Postal Code</Form.Label>
+								<Input {...props} bind:value={$formData.postal_code} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 					<Form.Field {form} name="city">
-						<Form.Control let:attrs>
-							<Form.Label>City</Form.Label>
-							<Input {...attrs} bind:value={$formData.city} />
-							<Form.FieldErrors />
+						<Form.Control>
+							{#snippet children({ props })}
+								<Form.Label>City</Form.Label>
+								<Input {...props} bind:value={$formData.city} />
+								<Form.FieldErrors />
+							{/snippet}
 						</Form.Control>
 					</Form.Field>
 				</div>
 			</div>
 			<div class="flex flex-row items-center justify-end gap-4">
 				<Button
-					variant={'ghost'}
-					on:click={(e) => {
+					variant="ghost"
+					onclick={(e) => {
 						e.preventDefault();
 						open = false;
 					}}

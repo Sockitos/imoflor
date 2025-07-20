@@ -1,5 +1,5 @@
 <div
-	class="fixed bottom-1 left-1 z-50 flex h-6 w-6 items-center justify-center rounded-full bg-foreground p-3 font-mono text-xs text-background"
+	class="bg-foreground text-background fixed bottom-1 left-1 z-50 flex h-6 w-6 items-center justify-center rounded-full p-3 font-mono text-xs"
 >
 	<div class="block sm:hidden">xs</div>
 	<div class="hidden sm:block md:hidden lg:hidden xl:hidden 2xl:hidden">sm</div>

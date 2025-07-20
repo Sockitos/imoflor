@@ -8,18 +8,17 @@
 	import { Textarea } from '@/components/ui/textarea';
 	import { createRentPaymentSchema, type CreateRentPaymentSchema } from '@/schemas/rent-payment';
 	import { cn } from '@/utils';
-	import {
-		DateFormatter,
-		getLocalTimeZone,
-		parseAbsolute,
-		type DateValue,
-	} from '@internationalized/date';
+	import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let open = false;
-	export let data: SuperValidated<Infer<CreateRentPaymentSchema>>;
+	interface Props {
+		open?: boolean;
+		data: SuperValidated<Infer<CreateRentPaymentSchema>>;
+	}
+
+	let { open = $bindable(false), data }: Props = $props();
 
 	const form = superForm(data, {
 		validators: zodClient(createRentPaymentSchema),
@@ -37,8 +36,7 @@
 		dateStyle: 'long',
 	});
 
-	let date: DateValue | undefined;
-	$: date = $formData.date ? parseAbsolute($formData.date, getLocalTimeZone()) : undefined;
+	let date = $derived($formData.date ? parseDate($formData.date) : undefined);
 </script>
 
 <Dialog.Root bind:open>
@@ -50,57 +48,64 @@
 		<form method="POST" use:enhance action="?/createRentPayment">
 			<div class="grid gap-4 py-4">
 				<Form.Field {form} name="value">
-					<Form.Control let:attrs>
-						<Form.Label>Value</Form.Label>
-						<Input type="number" step="any" {...attrs} bind:value={$formData.value} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label>Value</Form.Label>
+							<Input type="number" step="any" {...props} bind:value={$formData.value} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<Form.Field {form} name="date">
-					<Form.Control id="date" let:attrs>
-						<Form.Label for="date">Date</Form.Label>
-						<Popover.Root>
-							<Popover.Trigger
-								{...attrs}
-								class={cn(
-									buttonVariants({ variant: 'outline' }),
-									'w-full justify-start pl-4 text-left font-normal',
-									!date && 'text-muted-foreground'
-								)}
-							>
-								{date ? df.format(date.toDate()) : 'Pick a date'}
-								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-							</Popover.Trigger>
-							<Popover.Content class="w-auto p-0" side="top">
-								<Calendar
-									initialFocus
-									value={date}
-									onValueChange={(v) => {
-										if (v) {
-											$formData.date = v.toDate(getLocalTimeZone()).toISOString();
-										} else {
-											$formData.date = '';
-										}
-									}}
-								/>
-							</Popover.Content>
-						</Popover.Root>
-						<Form.FieldErrors />
-						<input hidden value={$formData.date} name={attrs.name} />
+					<Form.Control id="date">
+						{#snippet children({ props })}
+							<Form.Label for="date">Date</Form.Label>
+							<Popover.Root>
+								<Popover.Trigger
+									{...props}
+									class={cn(
+										buttonVariants({ variant: 'outline' }),
+										'w-full justify-start pl-4 text-left font-normal',
+										!date && 'text-muted-foreground'
+									)}
+								>
+									{date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date'}
+									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-auto p-0" side="top">
+									<Calendar
+										type="single"
+										initialFocus
+										value={date}
+										onValueChange={(v) => {
+											if (v) {
+												$formData.date = v.toString();
+											} else {
+												$formData.date = '';
+											}
+										}}
+									/>
+								</Popover.Content>
+							</Popover.Root>
+							<Form.FieldErrors />
+							<input hidden value={$formData.date} name={props.name} />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 				<Form.Field {form} name="description">
-					<Form.Control let:attrs>
-						<Form.Label for="description">Description</Form.Label>
-						<Textarea {...attrs} bind:value={$formData.description} />
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label for="description">Description</Form.Label>
+							<Textarea {...props} bind:value={$formData.description} />
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 			</div>
 			<div class="flex flex-row items-center justify-end gap-4">
 				<Button
-					variant={'ghost'}
-					on:click={(e) => {
+					variant="ghost"
+					onclick={(e) => {
 						e.preventDefault();
 						open = false;
 					}}

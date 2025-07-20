@@ -16,7 +16,7 @@ export const load = async (event) => {
 		const { data: tenant, error: tenantError } = await event.locals.supabase
 			.from('tenants')
 			.select('*')
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (tenantError) {
@@ -57,7 +57,7 @@ export const actions = {
 			const { error } = await event.locals.supabase
 				.from('tenants')
 				.update(form.data)
-				.eq('id', event.params.id);
+				.eq('id', Number(event.params.id));
 
 			if (error) {
 				setFlash({ type: 'error', message: error.message }, event.cookies);

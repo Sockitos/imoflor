@@ -38,6 +38,24 @@ export default [
 		},
 	},
 	{
+		files: ['**/*.svelte.ts'],
+		languageOptions: {
+			parserOptions: {
+				parser: ts.parser,
+			},
+		},
+		rules: {
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{
+					args: 'after-used',
+					argsIgnorePattern: '^_',
+					varsIgnorePattern: '^_|\\$\\$(Props|Events|Slots|Generic)$',
+				},
+			],
+		},
+	},
+	{
 		ignores: ['build/', '.svelte-kit/', 'dist/'],
 	},
 ];

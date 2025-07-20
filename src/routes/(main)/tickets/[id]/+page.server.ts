@@ -17,7 +17,7 @@ export const load = async (event) => {
 			.select(
 				'*, property:properties!inner (id, label:address), fraction:fractions!inner (id, label:address)'
 			)
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.single();
 
 		if (ticketError) {
@@ -69,7 +69,7 @@ export const actions = {
 			const { error } = await event.locals.supabase
 				.from('tickets')
 				.update(form.data)
-				.eq('id', event.params.id);
+				.eq('id', Number(event.params.id));
 
 			if (error) {
 				return fail(500, { message: error.message, form });

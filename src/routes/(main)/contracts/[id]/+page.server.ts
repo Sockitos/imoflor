@@ -29,7 +29,7 @@ export const load = async (event) => {
 			.select(
 				'*, tenants:tenants!inner (id, label:name), fraction:fractions_view!inner (id, label:address_full)'
 			)
-			.eq('id', event.params.id)
+			.eq('id', Number(event.params.id))
 			.returns<Contract[]>() // TODO: try not to use returns
 			.single();
 
@@ -43,7 +43,7 @@ export const load = async (event) => {
 		const { data: contractAccount, error: contractAccountError } = await event.locals.supabase
 			.from('contracts_accounts_view')
 			.select('*')
-			.eq('contract_id', event.params.id);
+			.eq('contract_id', Number(event.params.id));
 
 		if (contractAccountError) {
 			return error(500, 'Error fetching contract account, please try again later.');
@@ -55,7 +55,7 @@ export const load = async (event) => {
 		const { data: rentUpdates, error: rentUpdatesError } = await event.locals.supabase
 			.from('rent_updates')
 			.select('*')
-			.eq('contract_id', event.params.id)
+			.eq('contract_id', Number(event.params.id))
 			.order('update_date');
 
 		if (rentUpdatesError) {
@@ -68,7 +68,7 @@ export const load = async (event) => {
 		const { data: installmentUpdates, error: installmentUpdatesError } = await event.locals.supabase
 			.from('installment_updates')
 			.select('*')
-			.eq('contract_id', event.params.id)
+			.eq('contract_id', Number(event.params.id))
 			.order('update_date');
 
 		if (installmentUpdatesError) {
@@ -200,7 +200,7 @@ export const actions = {
 						type: form.data.type,
 						data: form.data,
 					})
-					.eq('id', event.params.id);
+					.eq('id', Number(event.params.id));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

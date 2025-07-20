@@ -1,8 +1,6 @@
 <script lang="ts">
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import { Separator } from '@/components/ui/separator';
+	import { Button } from '$lib/components/ui/button';
+	import { Separator } from '$lib/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
 	import EmployeeForm from './_components/employee-form.svelte';
 	import EmployeeTable from './_components/employee-table.svelte';
@@ -12,18 +10,18 @@
 	let openForm = false;
 </script>
 
-<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
-	<div class="flex flex-row items-start justify-between">
+<div class="container mx-auto py-10">
+	<div class="flex items-center justify-between">
 		<div>
-			<PageTitle>Employees ({employees.length})</PageTitle>
-			<PageSubtitle>Manage your employees and Lorem Ipsum</PageSubtitle>
+			<h2 class="text-3xl font-bold tracking-tight">Employees</h2>
+			<p class="text-muted-foreground">Manage your employees and their information</p>
 		</div>
-		<Button on:click={() => (openForm = true)}>
+		<Button onclick={() => (openForm = true)}>
 			<PlusCircle class="mr-2 h-4 w-4" />
 			Add Employee
 		</Button>
 	</div>
-	<Separator />
+	<Separator class="my-6" />
 	<EmployeeTable {employees} />
 </div>
 
