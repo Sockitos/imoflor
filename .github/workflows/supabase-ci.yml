@@ -1,24 +1,38 @@
-name: Supabase CI
+name: CI
 
 on: [push, pull_request]
 
 jobs:
-  test:
-    name: Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - run: supabase db start
-      - run: supabase db lint
-      - run: supabase test db
+      - name: Start Database
+        run: supabase start
 
-      - name: Verify generated types are checked in
+      - name: Lint Database
+        run: supabase db lint
+
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Database
+        run: supabase start
+
+      - name: Check Types
         run: |
           supabase gen types typescript --local > ./src/lib/types/supabase-types.gen.ts
           if ! git diff --ignore-space-at-eol --exit-code --quiet ./src/lib/types/supabase-types.gen.ts; then
@@ -26,3 +40,19 @@ jobs:
             git diff
             exit 1
           fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Database
+        run: supabase start
+
+      - name: Test Database
+        run: supabase test db
