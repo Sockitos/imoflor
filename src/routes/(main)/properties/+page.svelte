@@ -7,9 +7,9 @@
 	import PropertyForm from './_components/property-form.svelte';
 	import PropertyTable from './_components/property-table.svelte';
 
-	export let data;
-	$: ({ properties, createPropertyForm } = data);
-	let openForm = false;
+	let { data } = $props();
+	let { properties, createPropertyForm } = $derived(data);
+	let openForm = $state(false);
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">

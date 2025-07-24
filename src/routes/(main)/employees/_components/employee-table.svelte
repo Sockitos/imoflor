@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Button } from '@/components/ui/button';
 	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
@@ -8,10 +10,16 @@
 	import { writable } from 'svelte/store';
 	import { columns } from './employee-columns';
 
-	export let employees: Employee[];
+	interface Props {
+		employees: Employee[];
+	}
+
+	let { employees }: Props = $props();
 
 	const data = writable(employees);
-	$: data.set(employees);
+	run(() => {
+		data.set(employees);
+	});
 
 	const globalFilter = writable('');
 

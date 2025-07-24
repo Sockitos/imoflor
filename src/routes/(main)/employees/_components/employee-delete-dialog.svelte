@@ -14,9 +14,13 @@
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	export let open = false;
-	export let employee: Employee;
-	export let data: SuperValidated<Infer<DeleteEmployeeSchema>>;
+	interface Props {
+		open?: boolean;
+		employee: Employee;
+		data: SuperValidated<Infer<DeleteEmployeeSchema>>;
+	}
+
+	let { open = $bindable(false), employee, data }: Props = $props();
 
 	const form = superForm(data, {
 		id: employee.id.toString(),

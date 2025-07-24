@@ -10,11 +10,11 @@
 	import FractionDeleteDialog from '../../_components/fraction-delete-dialog.svelte';
 	import FractionForm from '../../_components/fraction-form.svelte';
 
-	export let data;
-	$: ({ property, fraction, updateFractionForm, deleteFractionForm } = data);
+	let { data } = $props();
+	let { property, fraction, updateFractionForm, deleteFractionForm } = $derived(data);
 
-	let openForm = page.url.searchParams.get('action') === 'edit';
-	let openDeleteDialog = false;
+	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openDeleteDialog = $state(false);
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">

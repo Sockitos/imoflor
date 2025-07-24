@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { Button } from '@/components/ui/button';
 	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
@@ -8,10 +10,16 @@
 	import { writable } from 'svelte/store';
 	import { columns } from './ticket-columns';
 
-	export let tickets: Ticket[];
+	interface Props {
+		tickets: Ticket[];
+	}
+
+	let { tickets }: Props = $props();
 
 	const data = writable(tickets);
-	$: data.set(tickets);
+	run(() => {
+		data.set(tickets);
+	});
 
 	const globalFilter = writable('');
 

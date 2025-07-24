@@ -7,7 +7,11 @@
 	import { writable } from 'svelte/store';
 	import { columns } from './tenant-columns';
 
-	export let tenants: Tenant[];
+	interface Props {
+		tenants: Tenant[];
+	}
+
+	let { tenants }: Props = $props();
 
 	const globalFilter = writable('');
 

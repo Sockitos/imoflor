@@ -7,7 +7,11 @@
 	import { writable } from 'svelte/store';
 	import { columns } from './movement-columns';
 
-	export let movements: Movement[];
+	interface Props {
+		movements: Movement[];
+	}
+
+	let { movements }: Props = $props();
 
 	const globalFilter = writable('');
 

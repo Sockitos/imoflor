@@ -2,12 +2,18 @@
 	import type { ContractAccountType } from '@/types/types';
 	import { typeMap } from './contract-account-type-map';
 
-	export let type: ContractAccountType;
+	interface Props {
+		type: ContractAccountType;
+	}
 
-	$: ({ label, icon } = typeMap[type]);
+	let { type }: Props = $props();
+
+	let { label, icon } = $derived(typeMap[type]);
+
+	const SvelteComponent = $derived(icon);
 </script>
 
 <div class="flex items-center">
-	<svelte:component this={icon} class="text-muted-foreground mr-2 h-4 w-4" />
+	<SvelteComponent class="text-muted-foreground mr-2 h-4 w-4" />
 	<span>{label}</span>
 </div>

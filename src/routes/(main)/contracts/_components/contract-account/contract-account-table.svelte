@@ -8,7 +8,11 @@
 	import { writable } from 'svelte/store';
 	import { columns } from './contract-account-columns';
 
-	export let contractAccount: ContractAccountItem[];
+	interface Props {
+		contractAccount: ContractAccountItem[];
+	}
+
+	let { contractAccount }: Props = $props();
 
 	const globalFilter = writable('');
 

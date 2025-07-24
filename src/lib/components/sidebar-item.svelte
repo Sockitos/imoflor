@@ -4,11 +4,15 @@
 	import type { ComponentType } from 'svelte';
 	import { Button } from './ui/button';
 
-	export let icon: ComponentType<Icon>;
-	export let label: string;
-	export let href: string;
+	interface Props {
+		icon: ComponentType<Icon>;
+		label: string;
+		href: string;
+	}
 
-	$: isSelected = page.url.pathname.startsWith(href);
+	let { icon, label, href }: Props = $props();
+
+	let isSelected = $derived(page.url.pathname.startsWith(href));
 </script>
 
 <Button
@@ -16,7 +20,8 @@
 	variant={isSelected ? 'secondary' : 'ghost'}
 	class="flex w-full justify-start md:hidden lg:flex"
 >
-	<svelte:component this={icon} class="text-muted-foreground mr-2 h-4 w-4" />
+	{@const SvelteComponent = icon}
+	<SvelteComponent class="text-muted-foreground mr-2 h-4 w-4" />
 	{label}
 </Button>
 <Button
@@ -25,5 +30,6 @@
 	variant={isSelected ? 'secondary' : 'ghost'}
 	class="hidden md:flex lg:hidden"
 >
-	<svelte:component this={icon} class="h-4 w-4" />
+	{@const SvelteComponent_1 = icon}
+	<SvelteComponent_1 class="h-4 w-4" />
 </Button>
