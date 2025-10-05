@@ -64,6 +64,6 @@
 		"svelte-sonner": "^1.0.5",
 		"sveltekit-superforms": "^2.27.2",
 		"type-fest": "^5.0.1",
-		"zod": "4.0.10"
+		"zod": "4.1.11"
 	}
 }
