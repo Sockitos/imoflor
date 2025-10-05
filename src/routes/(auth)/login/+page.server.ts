@@ -3,11 +3,11 @@ import { handleFormAction } from '@/utils';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async () => {
 	return {
-		form: await superValidate(zod(signInSchema), { id: 'sign-in' }),
+		form: await superValidate(zod4(signInSchema), { id: 'sign-in' }),
 	};
 };
 

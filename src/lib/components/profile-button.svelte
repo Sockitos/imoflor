@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import * as Avatar from '@/components/ui/avatar';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -37,11 +38,11 @@
 		</DropdownMenu.Label>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Group>
-			<DropdownMenu.Item onclick={() => goto('/profile')}>
+			<DropdownMenu.Item onclick={() => goto(resolve('/'))}>
 				Profile
 				<DropdownMenu.Shortcut>⇧⌘P</DropdownMenu.Shortcut>
 			</DropdownMenu.Item>
-			<DropdownMenu.Item onclick={() => goto('/settings')}>
+			<DropdownMenu.Item onclick={() => goto(resolve('/'))}>
 				Settings
 				<DropdownMenu.Shortcut>⌘S</DropdownMenu.Shortcut>
 			</DropdownMenu.Item>

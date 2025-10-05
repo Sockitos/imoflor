@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import PageSubtitle from '@/components/page-subtitle.svelte';
 	import PageTitle from '@/components/page-title.svelte';
@@ -139,7 +140,7 @@
 						<dt class="text-muted-foreground text-sm">Fraction</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{contract.fraction.label}
-							<Button size="icon" variant="ghost" href="/fractions/{contract.fraction.id}">
+							<Button size="icon" variant="ghost" href={resolve('/')}>
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -149,7 +150,7 @@
 						{#each contract.tenants as tenant (tenant.id)}
 							<dd class="flex flex-row items-center gap-x-2">
 								{tenant.label}
-								<Button size="icon" variant="ghost" href="/tenants/{tenant.id}">
+								<Button size="icon" variant="ghost" href={resolve(`/tenants/${tenant.id}`)}>
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>

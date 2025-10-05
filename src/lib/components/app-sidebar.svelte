@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import type { RouteId } from '$app/types';
 	import * as Avatar from '@/components/ui/avatar';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
 	import * as Sidebar from '@/components/ui/sidebar';
@@ -18,13 +20,30 @@
 	import ToolIcon from '@tabler/icons-svelte/icons/tool';
 	import UsersIcon from '@tabler/icons-svelte/icons/users';
 	import { UserCircleIcon } from 'lucide-svelte';
-	import type { ComponentProps } from 'svelte';
+	import type { ComponentProps, ComponentType } from 'svelte';
 
 	interface props extends ComponentProps<typeof Sidebar.Root> {
 		profile?: Profile | null;
 	}
 
 	let { profile, ...restProps }: props = $props();
+
+	type NavItem = {
+		title: string;
+		url: RouteId;
+		icon: ComponentType;
+	};
+
+	type NavGroup = {
+		title: string;
+		items: NavItem[];
+	};
+
+	type NavData = {
+		navMain: NavItem[];
+		navGroups: NavGroup[];
+		navSecondary: NavItem[];
+	};
 
 	const data = {
 		navMain: [
@@ -35,7 +54,7 @@
 			},
 			{
 				title: 'Statistics',
-				url: '/statistics',
+				url: '/',
 				icon: ChartBarIcon,
 			},
 		],
@@ -45,17 +64,17 @@
 				items: [
 					{
 						title: 'Tenants',
-						url: '/tenants',
+						url: '/(main)/tenants',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Properties',
-						url: '/properties',
+						url: '/(main)/properties',
 						icon: BuildingIcon,
 					},
 					{
 						title: 'Contracts',
-						url: '/contracts',
+						url: '/(main)/contracts',
 						icon: FileTextIcon,
 					},
 				],
@@ -65,12 +84,12 @@
 				items: [
 					{
 						title: 'Tickets',
-						url: '/tickets',
+						url: '/(main)/tickets',
 						icon: TicketIcon,
 					},
 					{
 						title: 'Interventions',
-						url: '/interventions',
+						url: '/(main)/interventions',
 						icon: ToolIcon,
 					},
 				],
@@ -80,12 +99,12 @@
 				items: [
 					{
 						title: 'Employees',
-						url: '/employees',
+						url: '/(main)/employees',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Vendors',
-						url: '/vendors',
+						url: '/(main)/vendors',
 						icon: UsersIcon,
 					},
 				],
@@ -94,21 +113,21 @@
 		navSecondary: [
 			{
 				title: 'Settings',
-				url: '/settings',
+				url: '/',
 				icon: SettingsIcon,
 			},
 			{
 				title: 'Get Help',
-				url: '/help',
+				url: '/',
 				icon: HelpIcon,
 			},
 			{
 				title: 'Search',
-				url: '/search',
+				url: '/',
 				icon: SearchIcon,
 			},
 		],
-	};
+	} satisfies NavData;
 
 	const sidebar = Sidebar.useSidebar();
 </script>
@@ -119,7 +138,7 @@
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
 					{#snippet child({ props })}
-						<a href="##" {...props}>
+						<a href={resolve('/')} {...props}>
 							<HomeIcon class="!size-5" />
 							<span class="text-base font-semibold">Imoflor</span>
 						</a>
@@ -129,7 +148,6 @@
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<!-- Main Navigation -->
 		<Sidebar.Group>
 			<Sidebar.GroupContent class="flex flex-col gap-2">
 				<Sidebar.Menu>
@@ -137,7 +155,7 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton tooltipContent={item.title}>
 								{#snippet child({ props })}
-									<a href={item.url} {...props}>
+									<a href={resolve(item.url)} {...props}>
 										<item.icon />
 										<span>{item.title}</span>
 									</a>
@@ -157,7 +175,7 @@
 							<Sidebar.MenuItem>
 								<Sidebar.MenuButton tooltipContent={item.title}>
 									{#snippet child({ props })}
-										<a href={item.url} {...props}>
+										<a href={resolve(item.url)} {...props}>
 											<item.icon />
 											<span>{item.title}</span>
 										</a>
@@ -176,7 +194,7 @@
 						<Sidebar.MenuItem>
 							<Sidebar.MenuButton>
 								{#snippet child({ props })}
-									<a href={item.url} {...props}>
+									<a href={resolve(item.url)} {...props}>
 										<item.icon />
 										<span>{item.title}</span>
 									</a>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -31,9 +32,11 @@
 		{/snippet}
 	</DropdownMenuTrigger>
 	<DropdownMenuContent align="end">
-		<DropdownMenuItem onclick={() => goto(`/employees/${employee.id}`)}>Open</DropdownMenuItem>
+		<DropdownMenuItem onclick={() => goto(resolve(`/employees/${employee.id}`))}
+			>Open</DropdownMenuItem
+		>
 		<DropdownMenuSeparator />
-		<DropdownMenuItem onclick={() => goto(`/employees/${employee.id}?action=edit`)}
+		<DropdownMenuItem onclick={() => goto(resolve(`/employees/${employee.id}?action=edit`))}
 			>Edit</DropdownMenuItem
 		>
 		<DropdownMenuItem onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenuItem>

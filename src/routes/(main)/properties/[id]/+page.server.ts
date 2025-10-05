@@ -5,7 +5,7 @@ import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -43,16 +43,16 @@ export const load = async (event) => {
 	return {
 		property: property,
 		fractions: await getFractions(),
-		updatePropertyForm: await superValidate(property, zod(createPropertySchema), {
+		updatePropertyForm: await superValidate(property, zod4(createPropertySchema), {
 			id: 'update-property',
 		}),
-		deletePropertyForm: await superValidate(zod(deletePropertySchema), {
+		deletePropertyForm: await superValidate(zod4(deletePropertySchema), {
 			id: 'delete-property',
 		}),
-		createFractionForm: await superValidate(zod(createFractionSchema), {
+		createFractionForm: await superValidate(zod4(createFractionSchema), {
 			id: 'create-fraction',
 		}),
-		deleteFractionForm: await superValidate(zod(deleteFractionSchema), {
+		deleteFractionForm: await superValidate(zod4(deleteFractionSchema), {
 			id: 'delete-fraction',
 		}),
 	};

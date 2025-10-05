@@ -2,18 +2,12 @@ import { z } from 'zod';
 import { genderSchema } from './gender';
 import { maritalStatusSchema } from './marital-status';
 
+export const salaryType = ['hourly', 'monthly'] as const;
 export const salaryTypeOptions = {
 	hourly: 'Hourly',
 	monthly: 'Monthly',
 };
-
-type SalaryType = keyof typeof salaryTypeOptions;
-
-export const salaryTypeSchema = z
-	.enum(['', ...(Object.keys(salaryTypeOptions) as [SalaryType, ...SalaryType[]])])
-	.refine((value) => value !== '', {
-		message: 'Salary Type is required',
-	});
+export const salaryTypeSchema = z.enum(salaryType).default('hourly');
 
 export const createEmployeeSchema = z.object({
 	name: z.string().min(1, 'Name is required'),

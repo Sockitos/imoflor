@@ -3,7 +3,7 @@
 	import { deleteTicketSchema, type DeleteTicketSchema } from '@/schemas/ticket';
 	import type { Ticket } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -15,7 +15,7 @@
 
 	const form = superForm(data, {
 		id: ticket.id.toString(),
-		validators: zodClient(deleteTicketSchema),
+		validators: zod4Client(deleteTicketSchema),
 	});
 
 	const { enhance } = form;

@@ -1,38 +1,26 @@
 import { z } from 'zod';
 
-export const priorityOptions = {
+export const ticketPriority = ['low', 'medium', 'high'] as const;
+export const ticketPriorityOptions = {
 	low: 'Low',
 	medium: 'Medium',
 	high: 'High',
 };
+export const ticketPrioritySchema = z.enum(ticketPriority).default('low');
 
-type Priority = keyof typeof priorityOptions;
-
-export const prioritySchema = z
-	.enum(['', ...(Object.keys(priorityOptions) as [Priority, ...Priority[]])])
-	.refine((value) => value !== '', {
-		message: 'Priority is required',
-	});
-
-export const statusOptions = {
+export const ticketStatus = ['open', 'in_progress', 'resolved', 'cancelled'] as const;
+export const ticketStatusOptions = {
 	open: 'Open',
 	in_progress: 'In Progress',
 	resolved: 'Resolved',
 	cancelled: 'Cancelled',
 };
-
-type Status = keyof typeof statusOptions;
-
-export const statusSchema = z
-	.enum(['', ...(Object.keys(statusOptions) as [Status, ...Status[]])])
-	.refine((value) => value !== '', {
-		message: 'Status is required',
-	});
+export const ticketStatusSchema = z.enum(ticketStatus).default('open');
 
 export const createTicketSchema = z.object({
 	date: z.string().min(1, 'Date is required.'),
-	priority: prioritySchema,
-	status: statusSchema,
+	priority: ticketPrioritySchema,
+	status: ticketStatusSchema,
 	title: z.string().min(1, 'Title is required.'),
 	description: z.string().min(1, 'Description is required.'),
 	property_id: z.number().min(1, 'Property is required.'),

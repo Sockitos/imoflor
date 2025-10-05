@@ -3,7 +3,7 @@ import type { IdWithLabel, Ticket } from '@/types/types';
 import { handleFormAction } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -54,10 +54,10 @@ export const load = async (event) => {
 		ticket: ticket,
 		propertyOptions: await getPropertyOptions(),
 		fractionOptions: await getFractionOptions(),
-		updateTicketForm: await superValidate(ticket, zod(createTicketSchema), {
+		updateTicketForm: await superValidate(ticket, zod4(createTicketSchema), {
 			id: 'update-ticket',
 		}),
-		deleteTicketForm: await superValidate(zod(deleteTicketSchema), {
+		deleteTicketForm: await superValidate(zod4(deleteTicketSchema), {
 			id: 'delete-ticket',
 		}),
 	};

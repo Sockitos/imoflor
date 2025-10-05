@@ -1,36 +1,24 @@
 import { z } from 'zod';
 
-export const classOptions = {
+export const propertyClass = ['urban', 'rustic'] as const;
+export const propertyClassOptions = {
 	urban: 'Urban',
 	rustic: 'Rustic',
 };
+export const propertyClassSchema = z.enum(propertyClass).default('urban');
 
-type Class = keyof typeof classOptions;
-
-export const classSchema = z
-	.enum(['', ...(Object.keys(classOptions) as [Class, ...Class[]])])
-	.refine((value) => value !== '', {
-		message: 'Class is required',
-	});
-
-export const typeOptions = {
+export const propertyType = ['building', 'terrain', 'house', 'garages'] as const;
+export const propertyTypeOptions = {
 	building: 'Building',
 	terrain: 'Terrain',
 	house: 'House',
 	garages: 'Garages',
 };
-
-type Type = keyof typeof typeOptions;
-
-export const typeSchema = z
-	.enum(['', ...(Object.keys(typeOptions) as [Type, ...Type[]])])
-	.refine((value) => value !== '', {
-		message: 'Type is required',
-	});
+export const propertyTypeSchema = z.enum(propertyType).default('building');
 
 export const createPropertySchema = z.object({
-	class: classSchema,
-	type: typeSchema,
+	class: propertyClassSchema,
+	type: propertyTypeSchema,
 	is_multi_unit: z.boolean().default(true),
 	matrix: z.string().min(1, 'Matrix is required.'),
 	conservatory: z.string().min(1, 'Conservatory is required.'),

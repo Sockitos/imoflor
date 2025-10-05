@@ -7,15 +7,15 @@
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
 	import {
-		classOptions,
 		createPropertySchema,
-		typeOptions,
+		propertyClassOptions,
+		propertyTypeOptions,
 		type CreatePropertySchema,
 	} from '@/schemas/property';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -26,7 +26,7 @@
 	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createPropertySchema),
+		validators: zod4Client(createPropertySchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;
@@ -66,7 +66,7 @@
 										{$formData.class ? $formData.class : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(classOptions) as [value, label] (value)}
+										{#each Object.entries(propertyClassOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>
@@ -86,7 +86,7 @@
 										{$formData.type ? $formData.type : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(typeOptions) as [value, label] (value)}
+										{#each Object.entries(propertyTypeOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>

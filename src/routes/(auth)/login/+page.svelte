@@ -5,12 +5,12 @@
 	import { signInSchema } from '@/schemas/sign-in';
 	import { Loader2 } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	let { data } = $props();
 
 	const form = superForm(data.form, {
-		validators: zodClient(signInSchema),
+		validators: zod4Client(signInSchema),
 	});
 
 	const { form: formData, enhance, submitting } = form;

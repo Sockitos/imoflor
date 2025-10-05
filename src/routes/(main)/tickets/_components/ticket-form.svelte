@@ -12,8 +12,8 @@
 	import { Textarea } from '@/components/ui/textarea';
 	import {
 		createTicketSchema,
-		priorityOptions,
-		statusOptions,
+		ticketPriorityOptions,
+		ticketStatusOptions,
 		type CreateTicketSchema,
 	} from '@/schemas/ticket';
 	import { cn } from '@/utils';
@@ -21,7 +21,7 @@
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -32,7 +32,7 @@
 	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createTicketSchema),
+		validators: zod4Client(createTicketSchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;
@@ -123,7 +123,7 @@
 										{$formData.priority ? $formData.priority : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(priorityOptions) as [value, label] (value)}
+										{#each Object.entries(ticketPriorityOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>
@@ -142,7 +142,7 @@
 										{$formData.status ? $formData.status : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(statusOptions) as [value, label] (value)}
+										{#each Object.entries(ticketStatusOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>

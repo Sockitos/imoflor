@@ -1,23 +1,17 @@
 import { z } from 'zod';
 
-export const typeOptions = {
+export const fractionType = ['apartment', 'store', 'garage', 'house', 'terrain'] as const;
+export const fractionTypeOptions = {
 	apartment: 'Apartment',
 	store: 'Store',
 	garage: 'Garage',
 	house: 'House',
 	terrain: 'Terrain',
 };
-
-type Type = keyof typeof typeOptions;
-
-export const typeSchema = z
-	.enum(['', ...(Object.keys(typeOptions) as [Type, ...Type[]])])
-	.refine((value) => value !== '', {
-		message: 'Type is required',
-	});
+export const fractionTypeSchema = z.enum(fractionType).default('apartment');
 
 export const createFractionSchema = z.object({
-	type: typeSchema,
+	type: fractionTypeSchema,
 	matrix: z.string().min(1, 'Matrix is required.'),
 	area: z.coerce.number().nullish(),
 	tipology: z.string().nullish(),

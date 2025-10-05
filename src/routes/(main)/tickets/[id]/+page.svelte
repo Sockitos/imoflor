@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import PageSubtitle from '@/components/page-subtitle.svelte';
 	import PageTitle from '@/components/page-title.svelte';
@@ -55,7 +56,11 @@
 						<dt class="text-muted-foreground text-sm">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{ticket.property.label}
-							<Button size="icon" variant="ghost" href="/properties/{ticket.property.id}">
+							<Button
+								size="icon"
+								variant="ghost"
+								href={resolve(`/properties/${ticket.property.id}`)}
+							>
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -65,7 +70,13 @@
 							<dt class="text-muted-foreground text-sm">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{ticket.fraction.label}
-								<Button size="icon" variant="ghost" href="/fractions/{ticket.fraction.id}">
+								<Button
+									size="icon"
+									variant="ghost"
+									href={resolve(
+										`/properties/${ticket.property.id}/fractions/${ticket.fraction.id}`
+									)}
+								>
 									<Link class="h-4 w-4" />
 								</Button>
 							</dd>

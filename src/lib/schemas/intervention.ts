@@ -1,37 +1,25 @@
 import { z } from 'zod';
 
-export const typeOptions = {
+export const interventionType = ['new', 'renovation', 'maintenance'] as const;
+export const interventionTypeOptions = {
 	new: 'New',
 	renovation: 'Renovation',
 	maintenance: 'Maintenance',
 };
+export const interventionTypeSchema = z.enum(interventionType).default('new');
 
-type Type = keyof typeof typeOptions;
-
-export const typeSchema = z
-	.enum(['', ...(Object.keys(typeOptions) as [Type, ...Type[]])])
-	.refine((value) => value !== '', {
-		message: 'Type is required',
-	});
-
-export const statusOptions = {
+export const interventionStatus = ['not_started', 'in_progress', 'completed', 'cancelled'] as const;
+export const interventionStatusOptions = {
 	not_started: 'Not Started',
 	in_progress: 'In Progress',
 	completed: 'Completed',
 	cancelled: 'Cancelled',
 };
-
-type Status = keyof typeof statusOptions;
-
-export const statusSchema = z
-	.enum(['', ...(Object.keys(statusOptions) as [Status, ...Status[]])])
-	.refine((value) => value !== '', {
-		message: 'Status is required',
-	});
+export const interventionStatusSchema = z.enum(interventionStatus).default('not_started');
 
 export const createInterventionSchema = z.object({
-	type: typeSchema,
-	status: statusSchema,
+	type: interventionTypeSchema,
+	status: interventionStatusSchema,
 	start_date: z.string().nullish(),
 	end_date: z.string().nullish(),
 	description: z.string().min(1, 'Description is required.'),

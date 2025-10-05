@@ -12,7 +12,7 @@
 	import { deleteEmployeeSchema, type DeleteEmployeeSchema } from '@/schemas/employee';
 	import type { Employee } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -24,7 +24,7 @@
 
 	const form = superForm(data, {
 		id: employee.id.toString(),
-		validators: zodClient(deleteEmployeeSchema),
+		validators: zod4Client(deleteEmployeeSchema),
 	});
 
 	const { enhance } = form;

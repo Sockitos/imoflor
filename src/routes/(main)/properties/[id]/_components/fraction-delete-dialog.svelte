@@ -3,7 +3,7 @@
 	import { deleteFractionSchema, type DeleteFractionSchema } from '@/schemas/fraction';
 	import type { Fraction } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -15,7 +15,7 @@
 
 	const form = superForm(data, {
 		id: fraction.id.toString(),
-		validators: zodClient(deleteFractionSchema),
+		validators: zod4Client(deleteFractionSchema),
 	});
 
 	const { enhance } = form;

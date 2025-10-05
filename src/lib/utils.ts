@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { RouteId as AppRouteId } from '$app/types';
 import type { LendingContract } from '@/types/types';
 import type { ActionFailure, LoadEvent, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
 import { clsx, type ClassValue } from 'clsx';
 import dayjs from 'dayjs';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate, type Infer, type SuperValidated } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
-import type { ZodTypeAny } from 'zod';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -27,60 +27,41 @@ export function handleLoginRedirect(event: LoadEvent | ServerLoadEvent) {
 type MaybePromise<T> = T | Promise<T>;
 
 export type FormAction<
-	Schema extends ZodTypeAny,
+	T extends Record<string, any>,
 	Params extends Partial<Record<string, string>> = Partial<Record<string, string>>,
 	OutputData extends Record<string, any> | void = Record<string, any> | void,
-	RouteId extends string | null = string | null,
+	RouteId extends AppRouteId = AppRouteId,
 	RequireAuth extends boolean = true,
 > = (
 	event: RequestEvent<Params, RouteId>,
 	userId: RequireAuth extends true ? string : undefined,
-	form: SuperValidated<Infer<Schema>>
+	form: SuperValidated<T>
 ) => MaybePromise<OutputData>;
 
 interface HandleFormActionOptions<RequireAuth extends boolean> {
 	requireAuth?: RequireAuth;
 }
 
-function assertUserId<RequireAuth extends boolean>(
-	userId: string | null | undefined,
-	requireAuth: RequireAuth
-): asserts userId is RequireAuth extends true ? string : undefined {
-	if (requireAuth && typeof userId !== 'string') {
-		throw new Error('User ID must be a string when authentication is required.');
-	}
-}
-
 export async function handleFormAction<
-	Schema extends ZodTypeAny,
-	Params extends Partial<Record<string, string>>,
-	OutputData extends Record<string, any> | void,
-	RouteId extends string | null,
+	Schema extends ZodValidationSchema,
+	Params extends Partial<Record<string, string>> = Partial<Record<string, string>>,
+	OutputData extends Record<string, any> | void = Record<string, any> | void,
+	RouteId extends AppRouteId = AppRouteId,
 	RequireAuth extends boolean = true,
 >(
 	event: RequestEvent<Params, RouteId>,
 	schema: Schema,
 	formId: string,
-	action: FormAction<Schema, Params, OutputData, RouteId, RequireAuth>,
+	action: FormAction<Infer<Schema, 'zod4'>, Params, OutputData, RouteId, RequireAuth>,
 	options?: HandleFormActionOptions<RequireAuth>
-): Promise<OutputData | ActionFailure<{ message: string }>> {
+): Promise<
+	OutputData | ActionFailure<{ message: string; form: SuperValidated<Infer<Schema, 'zod4'>> }>
+> {
 	const { requireAuth = true as RequireAuth } = options ?? {};
-	let userId: string | undefined = undefined;
 
-	const form = await superValidate(event.request, zod(schema), { id: formId });
-
-	if (requireAuth) {
-		const { session, user } = await event.locals.safeGetSession();
-
-		if (!session || !user) {
-			setFlash({ type: 'error', message: 'Unauthorized' }, event.cookies);
-			return fail(401, { message: 'Unauthorized', form });
-		}
-
-		userId = user.id;
-	}
-
-	assertUserId(userId, requireAuth);
+	const form = await superValidate(event.request, zod4(schema), {
+		id: formId,
+	});
 
 	if (!form.valid) {
 		const errorMessage = 'Invalid form.';
@@ -88,9 +69,27 @@ export async function handleFormAction<
 		return fail(400, { message: errorMessage, form });
 	}
 
-	const result = await action(event, userId, form as SuperValidated<Infer<Schema>>);
+	if (requireAuth) {
+		const { session, user } = await event.locals.safeGetSession();
+		if (!session || !user) {
+			setFlash({ type: 'error', message: 'Unauthorized' }, event.cookies);
+			return fail(401, { message: 'Unauthorized', form });
+		}
 
-	return result;
+		const result = await action(
+			event,
+			user.id as RequireAuth extends true ? string : undefined,
+			form
+		);
+		return result;
+	} else {
+		const result = await action(
+			event,
+			undefined as RequireAuth extends true ? string : undefined,
+			form
+		);
+		return result;
+	}
 }
 
 export function calculateInterest(contract: LendingContract, date: string): number {

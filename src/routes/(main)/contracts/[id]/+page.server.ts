@@ -15,7 +15,7 @@ import { calculateInterest, handleFormAction, handleLoginRedirect } from '@/util
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -120,12 +120,12 @@ export const load = async (event) => {
 				tenant_id: contract.tenants[0].id,
 				...contract.data,
 			},
-			zod(createContractSchema),
+			zod4(createContractSchema),
 			{
 				id: 'update-contract',
 			}
 		),
-		deleteContractForm: await superValidate(zod(deleteContractSchema), {
+		deleteContractForm: await superValidate(zod4(deleteContractSchema), {
 			id: 'delete-contract',
 		}),
 		createRentUpdateForm: await superValidate(
@@ -133,7 +133,7 @@ export const load = async (event) => {
 				rent: contract.type === 'renting' ? contract.data.rent : 0,
 				update_date: new Date().toISOString(),
 			},
-			zod(createRentUpdateSchema),
+			zod4(createRentUpdateSchema),
 			{
 				id: 'create-rent-update',
 			}
@@ -144,7 +144,7 @@ export const load = async (event) => {
 				interest: contract.type === 'lending' ? contract.data.interest : 0,
 				update_date: new Date().toISOString(),
 			},
-			zod(createInstallmentUpdateSchema),
+			zod4(createInstallmentUpdateSchema),
 			{
 				id: 'create-installment-update',
 			}
@@ -154,7 +154,7 @@ export const load = async (event) => {
 				value: contract.type === 'renting' ? contract.data.rent : contract.data.installment,
 				due_date: new Date().toISOString(),
 			},
-			zod(createDueNoteSchema),
+			zod4(createDueNoteSchema),
 			{
 				id: 'create-due-note',
 			}
@@ -164,7 +164,7 @@ export const load = async (event) => {
 				date: new Date().toISOString(),
 				value: contract.type === 'renting' ? contract.data.rent : 0,
 			},
-			zod(createRentPaymentSchema),
+			zod4(createRentPaymentSchema),
 			{
 				id: 'create-rent-payment',
 			}
@@ -176,7 +176,7 @@ export const load = async (event) => {
 				amortization: contract.type === 'lending' ? contract.data.installment - interest : 0,
 				interest: contract.type === 'lending' ? interest : 0,
 			},
-			zod(createInstallmentPaymentSchema),
+			zod4(createInstallmentPaymentSchema),
 			{
 				id: 'create-installment-payment',
 			}

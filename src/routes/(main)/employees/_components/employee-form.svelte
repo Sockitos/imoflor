@@ -7,7 +7,11 @@
 	import * as Popover from '@/components/ui/popover';
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
-	import { createEmployeeSchema, type CreateEmployeeSchema } from '@/schemas/employee';
+	import {
+		createEmployeeSchema,
+		salaryTypeOptions,
+		type CreateEmployeeSchema,
+	} from '@/schemas/employee';
 	import { genderOptions } from '@/schemas/gender';
 	import { maritalStatusOptions } from '@/schemas/marital-status';
 	import { cn } from '@/utils';
@@ -15,7 +19,7 @@
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -26,7 +30,7 @@
 	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createEmployeeSchema),
+		validators: zod4Client(createEmployeeSchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;
@@ -77,8 +81,9 @@
 										{$formData.salary_type ? $formData.salary_type : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										<Select.Item value="hourly">Hourly</Select.Item>
-										<Select.Item value="monthly">Monthly</Select.Item>
+										{#each Object.entries(salaryTypeOptions) as [value, label] (value)}
+											<Select.Item {value} {label} />
+										{/each}
 									</Select.Content>
 								</Select.Root>
 								<input hidden bind:value={$formData.salary_type} name={props.name} />

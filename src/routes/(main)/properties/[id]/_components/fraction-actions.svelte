@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -26,14 +27,14 @@
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content align="end">
 		<DropdownMenu.Item
-			onclick={() => goto(`/properties/${fraction.property_id}/fractions/${fraction.id}`)}
+			onclick={() => goto(resolve(`/properties/${fraction.property_id}/fractions/${fraction.id}`))}
 		>
 			Open
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Item
 			onclick={() =>
-				goto(`/properties/${fraction.property_id}/fractions/${fraction.id}?action=edit`)}
+				goto(resolve(`/properties/${fraction.property_id}/fractions/${fraction.id}?action=edit`))}
 		>
 			Edit
 		</DropdownMenu.Item>

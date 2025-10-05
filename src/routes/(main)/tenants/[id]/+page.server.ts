@@ -4,7 +4,7 @@ import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -42,10 +42,10 @@ export const load = async (event) => {
 	return {
 		tenant: tenant,
 		movements: await getMovements(tenant.tax_id_number),
-		updateTenantForm: await superValidate(tenant, zod(createTenantSchema), {
+		updateTenantForm: await superValidate(tenant, zod4(createTenantSchema), {
 			id: 'update-tenant',
 		}),
-		deleteTenantForm: await superValidate(zod(deleteTenantSchema), {
+		deleteTenantForm: await superValidate(zod4(deleteTenantSchema), {
 			id: 'delete-tenant',
 		}),
 	};

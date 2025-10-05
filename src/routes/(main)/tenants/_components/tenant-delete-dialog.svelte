@@ -3,7 +3,7 @@
 	import { deleteTenantSchema, type DeleteTenantSchema } from '@/schemas/tenant';
 	import type { Tenant } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -15,7 +15,7 @@
 
 	const form = superForm(data, {
 		id: tenant.id.toString(),
-		validators: zodClient(deleteTenantSchema),
+		validators: zod4Client(deleteTenantSchema),
 	});
 
 	const { enhance } = form;

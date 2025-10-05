@@ -3,7 +3,7 @@
 	import { deleteInterventionSchema, type DeleteInterventionSchema } from '@/schemas/intervention';
 	import type { Intervention } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -15,7 +15,7 @@
 
 	const form = superForm(data, {
 		id: intervention.id.toString(),
-		validators: zodClient(deleteInterventionSchema),
+		validators: zod4Client(deleteInterventionSchema),
 	});
 
 	const { enhance } = form;

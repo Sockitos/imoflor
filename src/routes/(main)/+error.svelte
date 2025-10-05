@@ -8,5 +8,5 @@
 <div class="flex h-full flex-col items-center justify-center">
 	<PageTitle>Error {page.status}</PageTitle>
 	<PageSubtitle>{page.error?.message}</PageSubtitle>
-	<Button href={page.url.pathname} class="mt-4">Refresh</Button>
+	<Button class="mt-4">Refresh</Button>
 </div>

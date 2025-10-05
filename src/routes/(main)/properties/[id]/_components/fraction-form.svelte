@@ -6,11 +6,15 @@
 	import { Separator } from '@/components/ui/separator';
 	import * as Sheet from '@/components/ui/sheet';
 	import { Textarea } from '@/components/ui/textarea';
-	import { createFractionSchema, typeOptions, type CreateFractionSchema } from '@/schemas/fraction';
+	import {
+		createFractionSchema,
+		fractionTypeOptions,
+		type CreateFractionSchema,
+	} from '@/schemas/fraction';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -21,7 +25,7 @@
 	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createFractionSchema),
+		validators: zod4Client(createFractionSchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;
@@ -53,7 +57,7 @@
 										{$formData.type ? $formData.type : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(typeOptions) as [value, label] (value)}
+										{#each Object.entries(fractionTypeOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>

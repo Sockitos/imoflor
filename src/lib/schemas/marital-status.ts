@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+export const maritalStatus = ['single', 'married', 'union', 'divorced', 'widowed'] as const;
 export const maritalStatusOptions = {
 	single: 'Single',
 	married: 'Married',
@@ -7,11 +8,4 @@ export const maritalStatusOptions = {
 	divorced: 'Divorced',
 	widowed: 'Widowed',
 };
-
-type MaritalStatus = keyof typeof maritalStatusOptions;
-
-export const maritalStatusSchema = z
-	.enum(['', ...(Object.keys(maritalStatusOptions) as [MaritalStatus, ...MaritalStatus[]])])
-	.refine((value) => value !== '', {
-		message: 'Marital status is required',
-	});
+export const maritalStatusSchema = z.enum(maritalStatus).default('single');

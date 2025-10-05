@@ -4,7 +4,7 @@ import { handleFormAction, handleLoginRedirect } from '@/utils';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
 	const { session } = await event.locals.safeGetSession();
@@ -25,10 +25,10 @@ export const load = async (event) => {
 
 	return {
 		employees: await getEmployees(),
-		createEmployeeForm: await superValidate(zod(createEmployeeSchema), {
+		createEmployeeForm: await superValidate(zod4(createEmployeeSchema), {
 			id: 'create-employee',
 		}),
-		deleteEmployeeForm: await superValidate(zod(deleteEmployeeSchema), {
+		deleteEmployeeForm: await superValidate(zod4(deleteEmployeeSchema), {
 			id: 'delete-employee',
 		}),
 	};

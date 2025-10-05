@@ -11,7 +11,7 @@
 	import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -21,7 +21,7 @@
 	let { open = $bindable(false), data }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createRentPaymentSchema),
+		validators: zod4Client(createRentPaymentSchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;

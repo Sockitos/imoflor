@@ -11,8 +11,8 @@
 	import { Textarea } from '@/components/ui/textarea';
 	import {
 		createInterventionSchema,
-		statusOptions,
-		typeOptions,
+		interventionStatusOptions,
+		interventionTypeOptions,
 		type CreateInterventionSchema,
 	} from '@/schemas/intervention';
 	import { cn } from '@/utils';
@@ -20,7 +20,7 @@
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
 
 	interface Props {
 		open?: boolean;
@@ -31,7 +31,7 @@
 	let { open = $bindable(false), data, action }: Props = $props();
 
 	const form = superForm(data, {
-		validators: zodClient(createInterventionSchema),
+		validators: zod4Client(createInterventionSchema),
 		onUpdated: ({ form: f }) => {
 			if (f.valid) {
 				open = false;
@@ -68,10 +68,10 @@
 								<Form.Label>Type</Form.Label>
 								<Select.Root {...props} type="single" bind:value={$formData.type}>
 									<Select.Trigger {...props}>
-										{$formData.type ? typeOptions[$formData.type] : 'Select'}
+										{$formData.type ? $formData.type : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(typeOptions) as [value, label] (value)}
+										{#each Object.entries(interventionTypeOptions) as [value, label] (value)}
 											<Select.Item {value} {label} />
 										{/each}
 									</Select.Content>
@@ -87,13 +87,12 @@
 								<Form.Label>Status</Form.Label>
 								<Select.Root {...props} type="single" bind:value={$formData.status}>
 									<Select.Trigger {...props}>
-										{$formData.status ? statusOptions[$formData.status] : 'Select'}
+										{$formData.status ? $formData.status : 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										<Select.Item value="not_started">Not Started</Select.Item>
-										<Select.Item value="in_progress">In Progress</Select.Item>
-										<Select.Item value="completed">Completed</Select.Item>
-										<Select.Item value="cancelled">Cancelled</Select.Item>
+										{#each Object.entries(interventionStatusOptions) as [value, label] (value)}
+											<Select.Item {value} {label} />
+										{/each}
 									</Select.Content>
 								</Select.Root>
 								<input hidden bind:value={$formData.status} name={props.name} />
