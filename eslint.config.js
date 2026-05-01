@@ -1,61 +1,46 @@
-import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import path from 'node:path';
+import { includeIgnoreFile } from '@eslint/compat';
+import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
+import { defineConfig } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
+import svelteConfig from './svelte.config.js';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
+
+export default defineConfig(
+	includeIgnoreFile(gitignorePath),
 	js.configs.recommended,
-	...ts.configs.recommended,
-	...svelte.configs['flat/recommended'],
+	ts.configs.recommended,
+	svelte.configs.recommended,
 	prettier,
-	...svelte.configs['flat/prettier'],
+	svelte.configs.prettier,
 	{
-		languageOptions: {
-			globals: {
-				...globals.browser,
-				...globals.node,
-			},
-		},
+		languageOptions: { globals: { ...globals.browser, ...globals.node } },
+		rules: {
+			// typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
+			// see: https://typescript-eslint.io/troubleshooting/faqs/eslint/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
+			'no-undef': 'off'
+		}
 	},
 	{
-		files: ['**/*.svelte'],
+		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		languageOptions: {
 			parserOptions: {
+				projectService: true,
+				extraFileExtensions: ['.svelte'],
 				parser: ts.parser,
-			},
-		},
-		rules: {
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{
-					args: 'after-used',
-					argsIgnorePattern: '^_',
-					varsIgnorePattern: '^_|\\$\\$(Props|Events|Slots|Generic)$',
-				},
-			],
-		},
+				svelteConfig
+			}
+		}
 	},
 	{
-		files: ['**/*.svelte.ts'],
-		languageOptions: {
-			parserOptions: {
-				parser: ts.parser,
-			},
-		},
+		// Override or add rule settings here, such as:
+		// 'svelte/button-has-type': 'error'
 		rules: {
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{
-					args: 'after-used',
-					argsIgnorePattern: '^_',
-					varsIgnorePattern: '^_|\\$\\$(Props|Events|Slots|Generic)$',
-				},
-			],
-		},
-	},
-	{
-		ignores: ['build/', '.svelte-kit/', 'dist/'],
-	},
-];
+			'@typescript-eslint/no-unused-vars': 'error'
+		}
+	}
+);
