@@ -25,17 +25,19 @@
 
 	let { open = $bindable(false), contract, data }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createInstallmentPaymentSchema),
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
+	const form = $derived(
+		superForm(data, {
+			validators: zod4Client(createInstallmentPaymentSchema),
+			onUpdated: ({ form: f }) => {
+				if (f.valid) {
+					open = false;
+				}
+			},
+			invalidateAll: 'force',
+		})
+	);
 
-	const { form: formData, enhance, submitting } = form;
+	const { form: formData, enhance, submitting } = $derived(form);
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',

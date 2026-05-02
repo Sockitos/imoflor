@@ -13,12 +13,14 @@
 
 	let { open = $bindable(false), fraction, data }: Props = $props();
 
-	const form = superForm(data, {
-		id: fraction.id.toString(),
-		validators: zod4Client(deleteFractionSchema),
-	});
+	const form = $derived(
+		superForm(data, {
+			id: fraction.id.toString(),
+			validators: zod4Client(deleteFractionSchema),
+		})
+	);
 
-	const { enhance } = form;
+	const { enhance } = $derived(form);
 </script>
 
 <AlertDialog.Root bind:open>

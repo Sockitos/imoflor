@@ -13,12 +13,14 @@
 
 	let { open = $bindable(false), property, data }: Props = $props();
 
-	const form = superForm(data, {
-		id: property.id.toString(),
-		validators: zod4Client(deletePropertySchema),
-	});
+	const form = $derived(
+		superForm(data, {
+			id: property.id.toString(),
+			validators: zod4Client(deletePropertySchema),
+		})
+	);
 
-	const { enhance } = form;
+	const { enhance } = $derived(form);
 </script>
 
 <AlertDialog.Root bind:open>

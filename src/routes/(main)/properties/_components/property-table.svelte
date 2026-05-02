@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { Button } from '@/components/ui/button';
 	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
@@ -16,16 +14,13 @@
 
 	let { properties }: Props = $props();
 
-	const data = writable(properties);
-	run(() => {
-		data.set(properties);
-	});
+	const data = $derived(properties);
 
 	const globalFilter = writable('');
 
 	const table = createSvelteTable({
 		get data() {
-			return $data;
+			return data;
 		},
 		columns,
 		getCoreRowModel: getCoreRowModel(),
