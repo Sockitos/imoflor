@@ -14,6 +14,5 @@
 			}
 		}
 	],
-	"tailwindConfig": "./tailwind.config.js",
-	"tailwindFunctions": ["clsx", "cn", "tv"]
+	"tailwindStylesheet": "./src/app.css"
 }

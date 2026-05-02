@@ -9,11 +9,13 @@
 
 	let { data } = $props();
 
-	const form = superForm(data.form, {
-		validators: zod4Client(signInSchema),
-	});
+	const form = $derived(
+		superForm(data.form, {
+			validators: zod4Client(signInSchema),
+		})
+	);
 
-	const { form: formData, enhance, submitting } = form;
+	const { form: formData, enhance, submitting } = $derived(form);
 </script>
 
 <div class="container flex h-screen w-screen flex-col items-center justify-center">

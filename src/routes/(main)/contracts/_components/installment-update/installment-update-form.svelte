@@ -28,17 +28,19 @@
 
 	let { open = $bindable(false), data, updates }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createInstallmentUpdateSchema),
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
+	const form = $derived(
+		superForm(data, {
+			validators: zod4Client(createInstallmentUpdateSchema),
+			onUpdated: ({ form: f }) => {
+				if (f.valid) {
+					open = false;
+				}
+			},
+			invalidateAll: 'force',
+		})
+	);
 
-	const { form: formData, enhance, submitting } = form;
+	const { form: formData, enhance, submitting } = $derived(form);
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
@@ -138,24 +140,24 @@
 		<h3 class="mb-4 text-lg font-medium">Update History</h3>
 		{#each updates as update (update.id)}
 			<div class="flex h-24 flex-row items-stretch gap-4">
-				<div class="border-primary flex w-2 flex-col items-center">
-					<div class="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full"></div>
+				<div class="flex w-2 flex-col items-center border-primary">
+					<div class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></div>
 					<Separator orientation="vertical" class="flex-1" />
 				</div>
 				<div>
 					<div class="flex items-center">
-						<CalendarIcon class="text-muted-foreground mr-2 h-4 w-4" />
-						<span class="text-muted-foreground text-sm"
+						<CalendarIcon class="mr-2 h-4 w-4 text-muted-foreground" />
+						<span class="text-sm text-muted-foreground"
 							>{dayjs(update.update_date).format('DD/MM/YYYY')}</span
 						>
 					</div>
 					<span class="text-sm font-medium">Installment:</span>
-					<span class="text-muted-foreground text-sm">
+					<span class="text-sm text-muted-foreground">
 						{currencyFormatter.format(update.installment)}
 					</span>
 					<br />
 					<span class="text-sm font-medium">Interest:</span>
-					<span class="text-muted-foreground text-sm">
+					<span class="text-sm text-muted-foreground">
 						{currencyFormatter.format(update.interest)}
 					</span>
 				</div>

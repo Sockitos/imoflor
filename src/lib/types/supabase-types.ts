@@ -31,7 +31,7 @@ export type Database = MergeDeep<
 						inserted_at: string;
 						is_active: boolean;
 						start_date: string;
-						type: Database['public']['Enums']['contract_type'];
+						type: DatabaseGenerated['public']['Enums']['contract_type'];
 					};
 					Insert: {
 						data: Json;
@@ -41,7 +41,7 @@ export type Database = MergeDeep<
 						inserted_at?: string;
 						is_active?: boolean;
 						start_date: string;
-						type: Database['public']['Enums']['contract_type'];
+						type: DatabaseGenerated['public']['Enums']['contract_type'];
 					};
 					Update: {
 						data?: Json;
@@ -51,7 +51,7 @@ export type Database = MergeDeep<
 						inserted_at?: string;
 						is_active?: boolean;
 						start_date?: string;
-						type?: Database['public']['Enums']['contract_type'];
+						type?: DatabaseGenerated['public']['Enums']['contract_type'];
 					};
 				};
 				fractions_view: {
@@ -73,7 +73,7 @@ export type Database = MergeDeep<
 						region: string | null;
 						sold: boolean;
 						tipology: string | null;
-						type: Database['public']['Enums']['fraction_type'];
+						type: DatabaseGenerated['public']['Enums']['fraction_type'];
 					};
 				};
 				installment_payments_view: {
@@ -124,7 +124,7 @@ export type Database = MergeDeep<
 				};
 				lending_contracts_view: {
 					Row: {
-						contract_type: Database['public']['Enums']['contract_type'] | null;
+						contract_type: DatabaseGenerated['public']['Enums']['contract_type'] | null;
 						debt: number;
 						down_payment: number;
 						extra_debt: number;
@@ -163,7 +163,7 @@ export type Database = MergeDeep<
 				};
 				renting_contracts_view: {
 					Row: {
-						contract_type: Database['public']['Enums']['contract_type'];
+						contract_type: DatabaseGenerated['public']['Enums']['contract_type'];
 						id: number;
 						inserted_at: string;
 						next_update: Json | null;

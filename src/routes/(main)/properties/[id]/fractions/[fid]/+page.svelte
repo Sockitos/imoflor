@@ -42,45 +42,45 @@
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Class</dt>
+							<dt class="text-sm text-muted-foreground">Class</dt>
 							<dd>{property.class}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Type</dt>
+							<dt class="text-sm text-muted-foreground">Type</dt>
 							<dd>{fraction.type}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Matrix</dt>
+							<dt class="text-sm text-muted-foreground">Matrix</dt>
 							<dd>{fraction.matrix}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Conservatory</dt>
+							<dt class="text-sm text-muted-foreground">Conservatory</dt>
 							<dd>{property.conservatory}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Area</dt>
+							<dt class="text-sm text-muted-foreground">Area</dt>
 							<dd>{areaFormatter(fraction.area)}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Tipology</dt>
+							<dt class="text-sm text-muted-foreground">Tipology</dt>
 							<dd>{fraction.tipology}</dd>
 						</div>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Description</dt>
+						<dt class="text-sm text-muted-foreground">Description</dt>
 						<dd>{fraction.description}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Patrimonial Value</dt>
+							<dt class="text-sm text-muted-foreground">Patrimonial Value</dt>
 							<dd>{currencyFormatter.format(fraction.patrimonial_value ?? 0)}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Market Value</dt>
+							<dt class="text-sm text-muted-foreground">Market Value</dt>
 							<dd>{currencyFormatter.format(fraction.market_value ?? 0)}</dd>
 						</div>
 					</div>
@@ -89,25 +89,25 @@
 					<div class="text-lg font-semibold tracking-tight">Address</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Country</dt>
+							<dt class="text-sm text-muted-foreground">Country</dt>
 							<dd>{property.country}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Region</dt>
+							<dt class="text-sm text-muted-foreground">Region</dt>
 							<dd>{property.region}</dd>
 						</div>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Address</dt>
+						<dt class="text-sm text-muted-foreground">Address</dt>
 						<dd>{property.address} - {fraction.address}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Postal Code</dt>
+							<dt class="text-sm text-muted-foreground">Postal Code</dt>
 							<dd>{property.postal_code}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">City</dt>
+							<dt class="text-sm text-muted-foreground">City</dt>
 							<dd>{property.city}</dd>
 						</div>
 					</div>

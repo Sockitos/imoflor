@@ -13,12 +13,14 @@
 
 	let { open = $bindable(false), intervention, data }: Props = $props();
 
-	const form = superForm(data, {
-		id: intervention.id.toString(),
-		validators: zod4Client(deleteInterventionSchema),
-	});
+	const form = $derived(
+		superForm(data, {
+			id: intervention.id.toString(),
+			validators: zod4Client(deleteInterventionSchema),
+		})
+	);
 
-	const { enhance } = form;
+	const { enhance } = $derived(form);
 </script>
 
 <AlertDialog.Root bind:open>

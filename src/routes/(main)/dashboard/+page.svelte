@@ -1,8 +1,4 @@
 <script lang="ts">
-	let _dateRange = {
-		start: new Date(2024, 1, 1),
-		end: new Date(2024, 9, 5),
-	};
 </script>
 
 <!-- <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">

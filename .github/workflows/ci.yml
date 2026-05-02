@@ -1,6 +1,9 @@
 name: CI
 
-on: [ push, pull_request ]
+on:
+  push:
+  pull_request:
+    types: [opened, reopened]
 
 env:
   PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -52,6 +55,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci

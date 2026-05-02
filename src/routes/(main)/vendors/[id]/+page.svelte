@@ -40,11 +40,11 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Identification</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Name</dt>
+						<dt class="text-sm text-muted-foreground">Name</dt>
 						<dd>{vendor.name}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Tax ID Number</dt>
+						<dt class="text-sm text-muted-foreground">Tax ID Number</dt>
 						<dd>{vendor.tax_id_number}</dd>
 					</div>
 				</div>
@@ -52,25 +52,25 @@
 					<div class="text-lg font-semibold tracking-tight">Address</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Country</dt>
+							<dt class="text-sm text-muted-foreground">Country</dt>
 							<dd>{vendor.country}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Region</dt>
+							<dt class="text-sm text-muted-foreground">Region</dt>
 							<dd>{vendor.region}</dd>
 						</div>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Address</dt>
+						<dt class="text-sm text-muted-foreground">Address</dt>
 						<dd>{vendor.address}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Postal Code</dt>
+							<dt class="text-sm text-muted-foreground">Postal Code</dt>
 							<dd>{vendor.postal_code}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">City</dt>
+							<dt class="text-sm text-muted-foreground">City</dt>
 							<dd>{vendor.city}</dd>
 						</div>
 					</div>
@@ -79,16 +79,16 @@
 					<div class="flex flex-col gap-y-2">
 						<div class="text-lg font-semibold tracking-tight">Contacts</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Email</dt>
+							<dt class="text-sm text-muted-foreground">Email</dt>
 							<dd>{vendor.email}</dd>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
-								<dt class="text-muted-foreground text-sm">Mobile</dt>
+								<dt class="text-sm text-muted-foreground">Mobile</dt>
 								<dd>{vendor.phone}</dd>
 							</div>
 							<div>
-								<dt class="text-muted-foreground text-sm">Phone</dt>
+								<dt class="text-sm text-muted-foreground">Phone</dt>
 								<dd>{vendor.phone}</dd>
 							</div>
 						</div>
@@ -100,7 +100,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<h2 class="text-lg font-semibold">Movements</h2>
-					<p class="text-muted-foreground text-sm">
+					<p class="text-sm text-muted-foreground">
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 						incididunt ut labore et dolore magna aliqua.
 					</p>
