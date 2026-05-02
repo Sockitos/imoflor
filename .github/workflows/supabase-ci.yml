@@ -1,6 +1,12 @@
 name: Supabase CI
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'supabase/**'
+  pull_request:
+    paths:
+      - 'supabase/**'
 
 jobs:
   lint:

@@ -33,7 +33,7 @@
 		<DropdownMenu.Label class="font-normal">
 			<div class="flex flex-col space-y-1">
 				<p class="text-sm leading-none font-medium">{profile?.display_name}</p>
-				<p class="text-muted-foreground text-xs leading-none">{profile?.email}</p>
+				<p class="text-xs leading-none text-muted-foreground">{profile?.email}</p>
 			</div>
 		</DropdownMenu.Label>
 		<DropdownMenu.Separator />

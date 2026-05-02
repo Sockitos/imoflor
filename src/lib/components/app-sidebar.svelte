@@ -223,7 +223,7 @@
 								</Avatar.Root>
 								<div class="grid flex-1 text-left text-sm leading-tight">
 									<span class="truncate font-medium">{profile?.display_name}</span>
-									<span class="text-muted-foreground truncate text-xs">
+									<span class="truncate text-xs text-muted-foreground">
 										{profile?.email}
 									</span>
 								</div>
@@ -247,7 +247,7 @@
 								</Avatar.Root>
 								<div class="grid flex-1 text-left text-sm leading-tight">
 									<span class="truncate font-medium">{profile?.display_name}</span>
-									<span class="text-muted-foreground truncate text-xs">
+									<span class="truncate text-xs text-muted-foreground">
 										{profile?.email}
 									</span>
 								</div>

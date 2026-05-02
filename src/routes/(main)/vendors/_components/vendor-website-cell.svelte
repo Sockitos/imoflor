@@ -9,6 +9,6 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<Globe class="text-muted-foreground mr-2 h-4 w-4"></Globe>
+	<Globe class="mr-2 h-4 w-4 text-muted-foreground"></Globe>
 	{website}
 </div>
