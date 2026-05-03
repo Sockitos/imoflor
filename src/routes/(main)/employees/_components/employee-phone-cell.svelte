@@ -9,6 +9,6 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<Phone class="text-muted-foreground mr-2 h-4 w-4"></Phone>
+	<Phone class="mr-2 h-4 w-4 text-muted-foreground"></Phone>
 	{phone}
 </div>

@@ -3,11 +3,10 @@
 	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
 	import { Input } from '@/components/ui/input';
 	import * as Table from '@/components/ui/table';
-	import type { Fraction, FractionType } from '@/types/types';
+	import type { Fraction } from '@/types/types';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { writable } from 'svelte/store';
 	import { columns } from './fraction-columns';
-	import { typeMap } from './fraction-type-map';
 
 	interface Props {
 		fractions: Fraction[];
@@ -35,26 +34,26 @@
 		},
 	});
 
-	const _typeOptions = Object.entries(typeMap).map(([value, { label, icon }]) => {
-		return { value, label, icon };
-	});
+	// const _typeOptions = Object.entries(typeMap).map(([value, { label, icon }]) => {
+	// 	return { value, label, icon };
+	// });
 
-	const _counts = $derived(
-		fractions.reduce(
-			(counts, fraction) => {
-				const type = fraction.type;
-				if (type) {
-					counts.type[type] = (counts.type[type] ?? 0) + 1;
-				}
-				return counts;
-			},
-			{
-				type: {} as Record<FractionType, number>,
-			}
-		)
-	);
+	// const _counts = $derived(
+	// 	fractions.reduce(
+	// 		(counts, fraction) => {
+	// 			const type = fraction.type;
+	// 			if (type) {
+	// 				counts.type[type] = (counts.type[type] ?? 0) + 1;
+	// 			}
+	// 			return counts;
+	// 		},
+	// 		{
+	// 			type: {} as Record<FractionType, number>,
+	// 		}
+	// 	)
+	// );
 
-	const _showReset = $derived(Object.values($globalFilter).some((v) => v.length > 0));
+	// const _showReset = $derived(Object.values($globalFilter).some((v) => v.length > 0));
 </script>
 
 <div class="flex flex-col gap-y-4">
@@ -72,7 +71,7 @@
 									<Button
 										variant="ghost"
 										onclick={() => header.column.toggleSorting()}
-										class="data-[state=open]:bg-accent -ml-3 h-8"
+										class="-ml-3 h-8 data-[state=open]:bg-accent"
 									>
 										<FlexRender
 											content={header.column.columnDef.header}

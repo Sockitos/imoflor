@@ -42,46 +42,46 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Identification</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Name</dt>
+						<dt class="text-sm text-muted-foreground">Name</dt>
 						<dd>{tenant.name}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Gender</dt>
+							<dt class="text-sm text-muted-foreground">Gender</dt>
 							<dd>{tenant.gender}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Marital Status</dt>
+							<dt class="text-sm text-muted-foreground">Marital Status</dt>
 							<dd>{tenant.marital_status}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Nationality</dt>
+							<dt class="text-sm text-muted-foreground">Nationality</dt>
 							<dd>{tenant.nationality}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Birth Date</dt>
+							<dt class="text-sm text-muted-foreground">Birth Date</dt>
 							<dd>{dateFormatter(tenant.birth_date)}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">ID Type</dt>
+							<dt class="text-sm text-muted-foreground">ID Type</dt>
 							<dd>{tenant.id_type}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">ID Expiration Date</dt>
+							<dt class="text-sm text-muted-foreground">ID Expiration Date</dt>
 							<dd>{dateFormatter(tenant.id_expiration_date)}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">ID Number</dt>
+							<dt class="text-sm text-muted-foreground">ID Number</dt>
 							<dd>{tenant.id_number}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Tax ID Number</dt>
+							<dt class="text-sm text-muted-foreground">Tax ID Number</dt>
 							<dd>{tenant.tax_id_number}</dd>
 						</div>
 					</div>
@@ -90,25 +90,25 @@
 					<div class="text-lg font-semibold tracking-tight">Address</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Country</dt>
+							<dt class="text-sm text-muted-foreground">Country</dt>
 							<dd>{tenant.country}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Region</dt>
+							<dt class="text-sm text-muted-foreground">Region</dt>
 							<dd>{tenant.region}</dd>
 						</div>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Address</dt>
+						<dt class="text-sm text-muted-foreground">Address</dt>
 						<dd>{tenant.address}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
-							<dt class="text-muted-foreground text-sm">Postal Code</dt>
+							<dt class="text-sm text-muted-foreground">Postal Code</dt>
 							<dd>{tenant.postal_code}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">City</dt>
+							<dt class="text-sm text-muted-foreground">City</dt>
 							<dd>{tenant.city}</dd>
 						</div>
 					</div>
@@ -117,16 +117,16 @@
 					<div class="flex flex-col gap-y-2">
 						<div class="text-lg font-semibold tracking-tight">Contacts</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Email</dt>
+							<dt class="text-sm text-muted-foreground">Email</dt>
 							<dd>{tenant.email}</dd>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
-								<dt class="text-muted-foreground text-sm">Mobile</dt>
+								<dt class="text-sm text-muted-foreground">Mobile</dt>
 								<dd>{tenant.phone}</dd>
 							</div>
 							<div>
-								<dt class="text-muted-foreground text-sm">Phone</dt>
+								<dt class="text-sm text-muted-foreground">Phone</dt>
 								<dd>{tenant.phone}</dd>
 							</div>
 						</div>
@@ -150,7 +150,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<h2 class="text-lg font-semibold">Movements</h2>
-					<p class="text-muted-foreground text-sm">
+					<p class="text-sm text-muted-foreground">
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 						incididunt ut labore et dolore magna aliqua.
 					</p>

@@ -14,6 +14,6 @@
 </script>
 
 <div class="flex items-center">
-	<SvelteComponent class="text-muted-foreground mr-2 h-4 w-4" />
+	<SvelteComponent class="mr-2 h-4 w-4 text-muted-foreground" />
 	<span>{label}</span>
 </div>

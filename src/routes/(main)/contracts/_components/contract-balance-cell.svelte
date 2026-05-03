@@ -14,6 +14,6 @@
 <div class="flex flex-row items-center">
 	{formatted}
 	{#if balance < 0}
-		<AlertTriangle class="text-destructive ml-2 h-4 w-4"></AlertTriangle>
+		<AlertTriangle class="ml-2 h-4 w-4 text-destructive"></AlertTriangle>
 	{/if}
 </div>

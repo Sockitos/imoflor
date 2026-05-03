@@ -1,6 +1,14 @@
 name: CI
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 env:
   PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -57,7 +65,7 @@ jobs:
         run: npm ci
 
       - name: Test
-        run: npm run test
+        run: npm run test:unit -- --run
 
   build:
     name: Build

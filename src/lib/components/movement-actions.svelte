@@ -1,14 +1,7 @@
 <script lang="ts">
 	import { Button } from '@/components/ui/button';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
-	import type { Movement } from '@/types/types';
 	import { MoreHorizontal } from 'lucide-svelte';
-
-	interface Props {
-		movement: Movement;
-	}
-
-	let { movement: _movement }: Props = $props();
 </script>
 
 <DropdownMenu.Root>

@@ -5,3 +5,6 @@ yarn.lock
 
 # Ignore supabase-types.gen.ts
 /src/lib/types/supabase-types.gen.ts
+
+# Ignore auto-generated shadcn-svelte UI components
+/src/lib/components/ui

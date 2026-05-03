@@ -42,27 +42,27 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Type</dt>
+						<dt class="text-sm text-muted-foreground">Type</dt>
 						<dd>{intervention.type}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Status</dt>
+						<dt class="text-sm text-muted-foreground">Status</dt>
 						<dd>{intervention.status}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Start Date</dt>
+						<dt class="text-sm text-muted-foreground">Start Date</dt>
 						<dd>{dayjs(intervention.start_date).format('DD/MM/YYYY')}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">End Date</dt>
+						<dt class="text-sm text-muted-foreground">End Date</dt>
 						<dd>{dayjs(intervention.end_date).format('DD/MM/YYYY')}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Description</dt>
+						<dt class="text-sm text-muted-foreground">Description</dt>
 						<dd>{intervention.description}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Property</dt>
+						<dt class="text-sm text-muted-foreground">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{intervention.property.label}
 							<Button
@@ -76,7 +76,7 @@
 					</div>
 					{#if intervention.fraction}
 						<div>
-							<dt class="text-muted-foreground text-sm">Fraction</dt>
+							<dt class="text-sm text-muted-foreground">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{intervention.fraction.label}
 								<Button
@@ -93,7 +93,7 @@
 					{/if}
 					{#if intervention.ticket}
 						<div>
-							<dt class="text-muted-foreground text-sm">Ticket</dt>
+							<dt class="text-sm text-muted-foreground">Ticket</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{intervention.ticket.label}
 								<Button
@@ -113,7 +113,7 @@
 			<div class="flex items-start justify-between">
 				<div>
 					<h2 class="text-lg font-semibold">Expenses</h2>
-					<p class="text-muted-foreground text-sm">
+					<p class="text-sm text-muted-foreground">
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 						incididunt ut labore et dolore magna aliqua.
 					</p>

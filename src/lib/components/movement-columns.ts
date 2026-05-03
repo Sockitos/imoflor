@@ -56,10 +56,8 @@ export const columns: ColumnDef<Movement>[] = [
 	{
 		accessorKey: 'actions',
 		header: '',
-		cell: ({ row }) => {
-			return renderComponent(MovementActions, {
-				movement: row.original,
-			});
+		cell: () => {
+			return renderComponent(MovementActions);
 		},
 		enableSorting: false,
 	},

@@ -41,19 +41,19 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Date</dt>
+						<dt class="text-sm text-muted-foreground">Date</dt>
 						<dd>{dayjs(ticket.date).format('DD/MM/YYYY')}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Title</dt>
+						<dt class="text-sm text-muted-foreground">Title</dt>
 						<dd>{ticket.title}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Description</dt>
+						<dt class="text-sm text-muted-foreground">Description</dt>
 						<dd>{ticket.description}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Property</dt>
+						<dt class="text-sm text-muted-foreground">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{ticket.property.label}
 							<Button
@@ -67,7 +67,7 @@
 					</div>
 					{#if ticket.fraction}
 						<div>
-							<dt class="text-muted-foreground text-sm">Fraction</dt>
+							<dt class="text-sm text-muted-foreground">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
 								{ticket.fraction.label}
 								<Button

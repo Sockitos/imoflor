@@ -55,7 +55,7 @@
 									<Button
 										variant="ghost"
 										onclick={() => header.column.toggleSorting()}
-										class="data-[state=open]:bg-accent -ml-3 h-8"
+										class="-ml-3 h-8 data-[state=open]:bg-accent"
 									>
 										<FlexRender
 											content={header.column.columnDef.header}

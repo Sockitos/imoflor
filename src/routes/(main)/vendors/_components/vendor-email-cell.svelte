@@ -9,6 +9,6 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<Mail class="text-muted-foreground mr-2 h-4 w-4"></Mail>
+	<Mail class="mr-2 h-4 w-4 text-muted-foreground"></Mail>
 	{email}
 </div>

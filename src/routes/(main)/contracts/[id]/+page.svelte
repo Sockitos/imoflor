@@ -91,11 +91,11 @@
 				<div class="flex flex-col gap-y-2">
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Start Date</dt>
+						<dt class="text-sm text-muted-foreground">Start Date</dt>
 						<dd>{dayjs(contract.start_date).format('DD/MM/YYYY')}</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">End Date</dt>
+						<dt class="text-sm text-muted-foreground">End Date</dt>
 						<dd>
 							{#if contract.end_date}
 								{dayjs(contract.end_date).format('DD/MM/YYYY')}
@@ -106,12 +106,12 @@
 					</div>
 					{#if contract.type === 'renting'}
 						<div>
-							<dt class="text-muted-foreground text-sm">Rent</dt>
+							<dt class="text-sm text-muted-foreground">Rent</dt>
 							<dd>
 								{currencyFormatter.format(contract.data.rent)}
 								{#if contract.data.next_update}
 									<br />
-									<span class="text-muted-foreground text-sm">
+									<span class="text-sm text-muted-foreground">
 										next update: {currencyFormatter.format(contract.data.next_update.rent)}
 										({dayjs(contract.data.next_update.update_date).format('DD/MM/YYYY')})
 									</span>
@@ -120,24 +120,24 @@
 						</div>
 					{:else}
 						<div>
-							<dt class="text-muted-foreground text-sm">Sale Value</dt>
+							<dt class="text-sm text-muted-foreground">Sale Value</dt>
 							<dd>{contract.data.sale_value}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Down Payment</dt>
+							<dt class="text-sm text-muted-foreground">Down Payment</dt>
 							<dd>{contract.data.down_payment}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Installment</dt>
+							<dt class="text-sm text-muted-foreground">Installment</dt>
 							<dd>{contract.data.installment}</dd>
 						</div>
 						<div>
-							<dt class="text-muted-foreground text-sm">Interest</dt>
+							<dt class="text-sm text-muted-foreground">Interest</dt>
 							<dd>{contract.data.interest}</dd>
 						</div>
 					{/if}
 					<div>
-						<dt class="text-muted-foreground text-sm">Fraction</dt>
+						<dt class="text-sm text-muted-foreground">Fraction</dt>
 						<dd class="flex flex-row items-center gap-x-2">
 							{contract.fraction.label}
 							<Button size="icon" variant="ghost" href={resolve('/')}>
@@ -146,7 +146,7 @@
 						</dd>
 					</div>
 					<div>
-						<dt class="text-muted-foreground text-sm">Tenants</dt>
+						<dt class="text-sm text-muted-foreground">Tenants</dt>
 						{#each contract.tenants as tenant (tenant.id)}
 							<dd class="flex flex-row items-center gap-x-2">
 								{tenant.label}
@@ -165,13 +165,13 @@
 					<Card.Root>
 						<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 							<Card.Title class="text-sm font-medium">Current Rent</Card.Title>
-							<HandCoins class="text-muted-foreground h-4 w-4" />
+							<HandCoins class="h-4 w-4 text-muted-foreground" />
 						</Card.Header>
 						<Card.Content>
 							<div class="text-2xl font-bold">
 								{currencyFormatter.format(contract.data.rent)}
 							</div>
-							<p class="text-muted-foreground text-xs">
+							<p class="text-xs text-muted-foreground">
 								{#if contract.data.next_update}
 									next update on the {dayjs(contract.data.next_update.update_date).format(
 										'DD/MM/YYYY'
@@ -186,13 +186,13 @@
 					<Card.Root>
 						<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 							<Card.Title class="text-sm font-medium">Current Installment</Card.Title>
-							<HandCoins class="text-muted-foreground h-4 w-4" />
+							<HandCoins class="h-4 w-4 text-muted-foreground" />
 						</Card.Header>
 						<Card.Content>
 							<div class="text-2xl font-bold">
 								{currencyFormatter.format(contract.data.installment)}
 							</div>
-							<p class="text-muted-foreground text-xs">
+							<p class="text-xs text-muted-foreground">
 								{#if contract.data.next_update}
 									next update on the {dayjs(contract.data.next_update.update_date).format(
 										'DD/MM/YYYY'
@@ -208,14 +208,14 @@
 					<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 						<Card.Title class="text-sm font-medium">Current Balance</Card.Title>
 						{#if contract.balance >= 0}
-							<CheckCheck class="text-muted-foreground h-4 w-4" />
+							<CheckCheck class="h-4 w-4 text-muted-foreground" />
 						{:else}
-							<AlertTriangle class="text-muted-foreground h-4 w-4" />
+							<AlertTriangle class="h-4 w-4 text-muted-foreground" />
 						{/if}
 					</Card.Header>
 					<Card.Content>
 						<div class="text-2xl font-bold">{currencyFormatter.format(contract.balance)}</div>
-						<p class="text-muted-foreground text-xs">
+						<p class="text-xs text-muted-foreground">
 							{#if contract.balance >= 0}
 								no debt
 							{:else}
@@ -227,7 +227,7 @@
 				<Card.Root>
 					<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 						<Card.Title class="text-sm font-medium">Total Revenue</Card.Title>
-						<PiggyBank class="text-muted-foreground h-4 w-4" />
+						<PiggyBank class="h-4 w-4 text-muted-foreground" />
 					</Card.Header>
 					<Card.Content>
 						<div class="text-2xl font-bold">
@@ -237,7 +237,7 @@
 									.reduce((sum, account) => sum + account.value, 0)
 							)}
 						</div>
-						<p class="text-muted-foreground text-xs">since contract start</p>
+						<p class="text-xs text-muted-foreground">since contract start</p>
 					</Card.Content>
 				</Card.Root>
 			</div>
@@ -245,7 +245,7 @@
 				<div class="flex items-start justify-between">
 					<div>
 						<h2 class="text-lg font-semibold">Account</h2>
-						<p class="text-muted-foreground text-sm">
+						<p class="text-sm text-muted-foreground">
 							List of all payments and due notes for this contract
 						</p>
 					</div>
