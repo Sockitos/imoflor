@@ -7,7 +7,7 @@
 	import { PlusCircle } from 'lucide-svelte';
 	import TenantForm from './_components/tenant-form.svelte';
 	import TenantTable from './_components/tenant-table.svelte';
-	import { getTenants } from './tenants.remote';
+	import { getTenants } from '@/remotes/tenants.remote.js';
 
 	let { data } = $props();
 	let { createTenantForm } = $derived(data);
