@@ -15,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				},
 				setAll(cookiesToSet, headers) {
 					/**
-					 * Note: You have to add the `path` variable to the test
+					 * Note: You have to add the `path` variable to the
 					 * set and remove method due to sveltekit's cookie API
 					 * requiring this to be set, setting the path to an empty string
 					 * will replicate previous/standard behavior (https://kit.svelte.dev/docs/types#public-types-cookies)
