@@ -25,19 +25,17 @@
 
 	let { open = $bindable(false), data, action }: Props = $props();
 
-	const form = $derived(
-		superForm(data, {
-			validators: zod4Client(createTenantSchema),
-			onUpdated: ({ form: f }) => {
-				if (f.valid) {
-					open = false;
-				}
-			},
-			invalidateAll: 'force',
-		})
-	);
+	const form = superForm(data, {
+		validators: zod4Client(createTenantSchema),
+		onUpdated: ({ form: f }) => {
+			if (f.valid) {
+				open = false;
+			}
+		},
+		invalidateAll: 'force',
+	});
 
-	const { form: formData, enhance, submitting } = $derived(form);
+	const { form: formData, enhance, submitting } = form;
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
@@ -141,7 +139,7 @@
 											value={birthDate}
 											onValueChange={(v) => {
 												if (v) {
-													$formData.birth_date = v.toDate(getLocalTimeZone()).toISOString();
+													$formData.birth_date = v.toString();
 												}
 											}}
 										/>
@@ -187,7 +185,7 @@
 											value={idExpirationDate}
 											onValueChange={(v) => {
 												if (v) {
-													$formData.id_expiration_date = v.toDate(getLocalTimeZone()).toISOString();
+													$formData.id_expiration_date = v.toString();
 												}
 											}}
 										/>

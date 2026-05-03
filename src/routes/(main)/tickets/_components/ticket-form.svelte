@@ -31,19 +31,17 @@
 
 	let { open = $bindable(false), data, action }: Props = $props();
 
-	const form = $derived(
-		superForm(data, {
-			validators: zod4Client(createTicketSchema),
-			onUpdated: ({ form: f }) => {
-				if (f.valid) {
-					open = false;
-				}
-			},
-			invalidateAll: 'force',
-		})
-	);
+	const form = superForm(data, {
+		validators: zod4Client(createTicketSchema),
+		onUpdated: ({ form: f }) => {
+			if (f.valid) {
+				open = false;
+			}
+		},
+		invalidateAll: 'force',
+	});
 
-	const { form: formData, enhance, submitting } = $derived(form);
+	const { form: formData, enhance, submitting } = form;
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',

@@ -25,19 +25,17 @@
 
 	let { open = $bindable(false), data, action }: Props = $props();
 
-	const form = $derived(
-		superForm(data, {
-			validators: zod4Client(createPropertySchema),
-			onUpdated: ({ form: f }) => {
-				if (f.valid) {
-					open = false;
-				}
-			},
-			invalidateAll: 'force',
-		})
-	);
+	const form = superForm(data, {
+		validators: zod4Client(createPropertySchema),
+		onUpdated: ({ form: f }) => {
+			if (f.valid) {
+				open = false;
+			}
+		},
+		invalidateAll: 'force',
+	});
 
-	const { form: formData, enhance, submitting } = $derived(form);
+	const { form: formData, enhance, submitting } = form;
 
 	$effect(() => {
 		if ($formData.type === 'building' || $formData.type === 'garages') {
