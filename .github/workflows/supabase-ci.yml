@@ -2,12 +2,17 @@ name: Supabase CI
 
 on:
   push:
+    branches: [main]
     paths:
       - 'supabase/**'
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
     paths:
       - 'supabase/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 jobs:
   lint:
