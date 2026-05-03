@@ -42,7 +42,7 @@
 			</div>
 		{/snippet}
 
-		{#snippet failed(err, reset)}
+		{#snippet failed(_, reset)}
 			<div class="flex flex-col items-center gap-y-4">
 				<p class="text-sm text-destructive">Failed to load tenants.</p>
 				<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
