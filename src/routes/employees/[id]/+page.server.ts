@@ -1,0 +1,88 @@
+import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
+import type { Employee, Movement } from '@/types/types';
+import { handleFormAction } from '@/utils';
+import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { fail, superValidate } from 'sveltekit-superforms';
+import { zod4 } from 'sveltekit-superforms/adapters';
+
+export const load = async (event) => {
+	async function getEmployee(): Promise<Employee> {
+		const { data: employee, error: employeeError } = await event.locals.supabase
+			.from('employees')
+			.select('*')
+			.eq('id', Number(event.params.id))
+			.single();
+
+		if (employeeError) {
+			return error(500, 'Error fetching employee, please try again later.');
+		}
+		return employee;
+	}
+
+	async function getMovements(tax_id_number: string): Promise<Movement[]> {
+		const { data: movements, error: movementsError } = await event.locals.supabase
+			.from('movements')
+			.select('*')
+			.eq('tax_id_number', tax_id_number);
+
+		if (movementsError) {
+			return error(500, 'Error fetching movements, please try again later.');
+		}
+		return movements;
+	}
+
+	const employee = await getEmployee();
+
+	return {
+		employee: employee,
+		movements: await getMovements(employee.tax_id_number),
+		updateEmployeeForm: await superValidate(employee, zod4(createEmployeeSchema), {
+			id: 'update-employee',
+		}),
+		deleteEmployeeForm: await superValidate(zod4(deleteEmployeeSchema), {
+			id: 'delete-employee',
+		}),
+	};
+};
+
+export const actions = {
+	update: async (event) =>
+		handleFormAction(
+			event,
+			createEmployeeSchema,
+			'update-employee',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase
+					.from('employees')
+					.update(form.data)
+					.eq('id', Number(event.params.id));
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return { success: true, form };
+			}
+		),
+	delete: async (event) =>
+		handleFormAction(
+			event,
+			deleteEmployeeSchema,
+			'delete-employee',
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase
+					.from('employees')
+					.delete()
+					.eq('id', form.data.id);
+
+				if (error) {
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
+				}
+
+				return redirect(302, '/employees');
+			}
+		),
+};

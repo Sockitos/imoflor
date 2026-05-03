@@ -64,17 +64,17 @@
 				items: [
 					{
 						title: 'Tenants',
-						url: '/(main)/tenants',
+						url: '/tenants',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Properties',
-						url: '/(main)/properties',
+						url: '/properties',
 						icon: BuildingIcon,
 					},
 					{
 						title: 'Contracts',
-						url: '/(main)/contracts',
+						url: '/contracts',
 						icon: FileTextIcon,
 					},
 				],
@@ -84,12 +84,12 @@
 				items: [
 					{
 						title: 'Tickets',
-						url: '/(main)/tickets',
+						url: '/tickets',
 						icon: TicketIcon,
 					},
 					{
 						title: 'Interventions',
-						url: '/(main)/interventions',
+						url: '/interventions',
 						icon: ToolIcon,
 					},
 				],
@@ -99,12 +99,12 @@
 				items: [
 					{
 						title: 'Employees',
-						url: '/(main)/employees',
+						url: '/employees',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Vendors',
-						url: '/(main)/vendors',
+						url: '/vendors',
 						icon: UsersIcon,
 					},
 				],

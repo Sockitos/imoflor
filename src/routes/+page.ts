@@ -6,5 +6,5 @@ export const load = async ({ parent }) => {
 		redirect(302, '/dashboard');
 	}
 
-	return redirect(302, '/login');
+	return redirect(302, '/auth/login');
 };
