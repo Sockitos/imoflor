@@ -10,8 +10,8 @@
 
 	const profile: Profile = {
 		id: '1',
-		display_name: 'John Doe',
-		email: 'john.doe@example.com',
+		display_name: 'Lorem Ipsum',
+		email: 'lorem.ipsum@example.com',
 		image: 'https://github.com/shadcn.png',
 	};
 	let initials = $derived(

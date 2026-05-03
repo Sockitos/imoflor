@@ -64,17 +64,17 @@
 				items: [
 					{
 						title: 'Tenants',
-						url: '/tenants',
+						url: '/(main)/tenants',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Properties',
-						url: '/properties',
+						url: '/(main)/properties',
 						icon: BuildingIcon,
 					},
 					{
 						title: 'Contracts',
-						url: '/contracts',
+						url: '/(main)/contracts',
 						icon: FileTextIcon,
 					},
 				],
@@ -84,12 +84,12 @@
 				items: [
 					{
 						title: 'Tickets',
-						url: '/tickets',
+						url: '/(main)/tickets',
 						icon: TicketIcon,
 					},
 					{
 						title: 'Interventions',
-						url: '/interventions',
+						url: '/(main)/interventions',
 						icon: ToolIcon,
 					},
 				],
@@ -99,12 +99,12 @@
 				items: [
 					{
 						title: 'Employees',
-						url: '/employees',
+						url: '/(main)/employees',
 						icon: UsersIcon,
 					},
 					{
 						title: 'Vendors',
-						url: '/vendors',
+						url: '/(main)/vendors',
 						icon: UsersIcon,
 					},
 				],
@@ -138,7 +138,7 @@
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
 					{#snippet child({ props })}
-						<a href={resolve('/')} {...props}>
+						<a href={resolve('/(main)')} {...props}>
 							<HomeIcon class="!size-5" />
 							<span class="text-base font-semibold">Imoflor</span>
 						</a>
