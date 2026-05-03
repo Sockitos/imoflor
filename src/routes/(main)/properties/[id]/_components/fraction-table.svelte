@@ -14,7 +14,7 @@
 
 	let { fractions }: Props = $props();
 
-	const data = $derived(fractions);
+	const data = $state(fractions);
 
 	const globalFilter = writable('');
 
@@ -33,6 +33,27 @@
 			},
 		},
 	});
+
+	// const _typeOptions = Object.entries(typeMap).map(([value, { label, icon }]) => {
+	// 	return { value, label, icon };
+	// });
+
+	// const _counts = $derived(
+	// 	fractions.reduce(
+	// 		(counts, fraction) => {
+	// 			const type = fraction.type;
+	// 			if (type) {
+	// 				counts.type[type] = (counts.type[type] ?? 0) + 1;
+	// 			}
+	// 			return counts;
+	// 		},
+	// 		{
+	// 			type: {} as Record<FractionType, number>,
+	// 		}
+	// 	)
+	// );
+
+	// const _showReset = $derived(Object.values($globalFilter).some((v) => v.length > 0));
 </script>
 
 <div class="flex flex-col gap-y-4">

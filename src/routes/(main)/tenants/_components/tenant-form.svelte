@@ -139,7 +139,7 @@
 											value={birthDate}
 											onValueChange={(v) => {
 												if (v) {
-													$formData.birth_date = v.toString();
+													$formData.birth_date = v.toDate(getLocalTimeZone()).toISOString();
 												}
 											}}
 										/>
@@ -185,7 +185,7 @@
 											value={idExpirationDate}
 											onValueChange={(v) => {
 												if (v) {
-													$formData.id_expiration_date = v.toString();
+													$formData.id_expiration_date = v.toDate(getLocalTimeZone()).toISOString();
 												}
 											}}
 										/>
