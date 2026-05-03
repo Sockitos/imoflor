@@ -10,5 +10,5 @@ export const POST = async ({ cookies, locals }) => {
 		return error(500, { message: errorMessage });
 	}
 
-	return redirect(302, '/login');
+	return redirect(302, '/auth/login');
 };

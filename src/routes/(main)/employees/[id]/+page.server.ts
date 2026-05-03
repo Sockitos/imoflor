@@ -1,17 +1,12 @@
 import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
 import type { Employee, Movement } from '@/types/types';
-import { handleFormAction, handleLoginRedirect } from '@/utils';
+import { handleFormAction } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const { session } = await event.locals.safeGetSession();
-	if (!session) {
-		return redirect(302, handleLoginRedirect(event));
-	}
-
 	async function getEmployee(): Promise<Employee> {
 		const { data: employee, error: employeeError } = await event.locals.supabase
 			.from('employees')

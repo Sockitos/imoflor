@@ -1,4 +1,4 @@
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import type { Database } from '@/types/supabase-types';
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 
@@ -6,12 +6,12 @@ export const load = async ({ fetch, data, depends }) => {
 	depends('supabase:auth');
 
 	const supabase = isBrowser()
-		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 				global: {
 					fetch,
 				},
 			})
-		: createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		: createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 				global: {
 					fetch,
 				},
@@ -23,13 +23,14 @@ export const load = async ({ fetch, data, depends }) => {
 			});
 
 	/**
-	 * It's fine to use `getSession` here, because on the client, `getSession` is
-	 * safe, and on the server, it reads `session` from the `LayoutData`, which
-	 * safely checked the session using `safeGetSession`.
+	 * `getClaims` validates the JWT signature locally (for asymmetric keys) once
+	 * the relevant signing keys are available or cached, and returns the decoded
+	 * claims. While an initial or periodic network request may be required to
+	 * fetch or refresh keys, this is both faster and safer than `getSession`,
+	 * which does not validate the JWT.
 	 */
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
+	const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+	const claims = claimsError ? null : claimsData?.claims;
 
-	return { supabase, session, user: data.user, profile: data.profile };
+	return { ...data, supabase, claims };
 };

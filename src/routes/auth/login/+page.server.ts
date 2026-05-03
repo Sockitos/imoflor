@@ -28,7 +28,7 @@ export const actions = {
 					return fail(500, { message: error.message, form });
 				}
 
-				return redirect(302, '/');
+				return redirect(302, event.url.searchParams.get('redirectTo') ?? '/dashboard');
 			},
 			{ requireAuth: false }
 		),

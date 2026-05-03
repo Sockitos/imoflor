@@ -1,17 +1,12 @@
 import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
 import type { Movement, Tenant } from '@/types/types';
-import { handleFormAction, handleLoginRedirect } from '@/utils';
+import { handleFormAction } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const { session } = await event.locals.safeGetSession();
-	if (!session) {
-		return redirect(302, handleLoginRedirect(event));
-	}
-
 	async function getTenant(): Promise<Tenant> {
 		const { data: tenant, error: tenantError } = await event.locals.supabase
 			.from('tenants')
