@@ -3,19 +3,29 @@
 	import PageTitle from '@/components/page-title.svelte';
 	import { Button } from '@/components/ui/button';
 	import { Separator } from '@/components/ui/separator';
+	import { Spinner } from '@/components/ui/spinner';
 	import { PlusCircle } from 'lucide-svelte';
 	import TenantForm from './_components/tenant-form.svelte';
 	import TenantTable from './_components/tenant-table.svelte';
+	import { getTenants } from './tenants.remote';
 
 	let { data } = $props();
-	let { tenants, createTenantForm } = $derived(data);
+	let { createTenantForm } = $derived(data);
+
+	const tenants = getTenants();
+
 	let openForm = $state(false);
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
 	<div class="flex flex-row items-start justify-between">
 		<div>
-			<PageTitle>Tenants ({tenants.length})</PageTitle>
+			<PageTitle
+				>Tenants
+				{#if tenants.ready}
+					({tenants.current?.length})
+				{/if}
+			</PageTitle>
 			<PageSubtitle>Manage your tenants and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={() => (openForm = true)}>
@@ -24,7 +34,21 @@
 		</Button>
 	</div>
 	<Separator />
-	<TenantTable {tenants} />
+	<svelte:boundary>
+		<TenantTable tenants={(await tenants) ?? []} />
+		{#snippet pending()}
+			<div class="flex items-center justify-center">
+				<Spinner class="size-6" />
+			</div>
+		{/snippet}
+
+		{#snippet failed(err, reset)}
+			<div class="flex flex-col items-center gap-y-4">
+				<p class="text-sm text-destructive">Failed to load tenants.</p>
+				<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+			</div>
+		{/snippet}
+	</svelte:boundary>
 </div>
 
 <TenantForm data={createTenantForm} action="?/create" bind:open={openForm} />
