@@ -3,14 +3,21 @@
 	import TopBar from '@/components/top-bar.svelte';
 	import * as Sidebar from '@/components/ui/sidebar';
 
-	let { data, children } = $props();
-	const profile = $derived(data.profile);
+	let { children } = $props();
 </script>
 
 <Sidebar.Provider
 	style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
 >
-	<AppSidebar variant="inset" {profile} />
+	<AppSidebar
+		variant="inset"
+		profile={{
+			id: '1',
+			email: 'lorem.ipsum@example.com',
+			display_name: 'Lorem Ipsum',
+			image: 'https://github.com/shadcn.png',
+		}}
+	/>
 	<Sidebar.Inset>
 		<TopBar />
 		<div class="flex flex-1 flex-col">

@@ -11,18 +11,13 @@ import type {
 	InstallmentUpdate,
 	RentUpdate,
 } from '@/types/types';
-import { calculateInterest, handleFormAction, handleLoginRedirect } from '@/utils';
+import { calculateInterest, handleFormAction } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const { session } = await event.locals.safeGetSession();
-	if (!session) {
-		return redirect(302, handleLoginRedirect(event));
-	}
-
 	async function getContract(): Promise<Contract> {
 		const { data: contract, error: contractError } = await event.locals.supabase
 			.from('contracts_view')

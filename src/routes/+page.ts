@@ -1,10 +1,10 @@
 import { redirect } from '@sveltejs/kit';
 
 export const load = async ({ parent }) => {
-	const { session } = await parent();
-	if (session) {
+	const { claims } = await parent();
+	if (claims) {
 		redirect(302, '/dashboard');
 	}
 
-	return redirect(302, '/login');
+	return redirect(302, '/auth/login');
 };

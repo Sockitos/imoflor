@@ -7,11 +7,6 @@ import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const { session } = await event.locals.safeGetSession();
-	if (!session) {
-		return error(401, 'Unauthorized');
-	}
-
 	async function getIntervention(): Promise<Intervention> {
 		const { data: interventions, error: interventionsError } = await event.locals.supabase
 			.from('interventions')

@@ -2,13 +2,18 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 	import * as Avatar from '@/components/ui/avatar';
 	import * as DropdownMenu from '@/components/ui/dropdown-menu';
+	import type { Profile } from '../types/types';
 	import { Button } from './ui/button';
-	const { profile } = page.data;
 	let formEl: HTMLFormElement | undefined = $state();
 
+	const profile: Profile = {
+		id: '1',
+		display_name: 'Lorem Ipsum',
+		email: 'lorem.ipsum@example.com',
+		image: 'https://github.com/shadcn.png',
+	};
 	let initials = $derived(
 		profile?.display_name
 			.split(' ')
@@ -48,7 +53,7 @@
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
-		<form method="POST" action="/logout" use:enhance bind:this={formEl}>
+		<form method="POST" action="/auth/logout" use:enhance bind:this={formEl}>
 			<DropdownMenu.Item onclick={() => formEl?.submit()}>
 				Log out
 				<DropdownMenu.Shortcut>⇧⌘Q</DropdownMenu.Shortcut>

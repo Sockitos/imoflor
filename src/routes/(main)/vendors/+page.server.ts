@@ -1,17 +1,12 @@
 import { createVendorSchema, deleteVendorSchema } from '@/schemas/vendor';
 import type { Vendor } from '@/types/types';
-import { handleFormAction, handleLoginRedirect } from '@/utils';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { handleFormAction } from '@/utils';
+import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
 export const load = async (event) => {
-	const { session } = await event.locals.safeGetSession();
-	if (!session) {
-		return redirect(302, handleLoginRedirect(event));
-	}
-
 	async function getVendors(): Promise<Vendor[]> {
 		const { data: vendors, error: vendorsError } = await event.locals.supabase
 			.from('vendors')

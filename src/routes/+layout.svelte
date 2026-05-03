@@ -13,7 +13,7 @@
 	import '../app.css';
 
 	let { data, children } = $props();
-	let { supabase, session } = $derived(data);
+	let { supabase, claims } = $derived(data);
 
 	const flash = getFlash(page);
 
@@ -31,7 +31,7 @@
 
 	onMount(() => {
 		const { data } = supabase.auth.onAuthStateChange((event, newSession) => {
-			if (newSession?.expires_at !== session?.expires_at) {
+			if (newSession?.expires_at !== claims?.exp) {
 				invalidate('supabase:auth');
 			}
 		});

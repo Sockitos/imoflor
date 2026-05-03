@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { RouteId as AppRouteId } from '$app/types';
 import type { LendingContract } from '@/types/types';
-import type { ActionFailure, LoadEvent, RequestEvent, ServerLoadEvent } from '@sveltejs/kit';
-import { clsx, type ClassValue } from 'clsx';
+import type { ActionFailure, RequestEvent } from '@sveltejs/kit';
+import { type ClassValue, clsx } from 'clsx';
 import dayjs from 'dayjs';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { fail, superValidate, type Infer, type SuperValidated } from 'sveltekit-superforms';
+import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
 
@@ -17,11 +17,17 @@ export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
 
 export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'children'> : T;
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
-export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
+export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & {
+	ref?: U | null;
+};
 
-export function handleLoginRedirect(event: LoadEvent | ServerLoadEvent) {
+export function handleLoginRedirect(event: { url: URL }) {
 	const redirectTo = event.url.pathname + event.url.search;
-	return `/login?redirectTo=${redirectTo}`;
+	if (!redirectTo || redirectTo === '/') {
+		return '/auth/login';
+	}
+
+	return `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
 }
 
 type MaybePromise<T> = T | Promise<T>;
@@ -70,15 +76,16 @@ export async function handleFormAction<
 	}
 
 	if (requireAuth) {
-		const { session, user } = await event.locals.safeGetSession();
-		if (!session || !user) {
+		const { data: claimsData, error: claimsError } = await event.locals.supabase.auth.getClaims();
+		const claims = claimsError ? null : claimsData?.claims;
+		if (!claims) {
 			setFlash({ type: 'error', message: 'Unauthorized' }, event.cookies);
 			return fail(401, { message: 'Unauthorized', form });
 		}
 
 		const result = await action(
 			event,
-			user.id as RequireAuth extends true ? string : undefined,
+			claims.sub as RequireAuth extends true ? string : undefined,
 			form
 		);
 		return result;
