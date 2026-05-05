@@ -264,6 +264,8 @@ create type "public"."ticket_status" as enum ('open', 'in_progress', 'resolved',
       );
 
 
+CREATE UNIQUE INDEX idx_contracts_property_id_active ON public.contracts USING btree (property_id) WHERE is_active;
+
 CREATE UNIQUE INDEX pk_addresses ON public.addresses USING btree (id);
 
 CREATE UNIQUE INDEX pk_contracts ON public.contracts USING btree (id);
@@ -303,8 +305,6 @@ CREATE UNIQUE INDEX pk_tickets ON public.tickets USING btree (id);
 CREATE UNIQUE INDEX pk_vendors ON public.vendors USING btree (id);
 
 CREATE UNIQUE INDEX uq_contracts_id_type ON public.contracts USING btree (id, type);
-
-CREATE UNIQUE INDEX uq_contracts_property_id_is_active ON public.contracts USING btree (property_id, is_active);
 
 alter table "public"."addresses" add constraint "pk_addresses" PRIMARY KEY using index "pk_addresses";
 
@@ -349,8 +349,6 @@ alter table "public"."contracts" add constraint "fk_contracts_property_id" FOREI
 alter table "public"."contracts" validate constraint "fk_contracts_property_id";
 
 alter table "public"."contracts" add constraint "uq_contracts_id_type" UNIQUE using index "uq_contracts_id_type";
-
-alter table "public"."contracts" add constraint "uq_contracts_property_id_is_active" UNIQUE using index "uq_contracts_property_id_is_active";
 
 alter table "public"."contracts_tenants" add constraint "fk_contracts_tenants_contract_id" FOREIGN KEY (contract_id) REFERENCES public.contracts(id) ON DELETE CASCADE not valid;
 

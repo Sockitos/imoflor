@@ -20,9 +20,12 @@ CREATE TABLE public.contracts(
   is_active boolean NOT NULL DEFAULT TRUE,
   CONSTRAINT pk_contracts PRIMARY KEY (id),
   CONSTRAINT fk_contracts_property_id FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
-  CONSTRAINT uq_contracts_id_type UNIQUE (id, type),
-  CONSTRAINT uq_contracts_property_id_is_active UNIQUE (property_id, is_active)
+  CONSTRAINT uq_contracts_id_type UNIQUE (id, type)
 );
+
+CREATE UNIQUE INDEX idx_contracts_property_id_active
+  ON public.contracts(property_id)
+  WHERE is_active;
 
 CREATE TRIGGER handle_updated_at
   BEFORE UPDATE ON public.contracts
