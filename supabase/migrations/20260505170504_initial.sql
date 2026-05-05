@@ -472,27 +472,27 @@ CREATE OR REPLACE FUNCTION public.insert_contract()
 AS $function$
 DECLARE
   contract_id bigint;
-  inserted_contract contracts_view % ROWTYPE;
+  inserted_contract public.contracts_view % ROWTYPE;
 BEGIN
-  INSERT INTO contracts(type, start_date, end_date, property_id)
+  INSERT INTO public.contracts(type, start_date, end_date, property_id)
     VALUES (NEW.type, NEW.start_date, NEW.end_date, NEW.property_id)
   RETURNING
     id INTO contract_id;
   IF NEW.type = 'renting' THEN
-    INSERT INTO renting_contracts(id)
+    INSERT INTO public.renting_contracts(id)
       VALUES (contract_id);
-    INSERT INTO rent_updates(contract_id, update_date, rent)
+    INSERT INTO public.rent_updates(contract_id, update_date, rent)
       VALUES (contract_id, NEW.start_date,(NEW.data ->> 'rent')::double precision);
   ELSIF NEW.type = 'lending' THEN
-    INSERT INTO lending_contracts(id, sale_value, down_payment, yearly_raise)
+    INSERT INTO public.lending_contracts(id, sale_value, down_payment, yearly_raise)
       VALUES (contract_id,(NEW.data ->> 'sale_value')::double precision,(NEW.data ->> 'down_payment')::double precision,(NEW.data ->> 'yearly_raise')::double precision);
-    INSERT INTO installment_updates(contract_id, update_date, installment, interest)
+    INSERT INTO public.installment_updates(contract_id, update_date, installment, interest)
       VALUES (contract_id, NEW.start_date,(NEW.data ->> 'installment')::double precision,(NEW.data ->> 'interest')::double precision);
   END IF;
   SELECT
     * INTO inserted_contract
   FROM
-    contracts_view
+    public.contracts_view
   WHERE
     id = contract_id;
   RETURN inserted_contract;
@@ -508,17 +508,17 @@ DECLARE
   interest_movement_id bigint;
   DECLARE amortization_movement_id bigint;
 BEGIN
-  INSERT INTO movements(type, value, date, description)
-    VALUES ('installment_interest'::movement_type, NEW.interest, NEW.date, NEW.description)
+  INSERT INTO public.movements(type, value, date, description)
+    VALUES ('installment_interest'::public.movement_type, NEW.interest, NEW.date, NEW.description)
   RETURNING
     id INTO interest_movement_id;
   IF NEW.amortization > 0 THEN
-    INSERT INTO movements(type, value, date, description)
-      VALUES ('installment_amortization'::movement_type, NEW.amortization, NEW.date, NEW.description)
+    INSERT INTO public.movements(type, value, date, description)
+      VALUES ('installment_amortization'::public.movement_type, NEW.amortization, NEW.date, NEW.description)
     RETURNING
       id INTO amortization_movement_id;
   END IF;
-  INSERT INTO installment_payments(contract_id, interest_movement_id, amortization_movement_id, extra_debt)
+  INSERT INTO public.installment_payments(contract_id, interest_movement_id, amortization_movement_id, extra_debt)
     VALUES (NEW.contract_id, interest_movement_id, amortization_movement_id, NEW.extra_debt);
   RETURN new;
 END;
@@ -532,11 +532,11 @@ AS $function$
 DECLARE
   movement_id bigint;
 BEGIN
-  INSERT INTO movements(type, value, date, description)
-    VALUES ('intervention'::movement_type, NEW.value, NEW.date, NEW.description)
+  INSERT INTO public.movements(type, value, date, description)
+    VALUES ('intervention'::public.movement_type, NEW.value, NEW.date, NEW.description)
   RETURNING
     id INTO movement_id;
-  INSERT INTO intervention_payments(intervention_id, movement_id)
+  INSERT INTO public.intervention_payments(intervention_id, movement_id)
     VALUES (NEW.intervention_id, movement_id);
   RETURN new;
 END;
@@ -550,11 +550,11 @@ AS $function$
 DECLARE
   movement_id bigint;
 BEGIN
-  INSERT INTO movements(type, value, date, description)
-    VALUES ('rent'::movement_type, NEW.value, NEW.date, NEW.description)
+  INSERT INTO public.movements(type, value, date, description)
+    VALUES ('rent'::public.movement_type, NEW.value, NEW.date, NEW.description)
   RETURNING
     id INTO movement_id;
-  INSERT INTO rent_payments(contract_id, movement_id)
+  INSERT INTO public.rent_payments(contract_id, movement_id)
     VALUES (NEW.contract_id, movement_id);
   RETURN new;
 END;
@@ -632,11 +632,11 @@ CREATE OR REPLACE FUNCTION public.remove_installment_payment()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-  DELETE FROM installment_payments
+  DELETE FROM public.installment_payments
   WHERE id = OLD.id;
-  DELETE FROM movements
+  DELETE FROM public.movements
   WHERE id = OLD.interest_movement_id;
-  DELETE FROM movements
+  DELETE FROM public.movements
   WHERE id = OLD.amortization_movement_id;
   RETURN old;
 END;
@@ -648,9 +648,9 @@ CREATE OR REPLACE FUNCTION public.remove_intervention_payment()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-  DELETE FROM intervention_payments
+  DELETE FROM public.intervention_payments
   WHERE id = OLD.id;
-  DELETE FROM movements
+  DELETE FROM public.movements
   WHERE id = OLD.movement_id;
   RETURN old;
 END;
@@ -662,9 +662,9 @@ CREATE OR REPLACE FUNCTION public.remove_rent_payment()
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-  DELETE FROM rent_payments
+  DELETE FROM public.rent_payments
   WHERE id = OLD.id;
-  DELETE FROM movements
+  DELETE FROM public.movements
   WHERE id = OLD.movement_id;
   RETURN old;
 END;
@@ -709,11 +709,11 @@ CREATE OR REPLACE FUNCTION public.update_contract()
 AS $function$
 DECLARE
   contract_id bigint;
-  updated_contract contracts_view % rowtype;
+  updated_contract public.contracts_view % rowtype;
 BEGIN
   contract_id := NEW.id;
   UPDATE
-    contracts
+    public.contracts
   SET
     start_date = NEW.start_date,
     end_date = NEW.end_date,
@@ -721,24 +721,24 @@ BEGIN
   WHERE
     id = contract_id;
   IF NEW.type = 'renting' THEN
-    INSERT INTO rent_updates(contract_id, update_date, rent)
+    INSERT INTO public.rent_updates(contract_id, update_date, rent)
       VALUES (contract_id, NEW.start_date,(NEW.data ->> 'rent')::double precision);
   ELSIF NEW.type = 'lending' THEN
     UPDATE
-      lending_contracts
+      public.lending_contracts
     SET
       sale_value =(NEW.data ->> 'sale_value')::double precision,
       down_payment =(NEW.data ->> 'down_payment')::double precision,
       yearly_raise =(NEW.data ->> 'yearly_raise')::double precision
     WHERE
       id = contract_id;
-    INSERT INTO installment_updates(contract_id, update_date, installment, interest)
+    INSERT INTO public.installment_updates(contract_id, update_date, installment, interest)
       VALUES (contract_id, NEW.start_date,(NEW.data ->> 'installment')::double precision,(NEW.data ->> 'interest')::double precision);
   END IF;
   SELECT
     * INTO updated_contract
   FROM
-    contracts_view
+    public.contracts_view
   WHERE
     id = contract_id;
   RETURN updated_contract;
@@ -751,9 +751,9 @@ CREATE OR REPLACE FUNCTION public.update_contract_tenants(p_contract_id bigint, 
  LANGUAGE plpgsql
 AS $function$
 BEGIN
-  DELETE FROM contracts_tenants
+  DELETE FROM public.contracts_tenants
   WHERE contract_id = p_contract_id;
-  INSERT INTO contracts_tenants(contract_id, tenant_id)
+  INSERT INTO public.contracts_tenants(contract_id, tenant_id)
   SELECT
     p_contract_id,
     unnest(p_tenants);
@@ -766,10 +766,10 @@ CREATE OR REPLACE FUNCTION public.validate_property_parent()
  LANGUAGE plpgsql
 AS $function$
 DECLARE
-  parent_type property_type;
+  parent_type public.property_type;
 BEGIN
   IF NEW.parent_id IS NULL THEN
-    IF NEW.type NOT IN ('building'::property_type, 'garages'::property_type) AND EXISTS (
+    IF NEW.type NOT IN ('building'::public.property_type, 'garages'::public.property_type) AND EXISTS (
       SELECT
         1
       FROM
@@ -789,7 +789,7 @@ BEGIN
   IF parent_type IS NULL THEN
     RAISE EXCEPTION 'parent property % does not exist', NEW.parent_id;
   END IF;
-  IF parent_type NOT IN ('building'::property_type, 'garages'::property_type) THEN
+  IF parent_type NOT IN ('building'::public.property_type, 'garages'::public.property_type) THEN
     RAISE EXCEPTION 'property type % cannot have fractions', parent_type;
   END IF;
   RETURN NEW;

@@ -16,6 +16,6 @@ CREATE TABLE public.vendors(
   phone text,
   website text,
   CONSTRAINT pk_vendors PRIMARY KEY (id),
-  CONSTRAINT fk_vendors_address_id FOREIGN KEY (address_id) REFERENCES addresses(id)
+  CONSTRAINT fk_vendors_address_id FOREIGN KEY (address_id) REFERENCES public.addresses(id)
 );
 
