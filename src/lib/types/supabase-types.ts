@@ -54,28 +54,6 @@ export type Database = MergeDeep<
 						type?: DatabaseGenerated['public']['Enums']['contract_type'];
 					};
 				};
-				fractions_view: {
-					Row: {
-						address: string;
-						address_full: string;
-						area: number | null;
-						city: string | null;
-						conservatory: string;
-						country: string | null;
-						description: string | null;
-						id: number;
-						inserted_at: string;
-						market_value: number | null;
-						matrix: string;
-						patrimonial_value: number | null;
-						postal_code: string | null;
-						property_id: number;
-						region: string | null;
-						sold: boolean;
-						tipology: string | null;
-						type: DatabaseGenerated['public']['Enums']['fraction_type'];
-					};
-				};
 				installment_payments_view: {
 					Row: {
 						amortization: number;
