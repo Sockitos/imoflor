@@ -12,6 +12,7 @@
 	import { Pencil, Trash } from 'lucide-svelte';
 	import TenantDeleteDialog from '../_components/tenant-delete-dialog.svelte';
 	import TenantForm from '../_components/tenant-form.svelte';
+	import { getMovements } from '@/remotes/movements.remote.js';
 
 	let { data } = $props();
 	let { updateTenantForm, deleteTenantForm } = $derived(data);
@@ -152,7 +153,22 @@
 				</Card.Root>
 			</div>
 			<div class="col-span-2">
-				<MovementTable tax_id_number={(await tenant).tax_id_number} />
+				<svelte:boundary>
+					<MovementTable movements={(await getMovements((await tenant).tax_id_number)) ?? []} />
+
+					{#snippet pending()}
+						<div class="flex items-center justify-center px-4 py-6 lg:px-8">
+							<Spinner class="size-6" />
+						</div>
+					{/snippet}
+
+					{#snippet failed(_, reset)}
+						<div class="flex flex-col items-center gap-y-4 px-4 py-6 lg:px-8">
+							<p class="text-sm text-destructive">Failed to load movements.</p>
+							<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+						</div>
+					{/snippet}
+				</svelte:boundary>
 			</div>
 		</div>
 	</div>
