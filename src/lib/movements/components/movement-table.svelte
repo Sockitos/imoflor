@@ -19,7 +19,9 @@
 
 	const table = $derived(
 		createSvelteTable({
-			data: movements,
+			get data() {
+				return movements;
+			},
 			columns,
 			getCoreRowModel: getCoreRowModel(),
 			getSortedRowModel: getSortedRowModel(),
@@ -34,7 +36,7 @@
 	);
 </script>
 
-<div class="flex flex-col gap-y-6">
+<div class="flex flex-col gap-y-4">
 	<div class="flex items-start justify-between">
 		<div>
 			<h2 class="text-lg font-semibold">Movements</h2>
