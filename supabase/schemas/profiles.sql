@@ -4,11 +4,13 @@
 -- =============================================
 -- Tables
 CREATE TABLE public.profiles(
-  id uuid REFERENCES auth.users(id) PRIMARY KEY,
+  id uuid,
   inserted_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
   email text NOT NULL,
   display_name text NOT NULL,
-  image text
+  image text,
+  CONSTRAINT pk_profiles PRIMARY KEY (id),
+  CONSTRAINT fk_profiles_id FOREIGN KEY (id) REFERENCES auth.users(id)
 );
 
 -- Functions
