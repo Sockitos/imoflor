@@ -1,4 +1,4 @@
-import type { Gender, MaritalStatus } from "@/types/types";
+import type { Gender, MaritalStatus } from '@/types/types';
 
 export interface Tenant {
 	id: number;
