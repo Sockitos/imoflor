@@ -34,50 +34,73 @@ export type Database = {
   }
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          id: number
+          inserted_at: string
+          postal_code: string | null
+          region: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          id?: number
+          inserted_at?: string
+          postal_code?: string | null
+          region?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          id?: number
+          inserted_at?: string
+          postal_code?: string | null
+          region?: string | null
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           end_date: string | null
-          fraction_id: number
           id: number
           inserted_at: string
           is_active: boolean
+          property_id: number
           start_date: string
           type: Database["public"]["Enums"]["contract_type"]
           updated_at: string
         }
         Insert: {
           end_date?: string | null
-          fraction_id: number
           id?: number
           inserted_at?: string
           is_active?: boolean
+          property_id: number
           start_date: string
           type: Database["public"]["Enums"]["contract_type"]
           updated_at?: string
         }
         Update: {
           end_date?: string | null
-          fraction_id?: number
           id?: number
           inserted_at?: string
           is_active?: boolean
+          property_id?: number
           start_date?: string
           type?: Database["public"]["Enums"]["contract_type"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "contracts_fraction_id_fkey"
-            columns: ["fraction_id"]
+            foreignKeyName: "fk_contracts_property_id"
+            columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "fractions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions_view"
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -97,28 +120,28 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "contracts_tenants_contract_id_fkey"
+            foreignKeyName: "fk_contracts_tenants_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contracts_tenants_contract_id_fkey"
+            foreignKeyName: "fk_contracts_tenants_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts_balances_view"
             referencedColumns: ["contract_id"]
           },
           {
-            foreignKeyName: "contracts_tenants_contract_id_fkey"
+            foreignKeyName: "fk_contracts_tenants_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "contracts_tenants_tenant_id_fkey"
+            foreignKeyName: "fk_contracts_tenants_tenant_id"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -150,21 +173,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "due_notes_contract_id_fkey"
+            foreignKeyName: "fk_due_notes_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "due_notes_contract_id_fkey"
+            foreignKeyName: "fk_due_notes_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts_balances_view"
             referencedColumns: ["contract_id"]
           },
           {
-            foreignKeyName: "due_notes_contract_id_fkey"
+            foreignKeyName: "fk_due_notes_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts_view"
@@ -174,10 +197,8 @@ export type Database = {
       }
       employees: {
         Row: {
-          address: string | null
+          address_id: number | null
           birth_date: string | null
-          city: string | null
-          country: string | null
           email: string | null
           gender: Database["public"]["Enums"]["gender"]
           id: number
@@ -191,18 +212,14 @@ export type Database = {
           nationality: string
           phone: string | null
           position: string
-          postal_code: string | null
-          region: string | null
           salary: number
           salary_type: Database["public"]["Enums"]["salary_type"]
           ss_number: string
           tax_id_number: string
         }
         Insert: {
-          address?: string | null
+          address_id?: number | null
           birth_date?: string | null
-          city?: string | null
-          country?: string | null
           email?: string | null
           gender: Database["public"]["Enums"]["gender"]
           id?: number
@@ -216,18 +233,14 @@ export type Database = {
           nationality: string
           phone?: string | null
           position: string
-          postal_code?: string | null
-          region?: string | null
           salary: number
           salary_type: Database["public"]["Enums"]["salary_type"]
           ss_number: string
           tax_id_number: string
         }
         Update: {
-          address?: string | null
+          address_id?: number | null
           birth_date?: string | null
-          city?: string | null
-          country?: string | null
           email?: string | null
           gender?: Database["public"]["Enums"]["gender"]
           id?: number
@@ -241,64 +254,17 @@ export type Database = {
           nationality?: string
           phone?: string | null
           position?: string
-          postal_code?: string | null
-          region?: string | null
           salary?: number
           salary_type?: Database["public"]["Enums"]["salary_type"]
           ss_number?: string
           tax_id_number?: string
         }
-        Relationships: []
-      }
-      fractions: {
-        Row: {
-          address: string
-          area: number | null
-          description: string | null
-          id: number
-          inserted_at: string
-          market_value: number | null
-          matrix: string
-          patrimonial_value: number | null
-          property_id: number
-          sold: boolean
-          tipology: string | null
-          type: Database["public"]["Enums"]["fraction_type"]
-        }
-        Insert: {
-          address: string
-          area?: number | null
-          description?: string | null
-          id?: number
-          inserted_at?: string
-          market_value?: number | null
-          matrix: string
-          patrimonial_value?: number | null
-          property_id: number
-          sold?: boolean
-          tipology?: string | null
-          type: Database["public"]["Enums"]["fraction_type"]
-        }
-        Update: {
-          address?: string
-          area?: number | null
-          description?: string | null
-          id?: number
-          inserted_at?: string
-          market_value?: number | null
-          matrix?: string
-          patrimonial_value?: number | null
-          property_id?: number
-          sold?: boolean
-          tipology?: string | null
-          type?: Database["public"]["Enums"]["fraction_type"]
-        }
         Relationships: [
           {
-            foreignKeyName: "fractions_property_id_fkey"
-            columns: ["property_id"]
+            foreignKeyName: "fk_employees_address_id"
+            columns: ["address_id"]
             isOneToOne: false
-            referencedRelation: "properties"
+            referencedRelation: "addresses"
             referencedColumns: ["id"]
           },
         ]
@@ -330,35 +296,35 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "installment_payments_amortization_movement_id_fkey"
+            foreignKeyName: "fk_installment_payments_amortization_movement_id"
             columns: ["amortization_movement_id"]
             isOneToOne: false
             referencedRelation: "movements"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_debts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_interest_movement_id_fkey"
+            foreignKeyName: "fk_installment_payments_interest_movement_id"
             columns: ["interest_movement_id"]
             isOneToOne: false
             referencedRelation: "movements"
@@ -393,21 +359,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "installment_updates_contract_id_fkey"
+            foreignKeyName: "fk_installment_updates_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_updates_contract_id_fkey"
+            foreignKeyName: "fk_installment_updates_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_debts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_updates_contract_id_fkey"
+            foreignKeyName: "fk_installment_updates_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_view"
@@ -436,14 +402,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "intervention_payments_intervention_id_fkey"
+            foreignKeyName: "fk_intervention_payments_intervention_id"
             columns: ["intervention_id"]
             isOneToOne: false
             referencedRelation: "interventions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "intervention_payments_movement_id_fkey"
+            foreignKeyName: "fk_intervention_payments_movement_id"
             columns: ["movement_id"]
             isOneToOne: false
             referencedRelation: "movements"
@@ -455,7 +421,6 @@ export type Database = {
         Row: {
           description: string
           end_date: string | null
-          fraction_id: number | null
           id: number
           inserted_at: string
           property_id: number
@@ -467,7 +432,6 @@ export type Database = {
         Insert: {
           description: string
           end_date?: string | null
-          fraction_id?: number | null
           id?: number
           inserted_at?: string
           property_id: number
@@ -479,7 +443,6 @@ export type Database = {
         Update: {
           description?: string
           end_date?: string | null
-          fraction_id?: number | null
           id?: number
           inserted_at?: string
           property_id?: number
@@ -490,28 +453,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "interventions_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "interventions_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "interventions_property_id_fkey"
+            foreignKeyName: "fk_interventions_property_id"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "interventions_ticket_id_fkey"
+            foreignKeyName: "fk_interventions_ticket_id"
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "tickets"
@@ -546,14 +495,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "lending_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_lending_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id", "type"]
           },
           {
-            foreignKeyName: "lending_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_lending_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts_view"
@@ -617,66 +566,72 @@ export type Database = {
       }
       properties: {
         Row: {
-          address: string
+          address_id: number
           area: number | null
-          city: string
           class: Database["public"]["Enums"]["property_class"]
           conservatory: string
-          country: string
           description: string | null
+          fraction: string | null
           id: number
           inserted_at: string
-          is_multi_unit: boolean
           market_value: number | null
           matrix: string
+          parent_id: number | null
           patrimonial_value: number | null
-          postal_code: string
-          region: string
           sold: boolean
           tipology: string | null
           type: Database["public"]["Enums"]["property_type"]
         }
         Insert: {
-          address: string
+          address_id: number
           area?: number | null
-          city: string
           class: Database["public"]["Enums"]["property_class"]
           conservatory: string
-          country: string
           description?: string | null
+          fraction?: string | null
           id?: number
           inserted_at?: string
-          is_multi_unit: boolean
           market_value?: number | null
           matrix: string
+          parent_id?: number | null
           patrimonial_value?: number | null
-          postal_code: string
-          region: string
           sold?: boolean
           tipology?: string | null
           type: Database["public"]["Enums"]["property_type"]
         }
         Update: {
-          address?: string
+          address_id?: number
           area?: number | null
-          city?: string
           class?: Database["public"]["Enums"]["property_class"]
           conservatory?: string
-          country?: string
           description?: string | null
+          fraction?: string | null
           id?: number
           inserted_at?: string
-          is_multi_unit?: boolean
           market_value?: number | null
           matrix?: string
+          parent_id?: number | null
           patrimonial_value?: number | null
-          postal_code?: string
-          region?: string
           sold?: boolean
           tipology?: string | null
           type?: Database["public"]["Enums"]["property_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_properties_address_id"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_properties_parent_id"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rent_payments: {
         Row: {
@@ -699,21 +654,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "rent_payments_contract_id_fkey"
+            foreignKeyName: "fk_rent_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rent_payments_contract_id_fkey"
+            foreignKeyName: "fk_rent_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rent_payments_movement_id_fkey"
+            foreignKeyName: "fk_rent_payments_movement_id"
             columns: ["movement_id"]
             isOneToOne: false
             referencedRelation: "movements"
@@ -745,14 +700,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "rent_updates_contract_id_fkey"
+            foreignKeyName: "fk_rent_updates_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rent_updates_contract_id_fkey"
+            foreignKeyName: "fk_rent_updates_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts_view"
@@ -778,14 +733,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "renting_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_renting_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id", "type"]
           },
           {
-            foreignKeyName: "renting_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_renting_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts_view"
@@ -795,10 +750,8 @@ export type Database = {
       }
       tenants: {
         Row: {
-          address: string | null
+          address_id: number | null
           birth_date: string | null
-          city: string | null
-          country: string | null
           email: string | null
           gender: Database["public"]["Enums"]["gender"]
           id: number
@@ -811,15 +764,11 @@ export type Database = {
           name: string
           nationality: string
           phone: string | null
-          postal_code: string | null
-          region: string | null
           tax_id_number: string
         }
         Insert: {
-          address?: string | null
+          address_id?: number | null
           birth_date?: string | null
-          city?: string | null
-          country?: string | null
           email?: string | null
           gender: Database["public"]["Enums"]["gender"]
           id?: number
@@ -832,15 +781,11 @@ export type Database = {
           name: string
           nationality: string
           phone?: string | null
-          postal_code?: string | null
-          region?: string | null
           tax_id_number: string
         }
         Update: {
-          address?: string | null
+          address_id?: number | null
           birth_date?: string | null
-          city?: string | null
-          country?: string | null
           email?: string | null
           gender?: Database["public"]["Enums"]["gender"]
           id?: number
@@ -853,17 +798,22 @@ export type Database = {
           name?: string
           nationality?: string
           phone?: string | null
-          postal_code?: string | null
-          region?: string | null
           tax_id_number?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_tenants_address_id"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tickets: {
         Row: {
           date: string
           description: string
-          fraction_id: number | null
           id: number
           inserted_at: string
           priority: Database["public"]["Enums"]["ticket_priority"]
@@ -874,7 +824,6 @@ export type Database = {
         Insert: {
           date: string
           description: string
-          fraction_id?: number | null
           id?: number
           inserted_at?: string
           priority: Database["public"]["Enums"]["ticket_priority"]
@@ -885,7 +834,6 @@ export type Database = {
         Update: {
           date?: string
           description?: string
-          fraction_id?: number | null
           id?: number
           inserted_at?: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
@@ -895,21 +843,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tickets_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tickets_property_id_fkey"
+            foreignKeyName: "fk_tickets_property_id"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -919,9 +853,7 @@ export type Database = {
       }
       vendors: {
         Row: {
-          address: string | null
-          city: string | null
-          country: string | null
+          address_id: number | null
           description: string | null
           email: string | null
           id: number
@@ -929,16 +861,12 @@ export type Database = {
           mobile: string | null
           name: string
           phone: string | null
-          postal_code: string | null
-          region: string | null
           tags: string[]
           tax_id_number: string
           website: string | null
         }
         Insert: {
-          address?: string | null
-          city?: string | null
-          country?: string | null
+          address_id?: number | null
           description?: string | null
           email?: string | null
           id?: number
@@ -946,16 +874,12 @@ export type Database = {
           mobile?: string | null
           name: string
           phone?: string | null
-          postal_code?: string | null
-          region?: string | null
           tags?: string[]
           tax_id_number: string
           website?: string | null
         }
         Update: {
-          address?: string | null
-          city?: string | null
-          country?: string | null
+          address_id?: number | null
           description?: string | null
           email?: string | null
           id?: number
@@ -963,13 +887,19 @@ export type Database = {
           mobile?: string | null
           name?: string
           phone?: string | null
-          postal_code?: string | null
-          region?: string | null
           tags?: string[]
           tax_id_number?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_vendors_address_id"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -995,54 +925,17 @@ export type Database = {
           balance: number | null
           data: Json | null
           end_date: string | null
-          fraction_id: number | null
           id: number | null
           inserted_at: string | null
           is_active: boolean | null
+          property_id: number | null
           start_date: string | null
           type: Database["public"]["Enums"]["contract_type"] | null
           updated_at: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "contracts_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_fraction_id_fkey"
-            columns: ["fraction_id"]
-            isOneToOne: false
-            referencedRelation: "fractions_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      fractions_view: {
-        Row: {
-          address: string | null
-          address_full: string | null
-          area: number | null
-          city: string | null
-          country: string | null
-          description: string | null
-          id: number | null
-          inserted_at: string | null
-          market_value: number | null
-          matrix: string | null
-          patrimonial_value: number | null
-          postal_code: string | null
-          property_id: number | null
-          region: string | null
-          sold: boolean | null
-          tipology: string | null
-          type: Database["public"]["Enums"]["fraction_type"] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fractions_property_id_fkey"
+            foreignKeyName: "fk_contracts_property_id"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -1062,21 +955,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_debts_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "installment_payments_contract_id_fkey"
+            foreignKeyName: "fk_installment_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lending_contracts_view"
@@ -1094,7 +987,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "intervention_payments_intervention_id_fkey"
+            foreignKeyName: "fk_intervention_payments_intervention_id"
             columns: ["intervention_id"]
             isOneToOne: false
             referencedRelation: "interventions"
@@ -1128,14 +1021,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "lending_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_lending_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id", "type"]
           },
           {
-            foreignKeyName: "lending_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_lending_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts_view"
@@ -1153,14 +1046,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "rent_payments_contract_id_fkey"
+            foreignKeyName: "fk_rent_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "rent_payments_contract_id_fkey"
+            foreignKeyName: "fk_rent_payments_contract_id"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "renting_contracts_view"
@@ -1178,14 +1071,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "renting_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_renting_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id", "type"]
           },
           {
-            foreignKeyName: "renting_contracts_id_contract_type_fkey"
+            foreignKeyName: "fk_renting_contracts_id_contract_type"
             columns: ["id", "contract_type"]
             isOneToOne: false
             referencedRelation: "contracts_view"
@@ -1202,7 +1095,6 @@ export type Database = {
     }
     Enums: {
       contract_type: "renting" | "lending"
-      fraction_type: "apartment" | "store" | "garage" | "house" | "terrain"
       gender: "male" | "female" | "other"
       intervention_status:
         | "not_started"
@@ -1218,7 +1110,14 @@ export type Database = {
         | "intervention"
         | "other"
       property_class: "urban" | "rustic"
-      property_type: "building" | "terrain" | "house" | "garages"
+      property_type:
+        | "building"
+        | "terrain"
+        | "house"
+        | "garages"
+        | "apartment"
+        | "store"
+        | "garage"
       salary_type: "hourly" | "monthly"
       ticket_priority: "low" | "medium" | "high"
       ticket_status: "open" | "in_progress" | "resolved" | "cancelled"
@@ -1353,7 +1252,6 @@ export const Constants = {
   public: {
     Enums: {
       contract_type: ["renting", "lending"],
-      fraction_type: ["apartment", "store", "garage", "house", "terrain"],
       gender: ["male", "female", "other"],
       intervention_status: [
         "not_started",
@@ -1371,7 +1269,15 @@ export const Constants = {
         "other",
       ],
       property_class: ["urban", "rustic"],
-      property_type: ["building", "terrain", "house", "garages"],
+      property_type: [
+        "building",
+        "terrain",
+        "house",
+        "garages",
+        "apartment",
+        "store",
+        "garage",
+      ],
       salary_type: ["hourly", "monthly"],
       ticket_priority: ["low", "medium", "high"],
       ticket_status: ["open", "in_progress", "resolved", "cancelled"],
