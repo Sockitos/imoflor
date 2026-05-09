@@ -1,7 +1,7 @@
 import { form, getRequestEvent, query } from '$app/server';
 import { genderSchema } from '@/schemas/gender';
 import { maritalStatusSchema } from '@/schemas/marital-status';
-import { deleteTenantSchema } from '@/schemas/tenant';
+import { deleteTenantSchema } from '@tenants/schemas/tenant';
 import { error, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 

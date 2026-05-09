@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { genderSchema } from './gender';
-import { maritalStatusSchema } from './marital-status';
+import { genderSchema } from '@/schemas/gender';
+import { maritalStatusSchema } from '@/schemas/marital-status';
 
 export const createTenantSchema = z.object({
 	name: z.string().min(1, 'Name is required'),

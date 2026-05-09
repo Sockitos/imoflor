@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@/components/movement-table.svelte';
+	import MovementTable from '@movements/components/movement-table.svelte';
 	import PageSubtitle from '@/components/page-subtitle.svelte';
 	import PageTitle from '@/components/page-title.svelte';
 	import { Button } from '@/components/ui/button';

@@ -9,7 +9,7 @@
 	import * as Sheet from '@/components/ui/sheet';
 	import { genderOptions } from '@/schemas/gender';
 	import { maritalStatusOptions } from '@/schemas/marital-status';
-	import { createTenantSchema, type CreateTenantSchema } from '@/schemas/tenant';
+	import { createTenantSchema, type CreateTenantSchema } from '@/tenants/schemas/tenant';
 	import { cn } from '@/utils';
 	import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import { deleteTenantSchema, type DeleteTenantSchema } from '@/schemas/tenant';
+	import { deleteTenantSchema, type DeleteTenantSchema } from '@/tenants/schemas/tenant';
 	import type { Tenant } from '@/types/types';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';

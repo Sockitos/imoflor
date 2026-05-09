@@ -1,5 +1,5 @@
-import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
-import type { Tenant } from '@/types/types';
+import { createTenantSchema, deleteTenantSchema } from '@tenants/schemas/tenant';
+import type { Tenant } from '@tenants/types/types';
 import { handleFormAction } from '@/utils';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';

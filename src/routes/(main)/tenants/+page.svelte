@@ -5,9 +5,9 @@
 	import { Separator } from '@/components/ui/separator';
 	import { Spinner } from '@/components/ui/spinner';
 	import { PlusCircle } from 'lucide-svelte';
-	import TenantForm from './_components/tenant-form.svelte';
-	import TenantTable from './_components/tenant-table.svelte';
-	import { getTenants } from '@/remotes/tenants.remote.js';
+	import TenantForm from '@tenants/components/tenant-form.svelte';
+	import TenantTable from '@tenants/components/tenant-table.svelte';
+	import { getTenants } from '@/tenants/remotes/tenants.remote.js';
 
 	let { data } = $props();
 	let { createTenantForm } = $derived(data);

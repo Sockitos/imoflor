@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@/components/movement-table.svelte';
+	import MovementTable from '@movements/components/movement-table.svelte';
 	import PageSubtitle from '@/components/page-subtitle.svelte';
 	import PageTitle from '@/components/page-title.svelte';
 	import { Button } from '@/components/ui/button';
@@ -8,11 +8,11 @@
 	import { Separator } from '@/components/ui/separator';
 	import { Spinner } from '@/components/ui/spinner';
 	import { dateFormatter } from '@/formatters';
-	import { getTenant } from '@/remotes/tenants.remote.js';
+	import { getTenant } from '@/tenants/remotes/tenants.remote.js';
 	import { Pencil, Trash } from 'lucide-svelte';
-	import TenantDeleteDialog from '../_components/tenant-delete-dialog.svelte';
-	import TenantForm from '../_components/tenant-form.svelte';
-	import { getMovements } from '@/remotes/movements.remote.js';
+	import TenantDeleteDialog from '@tenants/components/tenant-delete-dialog.svelte';
+	import TenantForm from '@tenants/components/tenant-form.svelte';
+	import { getMovements } from '@/movements/remotes/movements.remote.js';
 
 	let { data } = $props();
 	let { updateTenantForm, deleteTenantForm } = $derived(data);

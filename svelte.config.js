@@ -21,6 +21,8 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			'@/*': './src/lib/*',
+			'@tenants/*': './src/lib/tenants/*',
+			'@movements/*': './src/lib/movements/*',
 		},
 		experimental: {
 			remoteFunctions: true,

@@ -1,6 +1,6 @@
 import { renderComponent } from '@/components/ui/data-table';
 import DataTableCheckbox from '@/components/ui/data-table/data-table-checkbox.svelte';
-import type { Tenant } from '@/types/tenant';
+import type { Tenant } from '@/tenants/types/tenant';
 import type { ColumnDef } from '@tanstack/table-core';
 import TenantActions from './tenant-actions.svelte';
 import TenantEmailCell from './tenant-email-cell.svelte';

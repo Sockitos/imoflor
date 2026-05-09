@@ -1,4 +1,4 @@
-import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
+import { createTenantSchema, deleteTenantSchema } from '@tenants/schemas/tenant';
 import type { Movement, Tenant } from '@/types/types';
 import { handleFormAction } from '@/utils';
 import { error, redirect } from '@sveltejs/kit';
