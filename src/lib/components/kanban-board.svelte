@@ -294,7 +294,7 @@
 </script>
 
 <div class="flex gap-4 overflow-x-auto pb-4">
-	{#each columnOrder as columnId (columnId)}
+	{#each columnOrder as columnId, index (columnId)}
 		{@const col = statusMap[columnId]}
 		{@const colTickets = ticketsForColumn(columnId)}
 		{@const isDragOverCol =
@@ -315,8 +315,10 @@
 		>
 			<!-- Column Header -->
 			<div class="flex items-center gap-2 px-3 py-3">
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
+					role="button"
+					aria-label="Drag to reorder column"
+					tabindex={index}
 					draggable="true"
 					class="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
 					ondragstart={(e) => onColumnHandleDragStart(e, columnId)}
@@ -339,8 +341,9 @@
 					{@const isDropTarget = dragOverCardId === ticket.id && draggingCardId !== ticket.id}
 					{@const priority = priorityMap[ticket.priority]}
 
-					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
+						role="region"
+						aria-label={`Ticket ${ticket.id}`}
 						draggable="true"
 						class="transition-opacity {isDragging ? 'opacity-30' : ''}"
 						ondragstart={(e) => onCardDragStart(e, ticket.id, columnId)}
@@ -349,17 +352,16 @@
 						ondrop={(e) => onCardDrop(e, ticket.id, columnId)}
 					>
 						<Card
-							class="cursor-grab select-none bg-background shadow-sm active:cursor-grabbing
+							class="cursor-grab bg-background shadow-sm select-none active:cursor-grabbing
 								{isDropTarget ? 'border-primary ring-1 ring-primary' : ''}"
 						>
 							<CardHeader class="p-3 pb-1">
-								<p class="line-clamp-1 text-sm font-medium leading-snug">{ticket.title}</p>
+								<p class="line-clamp-1 text-sm leading-snug font-medium">{ticket.title}</p>
 							</CardHeader>
 							<CardContent class="p-3 pt-1">
 								<p class="mb-3 line-clamp-2 text-xs text-muted-foreground">{ticket.description}</p>
 								<div class="flex items-center justify-between gap-2">
-									<span class="truncate text-xs text-muted-foreground"
-										>{ticket.property.label}</span
+									<span class="truncate text-xs text-muted-foreground">{ticket.property.label}</span
 									>
 									<Badge
 										variant={priority.variant}
