@@ -1,10 +1,6 @@
-import { addressSchema, deleteByIdSchema, idSchema } from "@/shared/schemas";
-import { z } from "zod";
-import {
-	fractionTypeValues,
-	propertyClassValues,
-	propertyTypeValues,
-} from "./types";
+import { addressSchema, deleteByIdSchema, idSchema } from '@/shared/schemas';
+import { z } from 'zod';
+import { fractionTypeValues, propertyClassValues, propertyTypeValues } from './types';
 
 export const propertyClassSchema = z.enum(propertyClassValues);
 export const propertyTypeSchema = z.enum(propertyTypeValues);
@@ -12,8 +8,8 @@ export const propertyTypeSchema = z.enum(propertyTypeValues);
 const propertySchema = z.object({
 	class: propertyClassSchema,
 	type: propertyTypeSchema,
-	matrix: z.string().min(1, "Matrix is required"),
-	conservatory: z.string().min(1, "Conservatory is required"),
+	matrix: z.string().min(1, 'Matrix is required'),
+	conservatory: z.string().min(1, 'Conservatory is required'),
 	area: z.coerce.number().nullish(),
 	tipology: z.string().nullish(),
 	description: z.string().nullish(),
@@ -39,15 +35,15 @@ export const fractionTypeSchema = z.enum(fractionTypeValues);
 const fractionSchema = z.object({
 	class: propertyClassSchema,
 	type: fractionTypeSchema,
-	matrix: z.string().min(1, "Matrix is required"),
-	conservatory: z.string().min(1, "Conservatory is required"),
+	matrix: z.string().min(1, 'Matrix is required'),
+	conservatory: z.string().min(1, 'Conservatory is required'),
 	area: z.coerce.number().nullish(),
 	tipology: z.string().nullish(),
 	description: z.string().nullish(),
 	patrimonial_value: z.coerce.number().nullish(),
 	market_value: z.coerce.number().nullish(),
 	address: addressSchema,
-	fraction: z.string().min(1, "Fraction is required"),
+	fraction: z.string().min(1, 'Fraction is required'),
 	parent_id: idSchema,
 });
 

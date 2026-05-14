@@ -1,8 +1,8 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 
-import type { Database } from "@/shared/types/supabase-types";
-import { Claims, SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from '@/shared/types/supabase-types';
+import { Claims, SupabaseClient } from '@supabase/supabase-js';
 
 declare global {
 	namespace App {
@@ -12,7 +12,7 @@ declare global {
 		interface PageData {
 			supabase: SupabaseClient<Database>;
 			claims: Claims;
-			flash?: { type: "success" | "error"; message: string };
+			flash?: { type: 'success' | 'error'; message: string };
 		}
 		// interface Error {}
 		// interface Platform {}

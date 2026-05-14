@@ -1,36 +1,34 @@
-import { renderComponent } from "@/shared/components/ui/data-table";
-import DataTableCheckbox from "@/shared/components/ui/data-table/data-table-checkbox.svelte";
-import { currencyFormatter } from "@/shared/formatters";
-import type { ColumnDef } from "@tanstack/table-core";
-import type { Contract, ContractType } from "../types";
-import ContractActions from "./contract-actions.svelte";
-import ContractBalanceCell from "./contract-balance-cell.svelte";
-import ContractTypeCell from "./contract-type-cell.svelte";
+import { renderComponent } from '@/shared/components/ui/data-table';
+import DataTableCheckbox from '@/shared/components/ui/data-table/data-table-checkbox.svelte';
+import { currencyFormatter } from '@/shared/formatters';
+import type { ColumnDef } from '@tanstack/table-core';
+import type { Contract, ContractType } from '../types';
+import ContractActions from './contract-actions.svelte';
+import ContractBalanceCell from './contract-balance-cell.svelte';
+import ContractTypeCell from './contract-type-cell.svelte';
 
 export const columns: ColumnDef<Contract>[] = [
 	{
-		id: "select",
+		id: 'select',
 		header: ({ table }) =>
 			renderComponent(DataTableCheckbox, {
 				checked: table.getIsAllPageRowsSelected(),
-				indeterminate: table.getIsSomePageRowsSelected() &&
-					!table.getIsAllPageRowsSelected(),
-				onCheckedChange: (value) =>
-					table.toggleAllPageRowsSelected(!!value),
-				"aria-label": "Select all",
+				indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
+				onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
+				'aria-label': 'Select all',
 			}),
 		cell: ({ row }) =>
 			renderComponent(DataTableCheckbox, {
 				checked: row.getIsSelected(),
 				onCheckedChange: (value) => row.toggleSelected(!!value),
-				"aria-label": "Select row",
+				'aria-label': 'Select row',
 			}),
 		enableSorting: false,
 		enableHiding: false,
 	},
 	{
-		accessorKey: "type",
-		header: "Type",
+		accessorKey: 'type',
+		header: 'Type',
 		cell: ({ row }) => {
 			return renderComponent(ContractTypeCell, {
 				type: row.original.type,
@@ -43,41 +41,37 @@ export const columns: ColumnDef<Contract>[] = [
 	},
 	{
 		accessorFn: (row) => row.property.label,
-		id: "property",
-		header: "Property",
+		id: 'property',
+		header: 'Property',
 	},
 	{
-		accessorKey: "tenants",
-		header: "Tenants",
+		accessorKey: 'tenants',
+		header: 'Tenants',
 		cell: ({ row }) => {
 			const tenants = row.original.tenants;
 			const count = tenants.length;
-			if (count === 0) return "";
-			return count === 1
-				? tenants[0].label
-				: `${tenants[0].label} +${count - 1}`;
+			if (count === 0) return '';
+			return count === 1 ? tenants[0].label : `${tenants[0].label} +${count - 1}`;
 		},
 	},
 	{
 		accessorFn: (row) => {
-			if (row.type === "renting") {
+			if (row.type === 'renting') {
 				return row.data.rent;
 			}
 			return row.data.installment;
 		},
-		id: "payment",
-		header: "Payment",
+		id: 'payment',
+		header: 'Payment',
 		cell: ({ row }) => {
 			const contract = row.original;
-			const value = contract.type === "renting"
-				? contract.data.rent
-				: contract.data.installment;
+			const value = contract.type === 'renting' ? contract.data.rent : contract.data.installment;
 			return currencyFormatter.format(value);
 		},
 	},
 	{
-		accessorKey: "balance",
-		header: "Balance",
+		accessorKey: 'balance',
+		header: 'Balance',
 		cell: ({ row }) => {
 			return renderComponent(ContractBalanceCell, {
 				balance: row.original.balance,
@@ -85,8 +79,8 @@ export const columns: ColumnDef<Contract>[] = [
 		},
 	},
 	{
-		id: "actions",
-		header: "",
+		id: 'actions',
+		header: '',
 		cell: ({ row }) => {
 			return renderComponent(ContractActions, {
 				contract: row.original,

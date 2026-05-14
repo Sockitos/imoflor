@@ -1,28 +1,24 @@
-import type { Id, IdAndLabel, Timestamp } from "@/shared/types";
+import type { Id, IdAndLabel, Timestamp } from '@/shared/types';
 
 export const interventionStatusValues = [
-	"not_started",
-	"in_progress",
-	"completed",
-	"cancelled",
+	'not_started',
+	'in_progress',
+	'completed',
+	'cancelled',
 ] as const;
 export const interventionStatusOptions = {
-	not_started: "Not Started",
-	in_progress: "In Progress",
-	completed: "Completed",
-	cancelled: "Cancelled",
+	not_started: 'Not Started',
+	in_progress: 'In Progress',
+	completed: 'Completed',
+	cancelled: 'Cancelled',
 };
 export type InterventionStatus = (typeof interventionStatusValues)[number];
 
-export const interventionTypeValues = [
-	"new",
-	"renovation",
-	"maintenance",
-] as const;
+export const interventionTypeValues = ['new', 'renovation', 'maintenance'] as const;
 export const interventionTypeOptions = {
-	new: "New",
-	renovation: "Renovation",
-	maintenance: "Maintenance",
+	new: 'New',
+	renovation: 'Renovation',
+	maintenance: 'Maintenance',
 };
 export type InterventionType = (typeof interventionTypeValues)[number];
 

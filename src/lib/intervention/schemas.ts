@@ -1,6 +1,6 @@
-import { deleteByIdSchema, idSchema } from "@/shared/schemas";
-import { z } from "zod";
-import { interventionStatusValues, interventionTypeValues } from "./types";
+import { deleteByIdSchema, idSchema } from '@/shared/schemas';
+import { z } from 'zod';
+import { interventionStatusValues, interventionTypeValues } from './types';
 
 export const interventionTypeSchema = z.enum(interventionTypeValues);
 export const interventionStatusSchema = z.enum(interventionStatusValues);
@@ -10,7 +10,7 @@ const interventionSchema = z.object({
 	status: interventionStatusSchema,
 	start_date: z.string().nullish(),
 	end_date: z.string().nullish(),
-	description: z.string().min(1, "Description is required"),
+	description: z.string().min(1, 'Description is required'),
 	property_id: idSchema,
 	ticket_id: idSchema.nullish(),
 });

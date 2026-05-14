@@ -1,4 +1,4 @@
-import type { Address, Gender, MaritalStatus, Timestamp } from "@/shared/types";
+import type { Address, Gender, MaritalStatus, Timestamp } from '@/shared/types';
 
 export type Tenant = {
 	id: number;

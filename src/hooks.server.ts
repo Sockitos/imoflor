@@ -1,11 +1,8 @@
-import {
-	PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-	PUBLIC_SUPABASE_URL,
-} from "$env/static/public";
-import type { Database } from "@/shared/types/supabase-types";
-import { handleLoginRedirect } from "@/shared/utils";
-import { createServerClient } from "@supabase/ssr";
-import { type Handle, redirect } from "@sveltejs/kit";
+import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
+import type { Database } from '@/shared/types/supabase-types';
+import { handleLoginRedirect } from '@/shared/utils';
+import { createServerClient } from '@supabase/ssr';
+import { type Handle, redirect } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient<Database>(
@@ -26,7 +23,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 					cookiesToSet.forEach(({ name, value, options }) =>
 						event.cookies.set(name, value, {
 							...options,
-							path: "/",
+							path: '/',
 						})
 					);
 					if (Object.keys(headers).length > 0) {
@@ -34,26 +31,24 @@ export const handle: Handle = async ({ event, resolve }) => {
 					}
 				},
 			},
-		},
+		}
 	);
 
-	const { data: claimsData, error: claimsError } = await event.locals.supabase
-		.auth.getClaims();
+	const { data: claimsData, error: claimsError } = await event.locals.supabase.auth.getClaims();
 	const claims = claimsError ? null : claimsData?.claims;
-	const isAuthRoute = event.url.pathname.startsWith("/auth");
+	const isAuthRoute = event.url.pathname.startsWith('/auth');
 
 	if (!claims && !isAuthRoute) {
 		return redirect(302, handleLoginRedirect(event));
 	}
 
-	if (claims && event.url.pathname === "/auth/login") {
-		return redirect(302, "/dashboard");
+	if (claims && event.url.pathname === '/auth/login') {
+		return redirect(302, '/dashboard');
 	}
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
-			return name === "content-range" ||
-				name === "x-supabase-api-version";
+			return name === 'content-range' || name === 'x-supabase-api-version';
 		},
 	});
 };
