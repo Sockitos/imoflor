@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import * as Tabs from '$lib/shared/components/ui/tabs';
+	import * as Tabs from '@/shared/components/ui/tabs';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';

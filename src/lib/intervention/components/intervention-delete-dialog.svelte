@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as AlertDialog from '$lib/shared/components/ui/alert-dialog';
+	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { deleteInterventionSchema, type DeleteInterventionSchema } from '../schemas';

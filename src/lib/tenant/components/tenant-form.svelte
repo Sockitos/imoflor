@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Select from '$lib/shared/components/ui/select';
+	import * as Select from '@/shared/components/ui/select';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
