@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import EntitySelector from '@shared/components/entity-selector.svelte';
-	import { Button, buttonVariants } from '@shared/components/ui/button';
-	import { Calendar } from '@shared/components/ui/calendar';
-	import * as Form from '@shared/components/ui/form';
-	import * as Popover from '@shared/components/ui/popover';
-	import * as Select from '@shared/components/ui/select';
-	import { Separator } from '@shared/components/ui/separator';
-	import * as Sheet from '@shared/components/ui/sheet';
-	import { Textarea } from '@shared/components/ui/textarea';
-	import { cn } from '@shared/utils';
+	import EntitySelector from '@/shared/components/entity-selector.svelte';
+	import { Button, buttonVariants } from '@/shared/components/ui/button';
+	import { Calendar } from '@/shared/components/ui/calendar';
+	import * as Form from '@/shared/components/ui/form';
+	import * as Popover from '@/shared/components/ui/popover';
+	import * as Select from '@/shared/components/ui/select';
+	import { Separator } from '@/shared/components/ui/separator';
+	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Textarea } from '@/shared/components/ui/textarea';
+	import { cn } from '@/shared/utils';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';

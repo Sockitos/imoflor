@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@movement/components/movement-table.svelte';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import * as Card from '@shared/components/ui/card';
-	import { Separator } from '@shared/components/ui/separator';
-	import { dateFormatter } from '@shared/formatters';
-	import { genderOptions, maritalStatusOptions } from '@shared/types';
-	import EmployeeDeleteDialog from '@employee/components/employee-delete-dialog.svelte';
-	import EmployeeForm from '@employee/components/employee-form.svelte';
+	import MovementTable from '@/movement/components/movement-table.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { dateFormatter } from '@/shared/formatters';
+	import { genderOptions, maritalStatusOptions } from '@/shared/types';
+	import EmployeeDeleteDialog from '@/employee/components/employee-delete-dialog.svelte';
+	import EmployeeForm from '@/employee/components/employee-form.svelte';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

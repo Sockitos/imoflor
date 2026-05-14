@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModeToggle from '@shared/components/mode-toggle.svelte';
-	import * as Breadcrumb from '@shared/components/ui/breadcrumb';
-	import { Separator } from '@shared/components/ui/separator';
-	import * as Sidebar from '@shared/components/ui/sidebar';
+	import ModeToggle from '@/shared/components/mode-toggle.svelte';
+	import * as Breadcrumb from '@/shared/components/ui/breadcrumb';
+	import { Separator } from '@/shared/components/ui/separator';
+	import * as Sidebar from '@/shared/components/ui/sidebar';
 
 	let pathParts = $derived(page.url.pathname.split('/').slice(1));
 </script>

@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import FractionForm from '@property/components/fraction-form.svelte';
-	import FractionTable from '@property/components/fraction-table.svelte';
-	import PropertyDeleteDialog from '@property/components/property-delete-dialog.svelte';
-	import PropertyForm from '@property/components/property-form.svelte';
-	import { propertyClassOptions, propertyTypeOptions } from '@property/types';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import * as Card from '@shared/components/ui/card';
-	import { Separator } from '@shared/components/ui/separator';
-	import { areaFormatter, currencyFormatter } from '@shared/formatters';
+	import FractionForm from '@/property/components/fraction-form.svelte';
+	import FractionTable from '@/property/components/fraction-table.svelte';
+	import PropertyDeleteDialog from '@/property/components/property-delete-dialog.svelte';
+	import PropertyForm from '@/property/components/property-form.svelte';
+	import { propertyClassOptions, propertyTypeOptions } from '@/property/types';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { areaFormatter, currencyFormatter } from '@/shared/formatters';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

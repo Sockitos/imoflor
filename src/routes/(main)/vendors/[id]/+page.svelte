@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@movement/components/movement-table.svelte';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import { Badge } from '@shared/components/ui/badge';
-	import { Separator } from '@shared/components/ui/separator';
-	import VendorDeleteDialog from '@vendor/components/vendor-delete-dialog.svelte';
-	import VendorForm from '@vendor/components/vendor-form.svelte';
+	import MovementTable from '@/movement/components/movement-table.svelte';
+	import VendorDeleteDialog from '@/vendor/components/vendor-delete-dialog.svelte';
+	import VendorForm from '@/vendor/components/vendor-form.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Badge } from '@/shared/components/ui/badge';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

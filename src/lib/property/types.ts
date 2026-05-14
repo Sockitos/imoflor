@@ -1,29 +1,29 @@
-import type { Address, Id } from '@shared/types';
+import type { Address, Id } from "@/shared/types";
 
-export const propertyClassValues = ['urban', 'rustic'] as const;
+export const propertyClassValues = ["urban", "rustic"] as const;
 export const propertyClassOptions = {
-	urban: 'Urban',
-	rustic: 'Rustic',
+	urban: "Urban",
+	rustic: "Rustic",
 };
 export type PropertyClass = (typeof propertyClassValues)[number];
 
 export const propertyTypeValues = [
-	'building',
-	'terrain',
-	'house',
-	'garages',
-	'apartment',
-	'store',
-	'garage',
+	"building",
+	"terrain",
+	"house",
+	"garages",
+	"apartment",
+	"store",
+	"garage",
 ] as const;
 export const propertyTypeOptions = {
-	building: 'Building',
-	terrain: 'Terrain',
-	house: 'House',
-	garages: 'Garages',
-	apartment: 'Apartment',
-	store: 'Store',
-	garage: 'Garage',
+	building: "Building",
+	terrain: "Terrain",
+	house: "House",
+	garages: "Garages",
+	apartment: "Apartment",
+	store: "Store",
+	garage: "Garage",
 };
 export type PropertyType = (typeof propertyTypeValues)[number];
 
@@ -43,11 +43,11 @@ export type Property = {
 	sold: boolean;
 };
 
-export const fractionTypeValues = ['apartment', 'store', 'garage'] as const;
+export const fractionTypeValues = ["apartment", "store", "garage"] as const;
 export const fractionTypeOptions = {
-	apartment: 'Apartment',
-	store: 'Store',
-	garage: 'Garage',
+	apartment: "Apartment",
+	store: "Store",
+	garage: "Garage",
 };
 export type FractionType = (typeof fractionTypeValues)[number];
 

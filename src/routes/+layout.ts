@@ -1,17 +1,31 @@
-import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import type { Database } from '@shared/types/supabase-types';
-import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
+import {
+	PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+	PUBLIC_SUPABASE_URL,
+} from "$env/static/public";
+import type { Database } from "@/shared/types/supabase-types";
+import {
+	createBrowserClient,
+	createServerClient,
+	isBrowser,
+} from "@supabase/ssr";
 
 export const load = async ({ fetch, data, depends }) => {
-	depends('supabase:auth');
+	depends("supabase:auth");
 
 	const supabase = isBrowser()
-		? createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+		? createBrowserClient<Database>(
+			PUBLIC_SUPABASE_URL,
+			PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+			{
 				global: {
 					fetch,
 				},
-			})
-		: createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+			},
+		)
+		: createServerClient<Database>(
+			PUBLIC_SUPABASE_URL,
+			PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+			{
 				global: {
 					fetch,
 				},
@@ -20,7 +34,8 @@ export const load = async ({ fetch, data, depends }) => {
 						return data.cookies;
 					},
 				},
-			});
+			},
+		);
 
 	/**
 	 * `getClaims` validates the JWT signature locally (for asymmetric keys) once
@@ -29,7 +44,8 @@ export const load = async ({ fetch, data, depends }) => {
 	 * fetch or refresh keys, this is both faster and safer than `getSession`,
 	 * which does not validate the JWT.
 	 */
-	const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+	const { data: claimsData, error: claimsError } = await supabase.auth
+		.getClaims();
 	const claims = claimsError ? null : claimsData?.claims;
 
 	return { ...data, supabase, claims };

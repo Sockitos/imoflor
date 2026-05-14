@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { RouteId } from '$app/types';
-	import { getProfile } from '@profile/profile.remote';
-	import * as Avatar from '@shared/components/ui/avatar';
-	import * as DropdownMenu from '@shared/components/ui/dropdown-menu';
-	import * as Sidebar from '@shared/components/ui/sidebar';
+	import { getProfile } from '@/profile/profile.remote';
+	import * as Avatar from '@/shared/components/ui/avatar';
+	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
+	import * as Sidebar from '@/shared/components/ui/sidebar';
 	import BuildingIcon from '@tabler/icons-svelte/icons/building';
 	import ChartBarIcon from '@tabler/icons-svelte/icons/chart-bar';
 	import DashboardIcon from '@tabler/icons-svelte/icons/dashboard';

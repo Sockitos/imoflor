@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { currencyFormatter } from '@shared/formatters';
+	import { currencyFormatter } from '@/shared/formatters';
 	import { AlertTriangle } from 'lucide-svelte';
 
 	interface Props {

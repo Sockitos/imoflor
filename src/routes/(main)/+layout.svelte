@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AppSidebar from '@shared/components/app-sidebar.svelte';
-	import TopBar from '@shared/components/top-bar.svelte';
-	import * as Sidebar from '@shared/components/ui/sidebar';
+	import AppSidebar from '@/shared/components/app-sidebar.svelte';
+	import TopBar from '@/shared/components/top-bar.svelte';
+	import * as Sidebar from '@/shared/components/ui/sidebar';
 
 	let { children } = $props();
 </script>

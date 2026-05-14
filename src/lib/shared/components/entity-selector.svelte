@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Button } from '@shared/components/ui/button';
-	import * as Command from '@shared/components/ui/command';
-	import * as Popover from '@shared/components/ui/popover';
-	import type { IdAndLabel } from '@shared/types';
-	import { cn } from '@shared/utils';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Command from '@/shared/components/ui/command';
+	import * as Popover from '@/shared/components/ui/popover';
+	import type { IdAndLabel } from '@/shared/types';
+	import { cn } from '@/shared/utils';
 	import { useId } from 'bits-ui';
 	import { tick } from 'svelte';
 	import CaretSort from 'svelte-radix/CaretSort.svelte';

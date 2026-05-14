@@ -1,4 +1,4 @@
-import type { Address, Id } from '@shared/types';
+import type { Address, Id } from "@/shared/types";
 
 export type Vendor = {
 	id: Id;

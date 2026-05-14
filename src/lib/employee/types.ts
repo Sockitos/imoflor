@@ -1,9 +1,15 @@
-import type { Address, Gender, Id, MaritalStatus, Timestamp } from '@shared/types';
+import type {
+	Address,
+	Gender,
+	Id,
+	MaritalStatus,
+	Timestamp,
+} from "@/shared/types";
 
-export const salaryTypeValues = ['hourly', 'monthly'] as const;
+export const salaryTypeValues = ["hourly", "monthly"] as const;
 export const salaryTypeOptions = {
-	hourly: 'Hourly',
-	monthly: 'Monthly',
+	hourly: "Hourly",
+	monthly: "Monthly",
 };
 export type SalaryType = (typeof salaryTypeValues)[number];
 

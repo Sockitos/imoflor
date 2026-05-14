@@ -1,6 +1,6 @@
-import type { Id, IdAndLabel, Timestamp } from '@shared/types';
+import type { Id, IdAndLabel, Timestamp } from "@/shared/types";
 
-export const contractTypeValues = ['renting', 'lending'] as const;
+export const contractTypeValues = ["renting", "lending"] as const;
 export type ContractType = (typeof contractTypeValues)[number];
 
 export type BaseContract = {
@@ -20,7 +20,7 @@ export type RentUpdate = {
 };
 
 export type RentingContractData = {
-	type: 'renting';
+	type: "renting";
 	data: { rent: number; next_update: RentUpdate | null };
 };
 
@@ -33,7 +33,7 @@ export type InstallmentUpdate = {
 	update_date: string;
 };
 export type LendingContractData = {
-	type: 'lending';
+	type: "lending";
 	data: {
 		sale_value: number;
 		down_payment: number;
@@ -51,7 +51,7 @@ export type LendingContract = BaseContract & LendingContractData;
 
 export type Contract = RentingContract | LendingContract;
 
-export const contractAccountTypeValues = ['due_note', 'payment'] as const;
+export const contractAccountTypeValues = ["due_note", "payment"] as const;
 export type ContractAccountType = (typeof contractAccountTypeValues)[number];
 
 export type ContractAccountItem = {

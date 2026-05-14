@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '@shared/utils.js';
+	import { cn, type WithElementRef } from '@/shared/utils.js';
 	import type { HTMLThAttributes } from 'svelte/elements';
 
 	let {

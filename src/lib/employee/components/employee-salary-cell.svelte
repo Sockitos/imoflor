@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Badge } from '@shared/components/ui/badge';
-	import { currencyFormatter } from '@shared/formatters';
+	import { Badge } from '@/shared/components/ui/badge';
+	import { currencyFormatter } from '@/shared/formatters';
 	import type { SalaryType } from '../types';
 
 	interface Props {

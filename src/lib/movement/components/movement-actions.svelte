@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from '@shared/components/ui/button';
-	import * as DropdownMenu from '@shared/components/ui/dropdown-menu';
+	import { Button } from '@/shared/components/ui/button';
+	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
 	import { MoreHorizontal } from 'lucide-svelte';
 </script>
 

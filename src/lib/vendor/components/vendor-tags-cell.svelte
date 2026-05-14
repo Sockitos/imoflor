@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Badge } from '@shared/components/ui/badge';
+	import { Badge } from '@/shared/components/ui/badge';
 
 	interface Props {
 		tags: string[] | null | undefined;

@@ -1,9 +1,9 @@
-import { addressSchema, deleteByIdSchema, idSchema } from '@shared/schemas';
-import { z } from 'zod';
+import { addressSchema, deleteByIdSchema, idSchema } from "@/shared/schemas";
+import { z } from "zod";
 
 const vendorSchema = z.object({
-	name: z.string().min(1, 'Name is required'),
-	tax_id_number: z.string().min(1, 'Tax ID Number is required'),
+	name: z.string().min(1, "Name is required"),
+	tax_id_number: z.string().min(1, "Tax ID Number is required"),
 	description: z.string().nullish(),
 	tags: z.array(z.string()),
 	address: addressSchema,

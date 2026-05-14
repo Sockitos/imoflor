@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { createSvelteTable, FlexRender } from '@shared/components/ui/data-table';
-	import { Input } from '@shared/components/ui/input';
-	import * as Table from '@shared/components/ui/table';
+	import { createSvelteTable, FlexRender } from '@/shared/components/ui/data-table';
+	import { Input } from '@/shared/components/ui/input';
+	import * as Table from '@/shared/components/ui/table';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { writable } from 'svelte/store';
 	import type { Movement } from '../types';

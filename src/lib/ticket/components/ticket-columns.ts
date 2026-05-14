@@ -1,37 +1,39 @@
-import { renderComponent } from '@shared/components/ui/data-table';
-import DataTableCheckbox from '@shared/components/ui/data-table/data-table-checkbox.svelte';
-import type { ColumnDef } from '@tanstack/table-core';
-import type { Ticket, TicketPriority, TicketStatus } from '../types';
-import TicketActions from './ticket-actions.svelte';
-import TicketPriorityCell from './ticket-priority-cell.svelte';
-import TicketStatusCell from './ticket-status-cell.svelte';
+import { renderComponent } from "@/shared/components/ui/data-table";
+import DataTableCheckbox from "@/shared/components/ui/data-table/data-table-checkbox.svelte";
+import type { ColumnDef } from "@tanstack/table-core";
+import type { Ticket, TicketPriority, TicketStatus } from "../types";
+import TicketActions from "./ticket-actions.svelte";
+import TicketPriorityCell from "./ticket-priority-cell.svelte";
+import TicketStatusCell from "./ticket-status-cell.svelte";
 
 export const columns: ColumnDef<Ticket>[] = [
 	{
-		id: 'select',
+		id: "select",
 		header: ({ table }) =>
 			renderComponent(DataTableCheckbox, {
 				checked: table.getIsAllPageRowsSelected(),
-				indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-				onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
-				'aria-label': 'Select all',
+				indeterminate: table.getIsSomePageRowsSelected() &&
+					!table.getIsAllPageRowsSelected(),
+				onCheckedChange: (value) =>
+					table.toggleAllPageRowsSelected(!!value),
+				"aria-label": "Select all",
 			}),
 		cell: ({ row }) =>
 			renderComponent(DataTableCheckbox, {
 				checked: row.getIsSelected(),
 				onCheckedChange: (value) => row.toggleSelected(!!value),
-				'aria-label': 'Select row',
+				"aria-label": "Select row",
 			}),
 		enableSorting: false,
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'id',
-		header: 'ID',
+		accessorKey: "id",
+		header: "ID",
 	},
 	{
-		accessorKey: 'status',
-		header: 'Status',
+		accessorKey: "status",
+		header: "Status",
 		cell: ({ row }) => {
 			return renderComponent(TicketStatusCell, {
 				status: row.original.status,
@@ -43,8 +45,8 @@ export const columns: ColumnDef<Ticket>[] = [
 		},
 	},
 	{
-		accessorKey: 'priority',
-		header: 'Priority',
+		accessorKey: "priority",
+		header: "Priority",
 		cell: ({ row }) => {
 			return renderComponent(TicketPriorityCell, {
 				priority: row.original.priority,
@@ -56,17 +58,17 @@ export const columns: ColumnDef<Ticket>[] = [
 		},
 	},
 	{
-		accessorKey: 'title',
-		header: 'Title',
+		accessorKey: "title",
+		header: "Title",
 	},
 	{
-		accessorFn: (row) => row.property?.label ?? '',
-		id: 'property',
-		header: 'Property',
+		accessorFn: (row) => row.property?.label ?? "",
+		id: "property",
+		header: "Property",
 	},
 	{
-		id: 'actions',
-		header: '',
+		id: "actions",
+		header: "",
 		cell: ({ row }) => {
 			return renderComponent(TicketActions, {
 				ticket: row.original,

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import FractionDeleteDialog from '@property/components/fraction-delete-dialog.svelte';
-	import FractionForm from '@property/components/fraction-form.svelte';
-	import { fractionTypeOptions, propertyClassOptions } from '@property/types';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import * as Card from '@shared/components/ui/card';
-	import { Separator } from '@shared/components/ui/separator';
-	import { areaFormatter, currencyFormatter } from '@shared/formatters';
+	import FractionDeleteDialog from '@/property/components/fraction-delete-dialog.svelte';
+	import FractionForm from '@/property/components/fraction-form.svelte';
+	import { fractionTypeOptions, propertyClassOptions } from '@/property/types';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { areaFormatter, currencyFormatter } from '@/shared/formatters';
 	import { Pencil, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

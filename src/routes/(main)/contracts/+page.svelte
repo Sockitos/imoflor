@@ -1,11 +1,11 @@
 <script lang="ts">
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import { Separator } from '@shared/components/ui/separator';
+	import ContractForm from '@/contract/components/contract-form.svelte';
+	import ContractTable from '@/contract/components/contract-table.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
-	import ContractForm from '@contract/components/contract-form.svelte';
-	import ContractTable from '@contract/components/contract-table.svelte';
 
 	let { data } = $props();
 	let { contracts, createContractForm } = $derived(data);

@@ -1,12 +1,20 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import * as Card from '@shared/components/ui/card';
-	import { Separator } from '@shared/components/ui/separator';
-	import { currencyFormatter, dateFormatter } from '@shared/formatters';
+	import ContractAccountTable from '@/contract/components/contract-account/contract-account-table.svelte';
+	import DueNoteForm from '@/contract/components/contract-account/due-note-form.svelte';
+	import InstallmentPaymentForm from '@/contract/components/contract-account/installment-payment-form.svelte';
+	import RentPaymentForm from '@/contract/components/contract-account/rent-payment-form.svelte';
+	import ContractDeleteDialog from '@/contract/components/contract-delete-dialog.svelte';
+	import ContractForm from '@/contract/components/contract-form.svelte';
+	import InstallmentUpdateForm from '@/contract/components/installment-update/installment-update-form.svelte';
+	import RentUpdateForm from '@/contract/components/rent-update/rent-update-form.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
 	import {
 		AlertTriangle,
 		ArrowUpDown,
@@ -19,14 +27,6 @@
 		PlusCircle,
 		Trash,
 	} from 'lucide-svelte';
-	import DueNoteForm from '@contract/components/contract-account/due-note-form.svelte';
-	import InstallmentPaymentForm from '@contract/components/contract-account/installment-payment-form.svelte';
-	import RentPaymentForm from '@contract/components/contract-account/rent-payment-form.svelte';
-	import ContractDeleteDialog from '@contract/components/contract-delete-dialog.svelte';
-	import ContractForm from '@contract/components/contract-form.svelte';
-	import InstallmentUpdateForm from '@contract/components/installment-update/installment-update-form.svelte';
-	import RentUpdateForm from '@contract/components/rent-update/rent-update-form.svelte';
-	import ContractAccountTable from '@contract/components/contract-account/contract-account-table.svelte';
 
 	let { data } = $props();
 	let {

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Button } from '@shared/components/ui/button';
-	import * as Form from '@shared/components/ui/form';
-	import { Input } from '@shared/components/ui/input';
-	import * as Select from '@shared/components/ui/select';
-	import { Separator } from '@shared/components/ui/separator';
-	import * as Sheet from '@shared/components/ui/sheet';
-	import { Textarea } from '@shared/components/ui/textarea';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Form from '@/shared/components/ui/form';
+	import { Input } from '@/shared/components/ui/input';
+	import * as Select from '@/shared/components/ui/select';
+	import { Separator } from '@/shared/components/ui/separator';
+	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Textarea } from '@/shared/components/ui/textarea';
 	import { Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';

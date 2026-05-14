@@ -6,103 +6,135 @@ import {
 	createRentPaymentSchema,
 	createRentUpdateSchema,
 	deleteContractSchema,
-} from '@contract/schemas';
-import type { Contract, ContractAccountItem, InstallmentUpdate, RentUpdate } from '@contract/types';
-import { calculateInterest } from '@contract/utils';
-import type { IdAndLabel } from '@shared/types';
-import { handleFormAction } from '@shared/utils';
-import { error, redirect } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
-import { fail, superValidate } from 'sveltekit-superforms';
-import { zod4 } from 'sveltekit-superforms/adapters';
+} from "@/contract/schemas";
+import type {
+	Contract,
+	ContractAccountItem,
+	InstallmentUpdate,
+	RentUpdate,
+} from "@/contract/types";
+import { calculateInterest } from "@/contract/utils";
+import type { IdAndLabel } from "@/shared/types";
+import { handleFormAction } from "@/shared/utils";
+import { error, redirect } from "@sveltejs/kit";
+import { setFlash } from "sveltekit-flash-message/server";
+import { fail, superValidate } from "sveltekit-superforms";
+import { zod4 } from "sveltekit-superforms/adapters";
 
 export const load = async (event) => {
 	async function getContract(): Promise<Contract> {
-		const { data: contract, error: contractError } = await event.locals.supabase
-			.from('contracts_view')
+		const { data: contract, error: contractError } = await event.locals
+			.supabase
+			.from("contracts_view")
 			.select(
-				'*, tenants:tenants!inner (id, label:name), property:properties!inner (id, ...addresses(label:address))'
+				"*, tenants:tenants!inner (id, label:name), property:properties!inner (id, ...addresses(label:address))",
 			)
-			.eq('id', Number(event.params.id))
+			.eq("id", Number(event.params.id))
 			.returns<Contract[]>() // TODO: try not to use returns
 			.single();
 
 		if (contractError) {
-			return error(500, 'Error fetching contract, please try again later.');
+			return error(
+				500,
+				"Error fetching contract, please try again later.",
+			);
 		}
 		return contract;
 	}
 
 	async function getContractAccount(): Promise<ContractAccountItem[]> {
-		const { data: contractAccount, error: contractAccountError } = await event.locals.supabase
-			.from('contracts_accounts_view')
-			.select('*')
-			.eq('contract_id', Number(event.params.id));
+		const { data: contractAccount, error: contractAccountError } =
+			await event.locals.supabase
+				.from("contracts_accounts_view")
+				.select("*")
+				.eq("contract_id", Number(event.params.id));
 
 		if (contractAccountError) {
-			return error(500, 'Error fetching contract account, please try again later.');
+			return error(
+				500,
+				"Error fetching contract account, please try again later.",
+			);
 		}
 		return contractAccount;
 	}
 
 	async function getRentUpdates(): Promise<RentUpdate[]> {
-		const { data: rentUpdates, error: rentUpdatesError } = await event.locals.supabase
-			.from('rent_updates')
-			.select('*')
-			.eq('contract_id', Number(event.params.id))
-			.order('update_date');
+		const { data: rentUpdates, error: rentUpdatesError } = await event
+			.locals.supabase
+			.from("rent_updates")
+			.select("*")
+			.eq("contract_id", Number(event.params.id))
+			.order("update_date");
 
 		if (rentUpdatesError) {
-			return error(500, 'Error fetching rent updates, please try again later.');
+			return error(
+				500,
+				"Error fetching rent updates, please try again later.",
+			);
 		}
 		return rentUpdates;
 	}
 
 	async function getInstallmentUpdates(): Promise<InstallmentUpdate[]> {
-		const { data: installmentUpdates, error: installmentUpdatesError } = await event.locals.supabase
-			.from('installment_updates')
-			.select('*')
-			.eq('contract_id', Number(event.params.id))
-			.order('update_date');
+		const { data: installmentUpdates, error: installmentUpdatesError } =
+			await event.locals.supabase
+				.from("installment_updates")
+				.select("*")
+				.eq("contract_id", Number(event.params.id))
+				.order("update_date");
 
 		if (installmentUpdatesError) {
-			return error(500, 'Error fetching installment updates, please try again later.');
+			return error(
+				500,
+				"Error fetching installment updates, please try again later.",
+			);
 		}
 		return installmentUpdates;
 	}
 
 	async function getPropertyOptions(): Promise<IdAndLabel[]> {
-		const { data: properties, error: propertiesError } = await event.locals.supabase
-			.from('properties')
-			.select('id, ...addresses(label:address)');
+		const { data: properties, error: propertiesError } = await event.locals
+			.supabase
+			.from("properties")
+			.select("id, ...addresses(label:address)");
 
 		if (propertiesError) {
-			return error(500, 'Error fetching properties, please try again later.');
+			return error(
+				500,
+				"Error fetching properties, please try again later.",
+			);
 		}
 		return properties;
 	}
 
 	async function getTenantOptions(): Promise<IdAndLabel[]> {
-		const { data: tenants, error: tenantsError } = await event.locals.supabase
-			.from('tenants')
-			.select('id, label:name');
+		const { data: tenants, error: tenantsError } = await event.locals
+			.supabase
+			.from("tenants")
+			.select("id, label:name");
 
 		if (tenantsError) {
-			return error(500, 'Error fetching tenants, please try again later.');
+			return error(
+				500,
+				"Error fetching tenants, please try again later.",
+			);
 		}
 		return tenants;
 	}
 
 	const contract = await getContract();
 
-	const interest =
-		contract.type === 'lending' ? calculateInterest(contract, new Date().toISOString()) : 0;
+	const interest = contract.type === "lending"
+		? calculateInterest(contract, new Date().toISOString())
+		: 0;
 
 	return {
 		contract: contract,
 		contractAccount: await getContractAccount(),
-		rentUpdates: contract.type === 'renting' ? await getRentUpdates() : [],
-		installmentUpdates: contract.type === 'lending' ? await getInstallmentUpdates() : [],
+		rentUpdates: contract.type === "renting" ? await getRentUpdates() : [],
+		installmentUpdates: contract.type === "lending"
+			? await getInstallmentUpdates()
+			: [],
 		propertyOptions: await getPropertyOptions(),
 		tenantOptions: await getTenantOptions(),
 		updateContractForm: await superValidate(
@@ -116,68 +148,78 @@ export const load = async (event) => {
 			},
 			zod4(createContractSchema),
 			{
-				id: 'update-contract',
-			}
+				id: "update-contract",
+			},
 		),
 		deleteContractForm: await superValidate(
 			{ id: Number(event.params.id) },
 			zod4(deleteContractSchema),
 			{
-				id: 'delete-contract',
-			}
+				id: "delete-contract",
+			},
 		),
 		createRentUpdateForm: await superValidate(
 			{
-				rent: contract.type === 'renting' ? contract.data.rent : 0,
+				rent: contract.type === "renting" ? contract.data.rent : 0,
 				update_date: new Date().toISOString(),
 			},
 			zod4(createRentUpdateSchema),
 			{
-				id: 'create-rent-update',
-			}
+				id: "create-rent-update",
+			},
 		),
 		createInstallmentUpdateForm: await superValidate(
 			{
-				installment: contract.type === 'lending' ? contract.data.installment : 0,
-				interest: contract.type === 'lending' ? contract.data.interest : 0,
+				installment: contract.type === "lending"
+					? contract.data.installment
+					: 0,
+				interest: contract.type === "lending"
+					? contract.data.interest
+					: 0,
 				update_date: new Date().toISOString(),
 			},
 			zod4(createInstallmentUpdateSchema),
 			{
-				id: 'create-installment-update',
-			}
+				id: "create-installment-update",
+			},
 		),
 		createDueNoteForm: await superValidate(
 			{
-				value: contract.type === 'renting' ? contract.data.rent : contract.data.installment,
+				value: contract.type === "renting"
+					? contract.data.rent
+					: contract.data.installment,
 				due_date: new Date().toISOString(),
 			},
 			zod4(createDueNoteSchema),
 			{
-				id: 'create-due-note',
-			}
+				id: "create-due-note",
+			},
 		),
 		createRentPaymentForm: await superValidate(
 			{
 				date: new Date().toISOString(),
-				value: contract.type === 'renting' ? contract.data.rent : 0,
+				value: contract.type === "renting" ? contract.data.rent : 0,
 			},
 			zod4(createRentPaymentSchema),
 			{
-				id: 'create-rent-payment',
-			}
+				id: "create-rent-payment",
+			},
 		),
 		createInstallmentPaymentForm: await superValidate(
 			{
 				date: new Date().toISOString(),
-				value: contract.type === 'lending' ? contract.data.installment : 0,
-				amortization: contract.type === 'lending' ? contract.data.installment - interest : 0,
-				interest: contract.type === 'lending' ? interest : 0,
+				value: contract.type === "lending"
+					? contract.data.installment
+					: 0,
+				amortization: contract.type === "lending"
+					? contract.data.installment - interest
+					: 0,
+				interest: contract.type === "lending" ? interest : 0,
 			},
 			zod4(createInstallmentPaymentSchema),
 			{
-				id: 'create-installment-payment',
-			}
+				id: "create-installment-payment",
+			},
 		),
 	};
 };
@@ -187,10 +229,10 @@ export const actions = {
 		handleFormAction(
 			event,
 			createContractSchema,
-			'update-contract',
+			"update-contract",
 			async (event, userId, form) => {
 				const { error } = await event.locals.supabase
-					.from('contracts_view')
+					.from("contracts_view")
 					.update({
 						property_id: form.data.property_id,
 						start_date: form.data.start_date,
@@ -198,72 +240,91 @@ export const actions = {
 						type: form.data.type,
 						data: form.data,
 					})
-					.eq('id', Number(event.params.id));
+					.eq("id", Number(event.params.id));
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
-				const { error: tenantError } = await event.locals.supabase.rpc('update_contract_tenants', {
-					p_contract_id: Number(event.params.id),
-					p_tenants: [form.data.tenant_id],
-				});
+				const { error: tenantError } = await event.locals.supabase.rpc(
+					"update_contract_tenants",
+					{
+						p_contract_id: Number(event.params.id),
+						p_tenants: [form.data.tenant_id],
+					},
+				);
 
 				if (tenantError) {
-					setFlash({ type: 'error', message: tenantError.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: tenantError.message },
+						event.cookies,
+					);
 					return fail(500, { message: tenantError.message, form });
 				}
 
 				return { success: true, form };
-			}
+			},
 		),
 	delete: async (event) =>
 		handleFormAction(
 			event,
 			deleteContractSchema,
-			'delete-contract',
+			"delete-contract",
 			async (event, userId, form) => {
 				const { error } = await event.locals.supabase
-					.from('contracts')
+					.from("contracts")
 					.delete()
-					.eq('id', form.data.id);
+					.eq("id", form.data.id);
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
-				return redirect(302, '/contracts');
-			}
+				return redirect(302, "/contracts");
+			},
 		),
 	createRentUpdate: async (event) =>
 		handleFormAction(
 			event,
 			createRentUpdateSchema,
-			'create-rent-update',
+			"create-rent-update",
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('rent_updates').insert({
+				const { error } = await event.locals.supabase.from(
+					"rent_updates",
+				).insert({
 					contract_id: Number(event.params.id),
 					rent: form.data.rent,
 					update_date: form.data.update_date,
 				});
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };
-			}
+			},
 		),
 	createInstallmentUpdate: async (event) =>
 		handleFormAction(
 			event,
 			createInstallmentUpdateSchema,
-			'create-installment-update',
+			"create-installment-update",
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('installment_updates').insert({
+				const { error } = await event.locals.supabase.from(
+					"installment_updates",
+				).insert({
 					contract_id: Number(event.params.id),
 					installment: form.data.installment,
 					interest: form.data.interest,
@@ -271,35 +332,49 @@ export const actions = {
 				});
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };
-			}
+			},
 		),
 	createDueNote: async (event) =>
-		handleFormAction(event, createDueNoteSchema, 'create-due-note', async (event, userId, form) => {
-			const { error } = await event.locals.supabase.from('due_notes').insert({
-				contract_id: Number(event.params.id),
-				due_date: form.data.due_date,
-				value: form.data.value,
-			});
+		handleFormAction(
+			event,
+			createDueNoteSchema,
+			"create-due-note",
+			async (event, userId, form) => {
+				const { error } = await event.locals.supabase.from("due_notes")
+					.insert({
+						contract_id: Number(event.params.id),
+						due_date: form.data.due_date,
+						value: form.data.value,
+					});
 
-			if (error) {
-				setFlash({ type: 'error', message: error.message }, event.cookies);
-				return fail(500, { message: error.message, form });
-			}
+				if (error) {
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
+					return fail(500, { message: error.message, form });
+				}
 
-			return { success: true, form };
-		}),
+				return { success: true, form };
+			},
+		),
 	createRentPayment: async (event) =>
 		handleFormAction(
 			event,
 			createRentPaymentSchema,
-			'create-rent-payment',
+			"create-rent-payment",
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('rent_payments_view').insert({
+				const { error } = await event.locals.supabase.from(
+					"rent_payments_view",
+				).insert({
 					contract_id: Number(event.params.id),
 					date: form.data.date,
 					value: form.data.value,
@@ -307,37 +382,48 @@ export const actions = {
 				});
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };
-			}
+			},
 		),
 	createInstallmentPayment: async (event) =>
 		handleFormAction(
 			event,
 			createInstallmentPaymentSchema,
-			'create-installment-payment',
+			"create-installment-payment",
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('installment_payments_view').insert({
+				const { error } = await event.locals.supabase.from(
+					"installment_payments_view",
+				).insert({
 					contract_id: Number(event.params.id),
 					date: form.data.date,
-					amortization: form.data.amortization < 0 ? 0 : form.data.amortization,
-					interest:
-						form.data.amortization < 0
-							? form.data.interest + form.data.amortization
-							: form.data.interest,
+					amortization: form.data.amortization < 0
+						? 0
+						: form.data.amortization,
+					interest: form.data.amortization < 0
+						? form.data.interest + form.data.amortization
+						: form.data.interest,
 					description: form.data.description,
-					extra_debt: form.data.amortization < 0 ? form.data.amortization * -1 : 0,
+					extra_debt: form.data.amortization < 0
+						? form.data.amortization * -1
+						: 0,
 				});
 
 				if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
+					setFlash(
+						{ type: "error", message: error.message },
+						event.cookies,
+					);
 					return fail(500, { message: error.message, form });
 				}
 
 				return { success: true, form };
-			}
+			},
 		),
 };

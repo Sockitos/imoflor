@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import { Separator } from '@shared/components/ui/separator';
-	import { dateFormatter } from '@shared/formatters';
-	import TicketDeleteDialog from '@ticket/components/ticket-delete-dialog.svelte';
-	import TicketForm from '@ticket/components/ticket-form.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { dateFormatter } from '@/shared/formatters';
+	import TicketDeleteDialog from '@/ticket/components/ticket-delete-dialog.svelte';
+	import TicketForm from '@/ticket/components/ticket-form.svelte';
 	import { Link, Pencil, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

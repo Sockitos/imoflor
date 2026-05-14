@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import ExpensesTable from '@intervention/components/expenses-table.svelte';
-	import InterventionDeleteDialog from '@intervention/components/intervention-delete-dialog.svelte';
-	import InterventionForm from '@intervention/components/intervention-form.svelte';
-	import { interventionStatusOptions, interventionTypeOptions } from '@intervention/types';
-	import PageSubtitle from '@shared/components/page-subtitle.svelte';
-	import PageTitle from '@shared/components/page-title.svelte';
-	import { Button } from '@shared/components/ui/button';
-	import { Separator } from '@shared/components/ui/separator';
-	import { dateFormatter } from '@shared/formatters';
+	import ExpensesTable from '@/intervention/components/expenses-table.svelte';
+	import InterventionDeleteDialog from '@/intervention/components/intervention-delete-dialog.svelte';
+	import InterventionForm from '@/intervention/components/intervention-form.svelte';
+	import { interventionStatusOptions, interventionTypeOptions } from '@/intervention/types';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { dateFormatter } from '@/shared/formatters';
 	import { Link, Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
 	let { data } = $props();

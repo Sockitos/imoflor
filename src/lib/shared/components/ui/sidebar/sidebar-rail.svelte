@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from '@shared/utils.js';
+	import { cn, type WithElementRef } from '@/shared/utils.js';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { useSidebar } from './context.svelte.js';
 
@@ -18,7 +18,7 @@
 	data-sidebar="rail"
 	data-slot="sidebar-rail"
 	aria-label="Toggle Sidebar"
-	tabIndex={-1}
+	tabindex={-1}
 	onclick={sidebar.toggle}
 	title="Toggle Sidebar"
 	class={cn(

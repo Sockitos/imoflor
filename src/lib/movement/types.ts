@@ -1,11 +1,11 @@
-import type { Id } from '@shared/types';
+import type { Id } from "@/shared/types";
 
 export const movementTypeValues = [
-	'rent',
-	'installment_amortization',
-	'installment_interest',
-	'intervention',
-	'other',
+	"rent",
+	"installment_amortization",
+	"installment_interest",
+	"intervention",
+	"other",
 ] as const;
 export type MovementType = (typeof movementTypeValues)[number];
 
