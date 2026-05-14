@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { areaFormatter, currencyFormatter } from '@/formatters';
+	import FractionForm from '@property/components/fraction-form.svelte';
+	import FractionTable from '@property/components/fraction-table.svelte';
+	import PropertyDeleteDialog from '@property/components/property-delete-dialog.svelte';
+	import PropertyForm from '@property/components/property-form.svelte';
+	import { propertyClassOptions, propertyTypeOptions } from '@property/types';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import * as Card from '@shared/components/ui/card';
+	import { Separator } from '@shared/components/ui/separator';
+	import { areaFormatter, currencyFormatter } from '@shared/formatters';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
-	import PropertyDeleteDialog from '../_components/property-delete-dialog.svelte';
-	import PropertyForm from '../_components/property-form.svelte';
-	import FractionForm from './_components/fraction-form.svelte';
-	import FractionTable from './_components/fraction-table.svelte';
 
 	let { data } = $props();
 	let { property, fractions, updatePropertyForm, deletePropertyForm, createFractionForm } =
@@ -47,11 +48,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Class</dt>
-							<dd>{property.class}</dd>
+							<dd>{propertyClassOptions[property.class]}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Type</dt>
-							<dd>{property.type}</dd>
+							<dd>{propertyTypeOptions[property.type]}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
@@ -94,11 +95,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Country</dt>
-							<dd>{property.country}</dd>
+							<dd>{property.address.country}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Region</dt>
-							<dd>{property.region}</dd>
+							<dd>{property.address.region}</dd>
 						</div>
 					</div>
 					<div>
@@ -108,11 +109,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Postal Code</dt>
-							<dd>{property.postal_code}</dd>
+							<dd>{property.address.postal_code}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">City</dt>
-							<dd>{property.city}</dd>
+							<dd>{property.address.city}</dd>
 						</div>
 					</div>
 				</div>
@@ -151,10 +152,6 @@
 
 <PropertyForm data={updatePropertyForm} action="?/update" bind:open={openForm} />
 
-<PropertyDeleteDialog {property} data={deletePropertyForm} bind:open={openDeleteDialog} />
+<PropertyDeleteDialog data={deletePropertyForm} bind:open={openDeleteDialog} />
 
-<FractionForm
-	data={createFractionForm}
-	action="/properties/{property.id}/fractions?/create"
-	bind:open={openFractionForm}
-/>
+<FractionForm data={createFractionForm} action="?/createFraction" bind:open={openFractionForm} />

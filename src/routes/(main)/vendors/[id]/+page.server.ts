@@ -1,7 +1,8 @@
-import { createVendorSchema, deleteVendorSchema } from '@/schemas/vendor';
-import type { Movement, Vendor } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import type { Movement } from '@movement/types';
+import { handleFormAction } from '@shared/utils';
 import { error, redirect } from '@sveltejs/kit';
+import { deleteVendorSchema, updateVendorSchema } from '@vendor/schemas';
+import type { Vendor } from '@vendor/types';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -10,7 +11,7 @@ export const load = async (event) => {
 	async function getVendor(): Promise<Vendor> {
 		const { data: vendor, error: vendorError } = await event.locals.supabase
 			.from('vendors')
-			.select('*')
+			.select('*, address:addresses(*)')
 			.eq('id', Number(event.params.id))
 			.single();
 
@@ -33,25 +34,58 @@ export const load = async (event) => {
 	}
 
 	const vendor = await getVendor();
+	const vendorFormData = { ...vendor, address: vendor.address ?? {} };
 
 	return {
 		vendor: vendor,
 		movements: await getMovements(vendor.tax_id_number),
-		updateVendorForm: await superValidate(vendor, zod4(createVendorSchema), {
+		updateVendorForm: await superValidate(vendorFormData, zod4(updateVendorSchema), {
 			id: 'update-vendor',
 		}),
-		deleteVendorForm: await superValidate(zod4(deleteVendorSchema), {
-			id: 'delete-vendor',
-		}),
+		deleteVendorForm: await superValidate(
+			{ id: Number(event.params.id) },
+			zod4(deleteVendorSchema),
+			{
+				id: 'delete-vendor',
+			}
+		),
 	};
 };
 
 export const actions = {
 	update: async (event) =>
-		handleFormAction(event, createVendorSchema, 'update-vendor', async (event, userId, form) => {
+		handleFormAction(event, updateVendorSchema, 'update-vendor', async (event, userId, form) => {
+			const { address: addressData, ...vendorData } = form.data;
+			const { id: addressId, ...addressFields } = addressData;
+
+			if (addressId) {
+				const { error: addressError } = await event.locals.supabase
+					.from('addresses')
+					.update(addressFields)
+					.eq('id', addressId);
+
+				if (addressError) {
+					setFlash({ type: 'error', message: addressError.message }, event.cookies);
+					return fail(500, { message: addressError.message, form });
+				}
+			} else {
+				const { data: insertedAddress, error: addressError } = await event.locals.supabase
+					.from('addresses')
+					.insert(addressFields)
+					.select('id')
+					.single();
+
+				if (addressError) {
+					setFlash({ type: 'error', message: addressError.message }, event.cookies);
+					return fail(500, { message: addressError.message, form });
+				}
+
+				Object.assign(vendorData, { address_id: insertedAddress?.id });
+			}
+
 			const { error } = await event.locals.supabase
 				.from('vendors')
-				.update(form.data)
+				.update(vendorData)
 				.eq('id', Number(event.params.id));
 
 			if (error) {

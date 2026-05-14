@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import { Separator } from '@/components/ui/separator';
-	import dayjs from 'dayjs';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import { Separator } from '@shared/components/ui/separator';
+	import { dateFormatter } from '@shared/formatters';
+	import TicketDeleteDialog from '@ticket/components/ticket-delete-dialog.svelte';
+	import TicketForm from '@ticket/components/ticket-form.svelte';
 	import { Link, Pencil, Trash } from 'lucide-svelte';
-	import TicketDeleteDialog from '../_components/ticket-delete-dialog.svelte';
-	import TicketForm from '../_components/ticket-form.svelte';
 
 	let { data } = $props();
 	let { ticket, updateTicketForm, deleteTicketForm } = $derived(data);
@@ -42,7 +42,7 @@
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Date</dt>
-						<dd>{dayjs(ticket.date).format('DD/MM/YYYY')}</dd>
+						<dd>{dateFormatter(ticket.date)}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Title</dt>
@@ -65,17 +65,15 @@
 							</Button>
 						</dd>
 					</div>
-					{#if ticket.fraction}
+					{#if ticket.property}
 						<div>
 							<dt class="text-sm text-muted-foreground">Fraction</dt>
 							<dd class="flex flex-row items-center gap-x-2">
-								{ticket.fraction.label}
+								{ticket.property.label}
 								<Button
 									size="icon"
 									variant="ghost"
-									href={resolve(
-										`/properties/${ticket.property.id}/fractions/${ticket.fraction.id}`
-									)}
+									href={resolve(`/properties/${ticket.property.id}`)}
 								>
 									<Link class="h-4 w-4" />
 								</Button>
@@ -91,4 +89,4 @@
 
 <TicketForm data={updateTicketForm} action="?/update" bind:open={openForm} />
 
-<TicketDeleteDialog {ticket} data={deleteTicketForm} bind:open={openDeleteDialog} />
+<TicketDeleteDialog data={deleteTicketForm} bind:open={openDeleteDialog} />

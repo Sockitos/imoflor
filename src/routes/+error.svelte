@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import Button from '@/components/ui/button/button.svelte';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import Button from '@shared/components/ui/button/button.svelte';
 </script>
 
 <div class="flex min-h-screen flex-col items-center justify-center">

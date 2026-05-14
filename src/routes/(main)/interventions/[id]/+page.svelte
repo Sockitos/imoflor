@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import { Separator } from '@/components/ui/separator';
-	import dayjs from 'dayjs';
+	import ExpensesTable from '@intervention/components/expenses-table.svelte';
+	import InterventionDeleteDialog from '@intervention/components/intervention-delete-dialog.svelte';
+	import InterventionForm from '@intervention/components/intervention-form.svelte';
+	import { interventionStatusOptions, interventionTypeOptions } from '@intervention/types';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import { Separator } from '@shared/components/ui/separator';
+	import { dateFormatter } from '@shared/formatters';
 	import { Link, Pencil, PlusCircle, Trash } from 'lucide-svelte';
-	import InterventionDeleteDialog from '../_components/intervention-delete-dialog.svelte';
-	import InterventionForm from '../_components/intervention-form.svelte';
-	import ExpensesTable from './_components/expenses-table.svelte';
 
 	let { data } = $props();
 	let { intervention, updateInterventionForm, deleteInterventionForm } = $derived(data);
@@ -43,19 +44,19 @@
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Type</dt>
-						<dd>{intervention.type}</dd>
+						<dd>{interventionTypeOptions[intervention.type]}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Status</dt>
-						<dd>{intervention.status}</dd>
+						<dd>{interventionStatusOptions[intervention.status]}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Start Date</dt>
-						<dd>{dayjs(intervention.start_date).format('DD/MM/YYYY')}</dd>
+						<dd>{dateFormatter(intervention.start_date)}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">End Date</dt>
-						<dd>{dayjs(intervention.end_date).format('DD/MM/YYYY')}</dd>
+						<dd>{dateFormatter(intervention.end_date)}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Description</dt>
@@ -74,23 +75,6 @@
 							</Button>
 						</dd>
 					</div>
-					{#if intervention.fraction}
-						<div>
-							<dt class="text-sm text-muted-foreground">Fraction</dt>
-							<dd class="flex flex-row items-center gap-x-2">
-								{intervention.fraction.label}
-								<Button
-									size="icon"
-									variant="ghost"
-									href={resolve(
-										`/properties/${intervention.property.id}/fractions/${intervention.fraction.id}`
-									)}
-								>
-									<Link class="h-4 w-4" />
-								</Button>
-							</dd>
-						</div>
-					{/if}
 					{#if intervention.ticket}
 						<div>
 							<dt class="text-sm text-muted-foreground">Ticket</dt>
@@ -130,8 +114,4 @@
 
 <InterventionForm data={updateInterventionForm} action="?/update" bind:open={openForm} />
 
-<InterventionDeleteDialog
-	{intervention}
-	data={deleteInterventionForm}
-	bind:open={openDeleteDialog}
-/>
+<InterventionDeleteDialog data={deleteInterventionForm} bind:open={openDeleteDialog} />

@@ -1,17 +1,16 @@
-import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
-import { createDueNoteSchema } from '@/schemas/due-note';
-import { createInstallmentPaymentSchema } from '@/schemas/installment-payment';
-import { createInstallmentUpdateSchema } from '@/schemas/installment-update';
-import { createRentPaymentSchema } from '@/schemas/rent-payment';
-import { createRentUpdateSchema } from '@/schemas/rent-update';
-import type {
-	Contract,
-	ContractAccountItem,
-	IdWithLabel,
-	InstallmentUpdate,
-	RentUpdate,
-} from '@/types/types';
-import { calculateInterest, handleFormAction } from '@/utils';
+import {
+	createContractSchema,
+	createDueNoteSchema,
+	createInstallmentPaymentSchema,
+	createInstallmentUpdateSchema,
+	createRentPaymentSchema,
+	createRentUpdateSchema,
+	deleteContractSchema,
+} from '@contract/schemas';
+import type { Contract, ContractAccountItem, InstallmentUpdate, RentUpdate } from '@contract/types';
+import { calculateInterest } from '@contract/utils';
+import type { IdAndLabel } from '@shared/types';
+import { handleFormAction } from '@shared/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -22,7 +21,7 @@ export const load = async (event) => {
 		const { data: contract, error: contractError } = await event.locals.supabase
 			.from('contracts_view')
 			.select(
-				'*, tenants:tenants!inner (id, label:name), fraction:fractions_view!inner (id, label:address_full)'
+				'*, tenants:tenants!inner (id, label:name), property:properties!inner (id, ...addresses(label:address))'
 			)
 			.eq('id', Number(event.params.id))
 			.returns<Contract[]>() // TODO: try not to use returns
@@ -72,18 +71,18 @@ export const load = async (event) => {
 		return installmentUpdates;
 	}
 
-	async function getFractionOptions(): Promise<IdWithLabel[]> {
-		const { data: fractions, error: fractionsError } = await event.locals.supabase
-			.from('fractions_view')
-			.select('id, label:address_full');
+	async function getPropertyOptions(): Promise<IdAndLabel[]> {
+		const { data: properties, error: propertiesError } = await event.locals.supabase
+			.from('properties')
+			.select('id, ...addresses(label:address)');
 
-		if (fractionsError) {
-			return error(500, 'Error fetching fractions, please try again later.');
+		if (propertiesError) {
+			return error(500, 'Error fetching properties, please try again later.');
 		}
-		return fractions;
+		return properties;
 	}
 
-	async function getTenantOptions() {
+	async function getTenantOptions(): Promise<IdAndLabel[]> {
 		const { data: tenants, error: tenantsError } = await event.locals.supabase
 			.from('tenants')
 			.select('id, label:name');
@@ -104,12 +103,12 @@ export const load = async (event) => {
 		contractAccount: await getContractAccount(),
 		rentUpdates: contract.type === 'renting' ? await getRentUpdates() : [],
 		installmentUpdates: contract.type === 'lending' ? await getInstallmentUpdates() : [],
-		fractionOptions: await getFractionOptions(),
+		propertyOptions: await getPropertyOptions(),
 		tenantOptions: await getTenantOptions(),
 		updateContractForm: await superValidate(
 			{
 				type: contract.type,
-				fraction_id: contract.fraction.id,
+				property_id: contract.property.id,
 				start_date: contract.start_date,
 				end_date: contract.end_date,
 				tenant_id: contract.tenants[0].id,
@@ -120,9 +119,13 @@ export const load = async (event) => {
 				id: 'update-contract',
 			}
 		),
-		deleteContractForm: await superValidate(zod4(deleteContractSchema), {
-			id: 'delete-contract',
-		}),
+		deleteContractForm: await superValidate(
+			{ id: Number(event.params.id) },
+			zod4(deleteContractSchema),
+			{
+				id: 'delete-contract',
+			}
+		),
 		createRentUpdateForm: await superValidate(
 			{
 				rent: contract.type === 'renting' ? contract.data.rent : 0,
@@ -189,7 +192,7 @@ export const actions = {
 				const { error } = await event.locals.supabase
 					.from('contracts_view')
 					.update({
-						fraction_id: form.data.fraction_id,
+						property_id: form.data.property_id,
 						start_date: form.data.start_date,
 						end_date: form.data.end_date,
 						type: form.data.type,

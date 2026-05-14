@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@/components/movement-table.svelte';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { dateFormatter } from '@/formatters';
+	import MovementTable from '@movement/components/movement-table.svelte';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import * as Card from '@shared/components/ui/card';
+	import { Separator } from '@shared/components/ui/separator';
+	import { dateFormatter } from '@shared/formatters';
+	import { genderOptions, maritalStatusOptions } from '@shared/types';
+	import TenantDeleteDialog from '@tenant/components/tenant-delete-dialog.svelte';
+	import TenantForm from '@tenant/components/tenant-form.svelte';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
-	import TenantDeleteDialog from '../_components/tenant-delete-dialog.svelte';
-	import TenantForm from '../_components/tenant-form.svelte';
 
 	let { data } = $props();
 	let { tenant, movements, updateTenantForm, deleteTenantForm } = $derived(data);
@@ -48,11 +49,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Gender</dt>
-							<dd>{tenant.gender}</dd>
+							<dd>{genderOptions[tenant.gender]}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Marital Status</dt>
-							<dd>{tenant.marital_status}</dd>
+							<dd>{maritalStatusOptions[tenant.marital_status]}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
@@ -91,25 +92,25 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Country</dt>
-							<dd>{tenant.country}</dd>
+							<dd>{tenant.address?.country}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Region</dt>
-							<dd>{tenant.region}</dd>
+							<dd>{tenant.address?.region}</dd>
 						</div>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Address</dt>
-						<dd>{tenant.address}</dd>
+						<dd>{tenant.address?.address}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Postal Code</dt>
-							<dd>{tenant.postal_code}</dd>
+							<dd>{tenant.address?.postal_code}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">City</dt>
-							<dd>{tenant.city}</dd>
+							<dd>{tenant.address?.city}</dd>
 						</div>
 					</div>
 				</div>
@@ -167,4 +168,4 @@
 
 <TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
 
-<TenantDeleteDialog {tenant} data={deleteTenantForm} bind:open={openDeleteDialog} />
+<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />

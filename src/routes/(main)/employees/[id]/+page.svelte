@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@/components/movement-table.svelte';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { dateFormatter } from '@/formatters';
+	import MovementTable from '@movement/components/movement-table.svelte';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import * as Card from '@shared/components/ui/card';
+	import { Separator } from '@shared/components/ui/separator';
+	import { dateFormatter } from '@shared/formatters';
+	import { genderOptions, maritalStatusOptions } from '@shared/types';
+	import EmployeeDeleteDialog from '@employee/components/employee-delete-dialog.svelte';
+	import EmployeeForm from '@employee/components/employee-form.svelte';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
-	import EmployeeDeleteDialog from '../_components/employee-delete-dialog.svelte';
-	import EmployeeForm from '../_components/employee-form.svelte';
 
 	let { data } = $props();
 	let { employee, movements, updateEmployeeForm, deleteEmployeeForm } = $derived(data);
@@ -48,11 +49,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Gender</dt>
-							<dd>{employee.gender}</dd>
+							<dd>{genderOptions[employee.gender]}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Marital Status</dt>
-							<dd>{employee.marital_status}</dd>
+							<dd>{maritalStatusOptions[employee.marital_status]}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
@@ -81,7 +82,7 @@
 							<dd>{employee.id_number}</dd>
 						</div>
 						<div>
-							<dt class="text-sm text-muted-foreground">SS Number</dt>
+							<dt class="text-sm text-muted-foreground">Tax ID Number</dt>
 							<dd>{employee.tax_id_number}</dd>
 						</div>
 					</div>
@@ -95,25 +96,25 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Country</dt>
-							<dd>{employee.country}</dd>
+							<dd>{employee.address?.country}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Region</dt>
-							<dd>{employee.region}</dd>
+							<dd>{employee.address?.region}</dd>
 						</div>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Address</dt>
-						<dd>{employee.address}</dd>
+						<dd>{employee.address?.address}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Postal Code</dt>
-							<dd>{employee.postal_code}</dd>
+							<dd>{employee.address?.postal_code}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">City</dt>
-							<dd>{employee.city}</dd>
+							<dd>{employee.address?.city}</dd>
 						</div>
 					</div>
 				</div>
@@ -127,7 +128,7 @@
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Mobile</dt>
-								<dd>{employee.phone}</dd>
+								<dd>{employee.mobile}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Phone</dt>
@@ -171,4 +172,4 @@
 
 <EmployeeForm data={updateEmployeeForm} action="?/update" bind:open={openForm} />
 
-<EmployeeDeleteDialog {employee} data={deleteEmployeeForm} bind:open={openDeleteDialog} />
+<EmployeeDeleteDialog data={deleteEmployeeForm} bind:open={openDeleteDialog} />

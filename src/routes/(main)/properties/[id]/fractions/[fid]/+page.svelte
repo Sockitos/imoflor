@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { areaFormatter, currencyFormatter } from '@/formatters';
+	import FractionDeleteDialog from '@property/components/fraction-delete-dialog.svelte';
+	import FractionForm from '@property/components/fraction-form.svelte';
+	import { fractionTypeOptions, propertyClassOptions } from '@property/types';
+	import PageSubtitle from '@shared/components/page-subtitle.svelte';
+	import PageTitle from '@shared/components/page-title.svelte';
+	import { Button } from '@shared/components/ui/button';
+	import * as Card from '@shared/components/ui/card';
+	import { Separator } from '@shared/components/ui/separator';
+	import { areaFormatter, currencyFormatter } from '@shared/formatters';
 	import { Pencil, Trash } from 'lucide-svelte';
-	import FractionDeleteDialog from '../../_components/fraction-delete-dialog.svelte';
-	import FractionForm from '../../_components/fraction-form.svelte';
 
 	let { data } = $props();
 	let { property, fraction, updateFractionForm, deleteFractionForm } = $derived(data);
@@ -43,11 +44,11 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Class</dt>
-							<dd>{property.class}</dd>
+							<dd>{propertyClassOptions[property.class]}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Type</dt>
-							<dd>{fraction.type}</dd>
+							<dd>{fractionTypeOptions[fraction.type]}</dd>
 						</div>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
@@ -90,25 +91,25 @@
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Country</dt>
-							<dd>{property.country}</dd>
+							<dd>{property.address.country}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Region</dt>
-							<dd>{property.region}</dd>
+							<dd>{property.address.region}</dd>
 						</div>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Address</dt>
-						<dd>{property.address} - {fraction.address}</dd>
+						<dd>{property.address.address} — {fraction.fraction}</dd>
 					</div>
 					<div class="grid grid-cols-2 gap-y-2">
 						<div>
 							<dt class="text-sm text-muted-foreground">Postal Code</dt>
-							<dd>{property.postal_code}</dd>
+							<dd>{property.address.postal_code}</dd>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">City</dt>
-							<dd>{property.city}</dd>
+							<dd>{property.address.city}</dd>
 						</div>
 					</div>
 				</div>
@@ -131,4 +132,8 @@
 
 <FractionForm data={updateFractionForm} action="?/update" bind:open={openForm} />
 
-<FractionDeleteDialog {fraction} data={deleteFractionForm} bind:open={openDeleteDialog} />
+<FractionDeleteDialog
+	propertyId={property.id}
+	data={deleteFractionForm}
+	bind:open={openDeleteDialog}
+/>

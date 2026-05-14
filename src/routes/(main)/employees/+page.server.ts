@@ -1,6 +1,6 @@
-import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
-import type { Employee } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { createEmployeeSchema, deleteEmployeeSchema } from '@employee/schemas';
+import type { Employee } from '@employee/types';
+import { handleFormAction } from '@shared/utils';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,7 +10,7 @@ export const load = async (event) => {
 	async function getEmployees(): Promise<Employee[]> {
 		const { data: employees, error: employeesError } = await event.locals.supabase
 			.from('employees')
-			.select('*');
+			.select('*, address:addresses(*)');
 
 		if (employeesError) {
 			return error(500, 'Error fetching employees, please try again later.');
@@ -36,7 +36,22 @@ export const actions = {
 			createEmployeeSchema,
 			'create-employee',
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('employees').insert(form.data);
+				const { address: addressData, ...employeeData } = form.data;
+
+				const { data: insertedAddress, error: addressError } = await event.locals.supabase
+					.from('addresses')
+					.insert(addressData)
+					.select('id')
+					.single();
+
+				if (addressError) {
+					setFlash({ type: 'error', message: addressError.message }, event.cookies);
+					return fail(500, { message: addressError.message, form });
+				}
+
+				const { error } = await event.locals.supabase
+					.from('employees')
+					.insert({ ...employeeData, address_id: insertedAddress?.id });
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

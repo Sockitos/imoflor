@@ -1,6 +1,6 @@
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
-import type { Database } from '@/types/supabase-types';
-import { handleLoginRedirect } from '@/utils';
+import type { Database } from '@shared/types/supabase-types';
+import { handleLoginRedirect } from '@shared/utils';
 import { createServerClient } from '@supabase/ssr';
 import { type Handle, redirect } from '@sveltejs/kit';
 

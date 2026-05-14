@@ -4,8 +4,8 @@
 	import { dev } from '$app/environment';
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
-	import TailwindIndicator from '@/components/tailwind-indicator.svelte';
-	import { Toaster } from '@/components/ui/sonner';
+	import TailwindIndicator from '@shared/components/tailwind-indicator.svelte';
+	import { Toaster } from '@shared/components/ui/sonner';
 	import { ModeWatcher } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';

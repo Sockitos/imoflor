@@ -10,6 +10,9 @@ const config = {
 	compilerOptions: {
 		// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 		runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true),
+		experimental: {
+			async: true,
+		},
 	},
 	kit: {
 		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
@@ -17,7 +20,20 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
-			'@/*': './src/lib/*',
+			'@auth/*': './src/lib/auth/*',
+			'@contract/*': './src/lib/contract/*',
+			'@employee/*': './src/lib/employee/*',
+			'@intervention/*': './src/lib/intervention/*',
+			'@movement/*': './src/lib/movement/*',
+			'@profile/*': './src/lib/profile/*',
+			'@property/*': './src/lib/property/*',
+			'@shared/*': './src/lib/shared/*',
+			'@tenant/*': './src/lib/tenant/*',
+			'@ticket/*': './src/lib/ticket/*',
+			'@vendor/*': './src/lib/vendor/*',
+		},
+		experimental: {
+			remoteFunctions: true,
 		},
 	},
 };

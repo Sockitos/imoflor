@@ -1,6 +1,6 @@
-import { createFractionSchema, deleteFractionSchema } from '@/schemas/fraction';
-import type { Fraction, Property } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { createFractionSchema, deleteFractionSchema } from '@property/schemas';
+import type { Fraction, Property } from '@property/types';
+import { handleFormAction } from '@shared/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -10,7 +10,7 @@ export const load = async (event) => {
 	async function getProperty(): Promise<Property> {
 		const { data: property, error: propertyError } = await event.locals.supabase
 			.from('properties')
-			.select('*')
+			.select('*, address:addresses(*)')
 			.eq('id', Number(event.params.id))
 			.single();
 
@@ -22,25 +22,44 @@ export const load = async (event) => {
 
 	async function getFraction(): Promise<Fraction> {
 		const { data: fraction, error: fractionError } = await event.locals.supabase
-			.from('fractions_view')
-			.select('*')
+			.from('properties')
+			.select('*, address:addresses(*)')
+			.eq('parent_id', Number(event.params.id))
 			.eq('id', Number(event.params.fid))
 			.single();
 
 		if (fractionError) {
 			return error(500, 'Error fetching fraction, please try again later.');
 		}
-		return fraction;
+		return fraction as unknown as Fraction;
 	}
 
+	const property = await getProperty();
 	const fraction = await getFraction();
 
 	return {
-		property: await getProperty(),
-		fraction: fraction,
-		updateFractionForm: await superValidate(fraction, zod4(createFractionSchema), {
-			id: 'update-fraction',
-		}),
+		property,
+		fraction,
+		updateFractionForm: await superValidate(
+			{
+				parent_id: fraction.parent_id,
+				class: fraction.class,
+				type: fraction.type,
+				matrix: fraction.matrix,
+				conservatory: fraction.conservatory,
+				area: fraction.area,
+				tipology: fraction.tipology,
+				description: fraction.description,
+				patrimonial_value: fraction.patrimonial_value ?? null,
+				market_value: fraction.market_value ?? null,
+				fraction: fraction.fraction,
+				address: property.address,
+			},
+			zod4(createFractionSchema),
+			{
+				id: 'update-fraction',
+			}
+		),
 		deleteFractionForm: await superValidate(zod4(deleteFractionSchema), {
 			id: 'delete-fraction',
 		}),
@@ -54,9 +73,30 @@ export const actions = {
 			createFractionSchema,
 			'update-fraction',
 			async (event, userId, form) => {
+				const { address: addressData, ...fractionData } = form.data;
+				const parentId = Number(event.params.id);
+
+				let addressId = addressData.id;
+				if (addressId == null) {
+					const { data: parent, error: parentError } = await event.locals.supabase
+						.from('properties')
+						.select('address_id')
+						.eq('id', parentId)
+						.single();
+
+					if (parentError) {
+						setFlash({ type: 'error', message: parentError.message }, event.cookies);
+						return fail(500, { message: parentError.message, form });
+					}
+					addressId = parent.address_id;
+				}
+
 				const { error } = await event.locals.supabase
-					.from('fractions')
-					.update({ property_id: Number(event.params.id), ...form.data })
+					.from('properties')
+					.update({
+						...fractionData,
+						address_id: addressId,
+					})
 					.eq('id', Number(event.params.fid));
 
 				if (error) {
@@ -74,9 +114,9 @@ export const actions = {
 			'delete-fraction',
 			async (event, userId, form) => {
 				const { error } = await event.locals.supabase
-					.from('fractions')
+					.from('properties')
 					.delete()
-					.eq('id', Number(event.params.id));
+					.eq('id', Number(event.params.fid));
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);
