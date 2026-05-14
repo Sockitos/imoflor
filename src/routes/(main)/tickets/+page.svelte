@@ -4,8 +4,8 @@
 	import { Button } from '@/components/ui/button';
 	import { Separator } from '@/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
+	import KanbanBoard from '@/components/kanban-board.svelte';
 	import TicketForm from './_components/ticket-form.svelte';
-	import TicketTable from './_components/ticket-table.svelte';
 
 	let { data } = $props();
 	let { tickets, createTicketForm } = $derived(data);
@@ -24,7 +24,7 @@
 		</Button>
 	</div>
 	<Separator />
-	<TicketTable {tickets} />
+	<KanbanBoard />
 </div>
 
 <TicketForm data={createTicketForm} action="?/create" bind:open={openForm} />
