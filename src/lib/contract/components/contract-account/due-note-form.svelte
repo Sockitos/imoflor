@@ -46,7 +46,7 @@
 			<Dialog.Title>Add Due Note</Dialog.Title>
 			<Dialog.Description>Add a due note to the contract.</Dialog.Description>
 		</Dialog.Header>
-		<form method="POST" use:enhance action="?/createDueNote" class="px-1">
+		<form method="POST" use:enhance action="?/createDueNote">
 			<div class="grid gap-4 py-4">
 				<Form.Field {form} name="value">
 					<Form.Control>

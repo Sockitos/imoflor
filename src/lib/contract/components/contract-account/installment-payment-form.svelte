@@ -58,7 +58,7 @@
 			<Dialog.Title>Add Installment Payment</Dialog.Title>
 			<Dialog.Description>Add a Installment payment to the contract.</Dialog.Description>
 		</Dialog.Header>
-		<form method="POST" use:enhance action="?/createInstallmentPayment" class="px-1">
+		<form method="POST" use:enhance action="?/createInstallmentPayment">
 			<div class="grid gap-4 py-4">
 				<Form.Field {form} name="value">
 					<Form.Control>

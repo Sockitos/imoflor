@@ -47,7 +47,7 @@
 			<Dialog.Title>Add Rent Payment</Dialog.Title>
 			<Dialog.Description>Add a rent payment to the contract.</Dialog.Description>
 		</Dialog.Header>
-		<form method="POST" use:enhance action="?/createRentPayment" class="px-1">
+		<form method="POST" use:enhance action="?/createRentPayment">
 			<div class="grid gap-4 py-4">
 				<Form.Field {form} name="value">
 					<Form.Control>
