@@ -1,13 +1,11 @@
 <script lang="ts">
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import { Separator } from '@/components/ui/separator';
-	import { Spinner } from '@/components/ui/spinner';
+	import TenantForm from '@/tenant/components/tenant-form.svelte';
+	import TenantTable from '@/tenant/components/tenant-table.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
-	import TenantForm from '@tenants/components/tenant-form.svelte';
-	import TenantTable from '@tenants/components/tenant-table.svelte';
-	import { getTenants } from '@/tenants/remotes/tenants.remote.js';
 
 	let { data } = $props();
 	let { createTenantForm } = $derived(data);

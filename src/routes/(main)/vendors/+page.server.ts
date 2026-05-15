@@ -1,6 +1,6 @@
-import { createVendorSchema, deleteVendorSchema } from '@/schemas/vendor';
-import type { Vendor } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { createVendorSchema, deleteVendorSchema } from '@/vendor/schemas';
+import type { Vendor } from '@/vendor/types';
+import { handleFormAction } from '@/shared/utils';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,7 +10,7 @@ export const load = async (event) => {
 	async function getVendors(): Promise<Vendor[]> {
 		const { data: vendors, error: vendorsError } = await event.locals.supabase
 			.from('vendors')
-			.select('*');
+			.select('*, address:addresses(*)');
 
 		if (vendorsError) {
 			return error(500, 'Error fetching vendors, please try again later.');
@@ -32,7 +32,22 @@ export const load = async (event) => {
 export const actions = {
 	create: async (event) =>
 		handleFormAction(event, createVendorSchema, 'create-vendor', async (event, userId, form) => {
-			const { error } = await event.locals.supabase.from('vendors').insert(form.data);
+			const { address: addressData, ...vendorData } = form.data;
+
+			const { data: insertedAddress, error: addressError } = await event.locals.supabase
+				.from('addresses')
+				.insert(addressData)
+				.select('id')
+				.single();
+
+			if (addressError) {
+				setFlash({ type: 'error', message: addressError.message }, event.cookies);
+				return fail(500, { message: addressError.message, form });
+			}
+
+			const { error } = await event.locals.supabase
+				.from('vendors')
+				.insert({ ...vendorData, address_id: insertedAddress?.id });
 
 			if (error) {
 				setFlash({ type: 'error', message: error.message }, event.cookies);

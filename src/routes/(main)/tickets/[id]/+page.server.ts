@@ -1,7 +1,9 @@
-import { createTicketSchema, deleteTicketSchema } from '@/schemas/ticket';
-import type { IdWithLabel, Ticket } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import type { IdAndLabel } from '@/shared/types';
+import { handleFormAction } from '@/shared/utils';
+import { createTicketSchema, deleteTicketSchema } from '@/ticket/schemas';
+import type { Ticket } from '@/ticket/types';
 import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
@@ -9,9 +11,7 @@ export const load = async (event) => {
 	async function getTicket(): Promise<Ticket> {
 		const { data: ticket, error: ticketError } = await event.locals.supabase
 			.from('tickets')
-			.select(
-				'*, property:properties!inner (id, label:address), fraction:fractions!inner (id, label:address)'
-			)
+			.select('*, property:properties!inner (id, ...addresses(label:address))')
 			.eq('id', Number(event.params.id))
 			.single();
 
@@ -21,10 +21,10 @@ export const load = async (event) => {
 		return ticket;
 	}
 
-	async function getPropertyOptions(): Promise<IdWithLabel[]> {
+	async function getPropertyOptions(): Promise<IdAndLabel[]> {
 		const { data: properties, error: propertiesError } = await event.locals.supabase
 			.from('properties')
-			.select('id, label:address');
+			.select('id, ...addresses(label:address)');
 
 		if (propertiesError) {
 			return error(500, 'Error fetching properties, please try again later.');
@@ -32,29 +32,21 @@ export const load = async (event) => {
 		return properties;
 	}
 
-	async function getFractionOptions(): Promise<IdWithLabel[]> {
-		const { data: fractions, error: fractionsError } = await event.locals.supabase
-			.from('fractions')
-			.select('id, label:address');
-
-		if (fractionsError) {
-			return error(500, 'Error fetching fractions, please try again later.');
-		}
-		return fractions;
-	}
-
 	const ticket = await getTicket();
 
 	return {
 		ticket: ticket,
 		propertyOptions: await getPropertyOptions(),
-		fractionOptions: await getFractionOptions(),
 		updateTicketForm: await superValidate(ticket, zod4(createTicketSchema), {
 			id: 'update-ticket',
 		}),
-		deleteTicketForm: await superValidate(zod4(deleteTicketSchema), {
-			id: 'delete-ticket',
-		}),
+		deleteTicketForm: await superValidate(
+			{ id: Number(event.params.id) },
+			zod4(deleteTicketSchema),
+			{
+				id: 'delete-ticket',
+			}
+		),
 	};
 };
 
@@ -77,6 +69,7 @@ export const actions = {
 			const { error } = await event.locals.supabase.from('tickets').delete().eq('id', form.data.id);
 
 			if (error) {
+				setFlash({ type: 'error', message: error.message }, event.cookies);
 				return fail(500, { message: error.message, form });
 			}
 

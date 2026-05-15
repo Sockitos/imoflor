@@ -1,8 +1,8 @@
 <script lang="ts">
-	import * as Card from '@/components/ui/card';
-	import * as Form from '@/components/ui/form';
-	import { Input } from '@/components/ui/input';
-	import { signInSchema } from '@/schemas/sign-in';
+	import { signInSchema } from '@/auth/schemas';
+	import * as Card from '@/shared/components/ui/card';
+	import * as Form from '@/shared/components/ui/form';
+	import { Input } from '@/shared/components/ui/input';
 	import { Loader2 } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';

@@ -10,7 +10,7 @@ CREATE TABLE public.vendors(
   tax_id_number text NOT NULL,
   description text,
   tags text[] NOT NULL DEFAULT '{}' ::text[],
-  address_id bigint,
+  address_id bigint NOT NULL,
   email text,
   mobile text,
   phone text,

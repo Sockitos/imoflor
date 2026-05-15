@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import MovementTable from '@movements/components/movement-table.svelte';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { Spinner } from '@/components/ui/spinner';
-	import { dateFormatter } from '@/formatters';
-	import { getTenant } from '@/tenants/remotes/tenants.remote.js';
-	import { Pencil, Trash } from 'lucide-svelte';
-	import TenantDeleteDialog from '@tenants/components/tenant-delete-dialog.svelte';
-	import TenantForm from '@tenants/components/tenant-form.svelte';
-	import { getMovements } from '@/movements/remotes/movements.remote.js';
+	import MovementTable from '@/movement/components/movement-table.svelte';
+	import TenantDeleteDialog from '@/tenant/components/tenant-delete-dialog.svelte';
+	import TenantForm from '@/tenant/components/tenant-form.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { dateFormatter } from '@/shared/formatters';
+	import { genderOptions, maritalStatusOptions } from '@/shared/types';
+	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
 	let { data } = $props();
 	let { updateTenantForm, deleteTenantForm } = $derived(data);
@@ -48,18 +46,12 @@
 					<div class="flex flex-col gap-y-2">
 						<div class="text-lg font-semibold tracking-tight">Identification</div>
 						<div>
-							<dt class="text-sm text-muted-foreground">Name</dt>
-							<dd>{(await tenant).name}</dd>
+							<dt class="text-sm text-muted-foreground">Gender</dt>
+							<dd>{genderOptions[tenant.gender]}</dd>
 						</div>
-						<div class="grid grid-cols-2 gap-y-2">
-							<div>
-								<dt class="text-sm text-muted-foreground">Gender</dt>
-								<dd>{(await tenant).gender}</dd>
-							</div>
-							<div>
-								<dt class="text-sm text-muted-foreground">Marital Status</dt>
-								<dd>{(await tenant).marital_status}</dd>
-							</div>
+						<div>
+							<dt class="text-sm text-muted-foreground">Marital Status</dt>
+							<dd>{maritalStatusOptions[tenant.marital_status]}</dd>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
@@ -108,20 +100,43 @@
 							<dt class="text-sm text-muted-foreground">Address</dt>
 							<dd>{(await tenant).address}</dd>
 						</div>
-						<div class="grid grid-cols-2 gap-y-2">
-							<div>
-								<dt class="text-sm text-muted-foreground">Postal Code</dt>
-								<dd>{(await tenant).postal_code}</dd>
-							</div>
-							<div>
-								<dt class="text-sm text-muted-foreground">City</dt>
-								<dd>{(await tenant).city}</dd>
-							</div>
+					</div>
+				</div>
+				<div class="flex flex-col gap-y-2">
+					<div class="text-lg font-semibold tracking-tight">Address</div>
+					<div class="grid grid-cols-2 gap-y-2">
+						<div>
+							<dt class="text-sm text-muted-foreground">Country</dt>
+							<dd>{tenant.address?.country}</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-muted-foreground">Region</dt>
+							<dd>{tenant.address?.region}</dd>
 						</div>
 					</div>
 					<div>
-						<div class="flex flex-col gap-y-2">
-							<div class="text-lg font-semibold tracking-tight">Contacts</div>
+						<dt class="text-sm text-muted-foreground">Address</dt>
+						<dd>{tenant.address?.address}</dd>
+					</div>
+					<div class="grid grid-cols-2 gap-y-2">
+						<div>
+							<dt class="text-sm text-muted-foreground">Postal Code</dt>
+							<dd>{tenant.address?.postal_code}</dd>
+						</div>
+						<div>
+							<dt class="text-sm text-muted-foreground">City</dt>
+							<dd>{tenant.address?.city}</dd>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="flex flex-col gap-y-2">
+						<div class="text-lg font-semibold tracking-tight">Contacts</div>
+						<div>
+							<dt class="text-sm text-muted-foreground">Email</dt>
+							<dd>{tenant.email}</dd>
+						</div>
+						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Email</dt>
 								<dd>{(await tenant).email}</dd>
@@ -175,7 +190,7 @@
 
 	<TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
 
-	<TenantDeleteDialog tenant={await tenant} data={deleteTenantForm} bind:open={openDeleteDialog} />
+<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />
 
 	{#snippet pending()}
 		<div class="flex items-center justify-center px-4 py-6 lg:px-8">
