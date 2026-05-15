@@ -1,16 +1,20 @@
 {
-	"$schema": "https://next.shadcn-svelte.com/schema.json",
+	"$schema": "https://shadcn-svelte.com/schema.json",
 	"tailwind": {
 		"css": "src/app.css",
 		"baseColor": "neutral"
 	},
 	"aliases": {
-		"components": "$lib/components/",
-		"utils": "$lib/utils",
-		"ui": "$lib/components/ui/",
-		"hooks": "$lib/hooks/",
-		"lib": "$lib/"
+		"components": "@/shared/components",
+		"utils": "@/shared/utils",
+		"ui": "@/shared/components/ui",
+		"hooks": "@/shared/hooks",
+		"lib": "@/shared/"
 	},
 	"typescript": true,
-	"registry": "https://next.shadcn-svelte.com/registry"
+	"registry": "https://shadcn-svelte.com/registry",
+	"style": "vega",
+	"iconLibrary": "lucide",
+	"menuColor": "default",
+	"menuAccent": "subtle"
 }

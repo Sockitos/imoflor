@@ -1,6 +1,7 @@
-import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
-import type { Movement, Tenant } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import type { Movement } from '@/movement/types';
+import { handleFormAction } from '@/shared/utils';
+import { deleteTenantSchema, updateTenantSchema } from '@/tenant/schemas';
+import type { Tenant } from '@/tenant/types';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -10,7 +11,7 @@ export const load = async (event) => {
 	async function getTenant(): Promise<Tenant> {
 		const { data: tenant, error: tenantError } = await event.locals.supabase
 			.from('tenants')
-			.select('*')
+			.select('*, address:addresses(*)')
 			.eq('id', Number(event.params.id))
 			.single();
 
@@ -37,21 +38,71 @@ export const load = async (event) => {
 	return {
 		tenant: tenant,
 		movements: await getMovements(tenant.tax_id_number),
-		updateTenantForm: await superValidate(tenant, zod4(createTenantSchema), {
+		updateTenantForm: await superValidate(tenant, zod4(updateTenantSchema), {
 			id: 'update-tenant',
 		}),
-		deleteTenantForm: await superValidate(zod4(deleteTenantSchema), {
-			id: 'delete-tenant',
-		}),
+		deleteTenantForm: await superValidate(
+			{ id: Number(event.params.id) },
+			zod4(deleteTenantSchema),
+			{
+				id: 'delete-tenant',
+			}
+		),
 	};
 };
 
 export const actions = {
 	update: async (event) =>
-		handleFormAction(event, createTenantSchema, 'update-tenant', async (event, userId, form) => {
+		handleFormAction(event, updateTenantSchema, 'update-tenant', async (event, userId, form) => {
+			const { address: addressData, ...tenantData } = form.data;
+			const { id: addressId, ...addressFields } = addressData;
+
+			if (addressId) {
+				const { error: addressError } = await event.locals.supabase
+					.from('addresses')
+					.update(addressFields)
+					.eq('id', addressId);
+
+				if (addressError) {
+					setFlash(
+						{
+							type: 'error',
+							message: addressError.message,
+						},
+						event.cookies
+					);
+					return fail(500, {
+						message: addressError.message,
+						form,
+					});
+				}
+			} else {
+				const { data: address, error: addressError } = await event.locals.supabase
+					.from('addresses')
+					.insert(addressFields)
+					.select('id')
+					.single();
+
+				if (addressError) {
+					setFlash(
+						{
+							type: 'error',
+							message: addressError.message,
+						},
+						event.cookies
+					);
+					return fail(500, {
+						message: addressError.message,
+						form,
+					});
+				}
+
+				Object.assign(tenantData, { address_id: address?.id });
+			}
+
 			const { error } = await event.locals.supabase
 				.from('tenants')
-				.update(form.data)
+				.update(tenantData)
 				.eq('id', Number(event.params.id));
 
 			if (error) {

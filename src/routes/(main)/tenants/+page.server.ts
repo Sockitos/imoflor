@@ -1,6 +1,6 @@
-import { createTenantSchema, deleteTenantSchema } from '@/schemas/tenant';
-import type { Tenant } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { handleFormAction } from '@/shared/utils';
+import { createTenantSchema, deleteTenantSchema } from '@/tenant/schemas';
+import type { Tenant } from '@/tenant/types';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -10,7 +10,7 @@ export const load = async (event) => {
 	async function getTenants(): Promise<Tenant[]> {
 		const { data: tenants, error: tenantsError } = await event.locals.supabase
 			.from('tenants')
-			.select('*');
+			.select('*, address:addresses(*)');
 
 		if (tenantsError) {
 			return error(500, 'Error fetching tenants, please try again later.');
@@ -32,7 +32,22 @@ export const load = async (event) => {
 export const actions = {
 	create: async (event) =>
 		handleFormAction(event, createTenantSchema, 'create-tenant', async (event, userId, form) => {
-			const { error } = await event.locals.supabase.from('tenants').insert(form.data);
+			const { address: addressData, ...tenantData } = form.data;
+
+			const { data: address, error: addressError } = await event.locals.supabase
+				.from('addresses')
+				.insert(addressData)
+				.select('id')
+				.single();
+
+			if (addressError) {
+				setFlash({ type: 'error', message: addressError.message }, event.cookies);
+				return fail(500, { message: addressError.message, form });
+			}
+
+			const { error } = await event.locals.supabase
+				.from('tenants')
+				.insert({ ...tenantData, address_id: address?.id });
 
 			if (error) {
 				setFlash({ type: 'error', message: error.message }, event.cookies);

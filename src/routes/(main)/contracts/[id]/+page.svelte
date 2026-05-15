@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import * as Card from '@/components/ui/card';
-	import { Separator } from '@/components/ui/separator';
-	import { currencyFormatter } from '@/formatters';
-	import dayjs from 'dayjs';
+	import ContractAccountTable from '@/contract/components/contract-account/contract-account-table.svelte';
+	import DueNoteForm from '@/contract/components/contract-account/due-note-form.svelte';
+	import InstallmentPaymentForm from '@/contract/components/contract-account/installment-payment-form.svelte';
+	import RentPaymentForm from '@/contract/components/contract-account/rent-payment-form.svelte';
+	import ContractDeleteDialog from '@/contract/components/contract-delete-dialog.svelte';
+	import ContractForm from '@/contract/components/contract-form.svelte';
+	import InstallmentUpdateForm from '@/contract/components/installment-update/installment-update-form.svelte';
+	import RentUpdateForm from '@/contract/components/rent-update/rent-update-form.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import * as Card from '@/shared/components/ui/card';
+	import { Separator } from '@/shared/components/ui/separator';
+	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
 	import {
 		AlertTriangle,
 		ArrowUpDown,
@@ -20,14 +27,6 @@
 		PlusCircle,
 		Trash,
 	} from 'lucide-svelte';
-	import DueNoteForm from '../_components/contract-account/due-note-form.svelte';
-	import InstallmentPaymentForm from '../_components/contract-account/installment-payment-form.svelte';
-	import RentPaymentForm from '../_components/contract-account/rent-payment-form.svelte';
-	import ContractDeleteDialog from '../_components/contract-delete-dialog.svelte';
-	import ContractForm from '../_components/contract-form.svelte';
-	import InstallmentUpdateForm from '../_components/installment-update/installment-update-form.svelte';
-	import RentUpdateForm from '../_components/rent-update/rent-update-form.svelte';
-	import ContractAccountTable from './../_components/contract-account/contract-account-table.svelte';
 
 	let { data } = $props();
 	let {
@@ -92,13 +91,13 @@
 					<div class="text-lg font-semibold tracking-tight">Information</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">Start Date</dt>
-						<dd>{dayjs(contract.start_date).format('DD/MM/YYYY')}</dd>
+						<dd>{dateFormatter(contract.start_date)}</dd>
 					</div>
 					<div>
 						<dt class="text-sm text-muted-foreground">End Date</dt>
 						<dd>
 							{#if contract.end_date}
-								{dayjs(contract.end_date).format('DD/MM/YYYY')}
+								{dateFormatter(contract.end_date)}
 							{:else}
 								<br />
 							{/if}
@@ -113,7 +112,7 @@
 									<br />
 									<span class="text-sm text-muted-foreground">
 										next update: {currencyFormatter.format(contract.data.next_update.rent)}
-										({dayjs(contract.data.next_update.update_date).format('DD/MM/YYYY')})
+										({dateFormatter(contract.data.next_update.update_date)})
 									</span>
 								{/if}
 							</dd>
@@ -137,10 +136,14 @@
 						</div>
 					{/if}
 					<div>
-						<dt class="text-sm text-muted-foreground">Fraction</dt>
+						<dt class="text-sm text-muted-foreground">Property</dt>
 						<dd class="flex flex-row items-center gap-x-2">
-							{contract.fraction.label}
-							<Button size="icon" variant="ghost" href={resolve('/')}>
+							{contract.property.label}
+							<Button
+								size="icon"
+								variant="ghost"
+								href={resolve(`/properties/${contract.property.id}`)}
+							>
 								<Link class="h-4 w-4" />
 							</Button>
 						</dd>
@@ -173,9 +176,7 @@
 							</div>
 							<p class="text-xs text-muted-foreground">
 								{#if contract.data.next_update}
-									next update on the {dayjs(contract.data.next_update.update_date).format(
-										'DD/MM/YYYY'
-									)}
+									next update on the {dateFormatter(contract.data.next_update.update_date)}
 								{:else}
 									no update scheduled yet
 								{/if}
@@ -194,9 +195,7 @@
 							</div>
 							<p class="text-xs text-muted-foreground">
 								{#if contract.data.next_update}
-									next update on the {dayjs(contract.data.next_update.update_date).format(
-										'DD/MM/YYYY'
-									)}
+									next update on the {dateFormatter(contract.data.next_update.update_date)}
 								{:else}
 									no update scheduled yet
 								{/if}
@@ -268,7 +267,7 @@
 
 <ContractForm data={updateContractForm} action="?/update" bind:open={openForm} />
 
-<ContractDeleteDialog {contract} data={deleteContractForm} bind:open={openDeleteDialog} />
+<ContractDeleteDialog data={deleteContractForm} bind:open={openDeleteDialog} />
 
 {#if contract.type === 'renting'}
 	<RentUpdateForm

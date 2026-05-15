@@ -1,6 +1,7 @@
-import { createEmployeeSchema, deleteEmployeeSchema } from '@/schemas/employee';
-import type { Employee, Movement } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { deleteEmployeeSchema, updateEmployeeSchema } from '@/employee/schemas';
+import type { Employee } from '@/employee/types';
+import type { Movement } from '@/movement/types';
+import { handleFormAction } from '@/shared/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';
@@ -10,7 +11,7 @@ export const load = async (event) => {
 	async function getEmployee(): Promise<Employee> {
 		const { data: employee, error: employeeError } = await event.locals.supabase
 			.from('employees')
-			.select('*')
+			.select('*, address:addresses(*)')
 			.eq('id', Number(event.params.id))
 			.single();
 
@@ -33,16 +34,21 @@ export const load = async (event) => {
 	}
 
 	const employee = await getEmployee();
+	const employeeFormData = { ...employee, address: employee.address ?? {} };
 
 	return {
 		employee: employee,
 		movements: await getMovements(employee.tax_id_number),
-		updateEmployeeForm: await superValidate(employee, zod4(createEmployeeSchema), {
+		updateEmployeeForm: await superValidate(employeeFormData, zod4(updateEmployeeSchema), {
 			id: 'update-employee',
 		}),
-		deleteEmployeeForm: await superValidate(zod4(deleteEmployeeSchema), {
-			id: 'delete-employee',
-		}),
+		deleteEmployeeForm: await superValidate(
+			{ id: Number(event.params.id) },
+			zod4(deleteEmployeeSchema),
+			{
+				id: 'delete-employee',
+			}
+		),
 	};
 };
 
@@ -50,12 +56,60 @@ export const actions = {
 	update: async (event) =>
 		handleFormAction(
 			event,
-			createEmployeeSchema,
+			updateEmployeeSchema,
 			'update-employee',
 			async (event, userId, form) => {
+				const { address: addressData, ...employeeData } = form.data;
+				const { id: addressId, ...addressFields } = addressData;
+
+				if (addressId) {
+					const { error: addressError } = await event.locals.supabase
+						.from('addresses')
+						.update(addressFields)
+						.eq('id', addressId);
+
+					if (addressError) {
+						setFlash(
+							{
+								type: 'error',
+								message: addressError.message,
+							},
+							event.cookies
+						);
+						return fail(500, {
+							message: addressError.message,
+							form,
+						});
+					}
+				} else {
+					const { data: insertedAddress, error: addressError } = await event.locals.supabase
+						.from('addresses')
+						.insert(addressFields)
+						.select('id')
+						.single();
+
+					if (addressError) {
+						setFlash(
+							{
+								type: 'error',
+								message: addressError.message,
+							},
+							event.cookies
+						);
+						return fail(500, {
+							message: addressError.message,
+							form,
+						});
+					}
+
+					Object.assign(employeeData, {
+						address_id: insertedAddress?.id,
+					});
+				}
+
 				const { error } = await event.locals.supabase
 					.from('employees')
-					.update(form.data)
+					.update(employeeData)
 					.eq('id', Number(event.params.id));
 
 				if (error) {
