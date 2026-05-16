@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "supabase/**"
+      - 'supabase/**'
   pull_request:
     types: [opened, reopened, synchronize]
 
