@@ -10,7 +10,7 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
-	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { Pencil, Trash } from 'lucide-svelte';
 	import { getTenant } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
