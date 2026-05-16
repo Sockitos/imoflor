@@ -92,25 +92,6 @@ values (
 		'',
 		'',
 		''
-	),
-	(
-		'00000000-0000-0000-0000-000000000000',
-		uuid_generate_v4 (),
-		'authenticated',
-		'authenticated',
-		'tomasviana_cof@hotmail.com',
-		crypt ('Password123', gen_salt ('bf')),
-		current_timestamp,
-		current_timestamp,
-		current_timestamp,
-		'{"provider":"email","providers":["email"]}',
-		'{"display_name": "Tomás Figueiredo"}',
-		current_timestamp,
-		current_timestamp,
-		'',
-		'',
-		'',
-		''
 	);
 insert into auth.identities (
 		id,
