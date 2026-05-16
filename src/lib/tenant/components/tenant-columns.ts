@@ -1,11 +1,5 @@
-<<<<<<<< HEAD:src/lib/tenants/components/tenant-columns.ts
-import { renderComponent } from '@/components/ui/data-table';
-import DataTableCheckbox from '@/components/ui/data-table/data-table-checkbox.svelte';
-import type { Tenant } from '@/tenants/types/tenant';
-========
 import { renderComponent } from '@/shared/components/ui/data-table';
 import DataTableCheckbox from '@/shared/components/ui/data-table/data-table-checkbox.svelte';
->>>>>>>> origin/master:src/lib/tenant/components/tenant-columns.ts
 import type { ColumnDef } from '@tanstack/table-core';
 import type { Tenant } from '../types';
 import TenantActions from './tenant-actions.svelte';

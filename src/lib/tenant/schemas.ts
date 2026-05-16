@@ -6,11 +6,6 @@ import {
 	maritalStatusSchema,
 } from '@/shared/schemas';
 import { z } from 'zod';
-<<<<<<<< HEAD:src/lib/tenants/schemas/tenant.ts
-import { genderSchema } from '@/schemas/gender';
-import { maritalStatusSchema } from '@/schemas/marital-status';
-========
->>>>>>>> origin/master:src/lib/tenant/schemas.ts
 
 const tenantSchema = z.object({
 	name: z.string().min(1, 'Name is required'),

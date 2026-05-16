@@ -11,6 +11,9 @@
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { getTenant } from '@/tenant/tenant.remote';
+	import { Spinner } from '@/shared/components/ui/spinner';
+	import { getMovements } from '@/movement/movement.remote';
 
 	let { data } = $props();
 	let { updateTenantForm, deleteTenantForm } = $derived(data);
@@ -46,12 +49,18 @@
 					<div class="flex flex-col gap-y-2">
 						<div class="text-lg font-semibold tracking-tight">Identification</div>
 						<div>
-							<dt class="text-sm text-muted-foreground">Gender</dt>
-							<dd>{genderOptions[tenant.gender]}</dd>
+							<dt class="text-sm text-muted-foreground">Name</dt>
+							<dd>{(await tenant).name}</dd>
 						</div>
-						<div>
-							<dt class="text-sm text-muted-foreground">Marital Status</dt>
-							<dd>{maritalStatusOptions[tenant.marital_status]}</dd>
+						<div class="grid grid-cols-2 gap-y-2">
+							<div>
+								<dt class="text-sm text-muted-foreground">Gender</dt>
+								<dd>{genderOptions[(await tenant).gender]}</dd>
+							</div>
+							<div>
+								<dt class="text-sm text-muted-foreground">Marital Status</dt>
+								<dd>{maritalStatusOptions[(await tenant).marital_status]}</dd>
+							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
@@ -89,54 +98,31 @@
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Country</dt>
-								<dd>{(await tenant).country}</dd>
+								<dd>{(await tenant).address?.country}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Region</dt>
-								<dd>{(await tenant).region}</dd>
+								<dd>{(await tenant).address?.region}</dd>
 							</div>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Address</dt>
-							<dd>{(await tenant).address}</dd>
+							<dd>{(await tenant).address?.address}</dd>
 						</div>
-					</div>
-				</div>
-				<div class="flex flex-col gap-y-2">
-					<div class="text-lg font-semibold tracking-tight">Address</div>
-					<div class="grid grid-cols-2 gap-y-2">
-						<div>
-							<dt class="text-sm text-muted-foreground">Country</dt>
-							<dd>{tenant.address?.country}</dd>
-						</div>
-						<div>
-							<dt class="text-sm text-muted-foreground">Region</dt>
-							<dd>{tenant.address?.region}</dd>
+						<div class="grid grid-cols-2 gap-y-2">
+							<div>
+								<dt class="text-sm text-muted-foreground">Postal Code</dt>
+								<dd>{(await tenant).address?.postal_code}</dd>
+							</div>
+							<div>
+								<dt class="text-sm text-muted-foreground">City</dt>
+								<dd>{(await tenant).address?.city}</dd>
+							</div>
 						</div>
 					</div>
 					<div>
-						<dt class="text-sm text-muted-foreground">Address</dt>
-						<dd>{tenant.address?.address}</dd>
-					</div>
-					<div class="grid grid-cols-2 gap-y-2">
-						<div>
-							<dt class="text-sm text-muted-foreground">Postal Code</dt>
-							<dd>{tenant.address?.postal_code}</dd>
-						</div>
-						<div>
-							<dt class="text-sm text-muted-foreground">City</dt>
-							<dd>{tenant.address?.city}</dd>
-						</div>
-					</div>
-				</div>
-				<div>
-					<div class="flex flex-col gap-y-2">
-						<div class="text-lg font-semibold tracking-tight">Contacts</div>
-						<div>
-							<dt class="text-sm text-muted-foreground">Email</dt>
-							<dd>{tenant.email}</dd>
-						</div>
-						<div class="grid grid-cols-2 gap-y-2">
+						<div class="flex flex-col gap-y-2">
+							<div class="text-lg font-semibold tracking-tight">Contacts</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Email</dt>
 								<dd>{(await tenant).email}</dd>
@@ -167,7 +153,7 @@
 					</Card.Footer>
 				</Card.Root>
 			</div>
-			<div class="col-span-2">
+			<div class="col-span-2 flex flex-col gap-y-6">
 				<svelte:boundary>
 					<MovementTable movements={(await getMovements((await tenant).tax_id_number)) ?? []} />
 
@@ -187,10 +173,9 @@
 			</div>
 		</div>
 	</div>
-
 	<TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
 
-<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />
+	<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />
 
 	{#snippet pending()}
 		<div class="flex items-center justify-center px-4 py-6 lg:px-8">

@@ -6,6 +6,8 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
+	import { getTenants } from '@/tenant/tenant.remote';
+	import Spinner from '@/shared/components/ui/spinner/spinner.svelte';
 
 	let { data } = $props();
 	let { createTenantForm } = $derived(data);

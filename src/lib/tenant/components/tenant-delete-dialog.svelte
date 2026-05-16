@@ -1,11 +1,5 @@
 <script lang="ts">
-<<<<<<<< HEAD:src/lib/tenants/components/tenant-delete-dialog.svelte
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import { deleteTenantSchema, type DeleteTenantSchema } from '@/tenants/schemas/tenant';
-	import type { Tenant } from '@/types/types';
-========
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
->>>>>>>> origin/master:src/lib/tenant/components/tenant-delete-dialog.svelte
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { deleteTenantSchema, type DeleteTenantSchema } from '../schemas';

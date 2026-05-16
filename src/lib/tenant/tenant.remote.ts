@@ -1,25 +1,12 @@
 import { form, getRequestEvent, query } from '$app/server';
-import { genderSchema } from '@/schemas/gender';
-import { maritalStatusSchema } from '@/schemas/marital-status';
-import { deleteTenantSchema } from '@tenants/schemas/tenant';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { deleteTenantSchema } from './schemas';
+import { setFlash } from 'sveltekit-flash-message/server';
+import type { Tenant } from './types';
+import { addressSchema, genderSchema, maritalStatusSchema } from '@/shared/schemas';
 
-export const getTenants = query(async () => {
-	const event = getRequestEvent();
-
-	const { data: tenants, error: tenantsError } = await event.locals.supabase
-		.from('tenants')
-		.select('*');
-
-	if (tenantsError) {
-		return error(500, 'Error fetching tenants, please try again later.');
-	}
-
-	return tenants;
-});
-
-const createTenantFormSchema = z.object({
+const createTenantSchema = z.object({
 	name: z.string().min(1, 'Name is required'),
 	gender: genderSchema,
 	marital_status: maritalStatusSchema,
@@ -29,23 +16,48 @@ const createTenantFormSchema = z.object({
 	id_expiration_date: z.string().optional(),
 	id_number: z.string().min(1, 'ID Number is required'),
 	tax_id_number: z.string().min(1, 'Tax ID Number is required'),
-	country: z.string().optional(),
-	region: z.string().optional(),
-	address: z.string().optional(),
-	postal_code: z.string().optional(),
-	city: z.string().optional(),
+	address: addressSchema,
 	email: z.string().optional(),
 	mobile: z.string().optional(),
 	phone: z.string().optional(),
 });
 
-export const createTenant = form(createTenantFormSchema, async (data) => {
+export const getTenants = query(async () => {
 	const event = getRequestEvent();
 
-	const { error: insertError } = await event.locals.supabase.from('tenants').insert(data);
+	const { data: tenants, error: tenantsError } = await event.locals.supabase
+		.from('tenants')
+		.select('*, address:addresses(*)');
 
-	if (insertError) {
-		return fail(500, { message: insertError.message, form });
+	if (tenantsError) {
+		return error(500, 'Error fetching tenants, please try again later.');
+	}
+	return tenants;
+});
+
+export const createTenant = form(createTenantSchema, async (data) => {
+	const event = getRequestEvent();
+
+	const { address: addressData, ...tenantData } = data;
+
+	const { data: address, error: addressError } = await event.locals.supabase
+		.from('addresses')
+		.insert(addressData)
+		.select('id')
+		.single();
+
+	if (addressError) {
+		setFlash({ type: 'error', message: addressError.message }, event.cookies);
+		return fail(500, { message: addressError.message, form });
+	}
+
+	const { error } = await event.locals.supabase
+		.from('tenants')
+		.insert({ ...tenantData, address_id: address?.id });
+
+	if (error) {
+		setFlash({ type: 'error', message: error.message }, event.cookies);
+		return fail(500, { message: error.message, form });
 	}
 
 	getTenants().refresh();
@@ -54,21 +66,24 @@ export const createTenant = form(createTenantFormSchema, async (data) => {
 export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
 	const event = getRequestEvent();
 
-	const { error: deleteError } = await event.locals.supabase.from('tenants').delete().eq('id', id);
+	const { error } = await event.locals.supabase.from('tenants').delete().eq('id', id);
 
-	if (deleteError) {
-		return fail(500, { message: deleteError.message, form });
+	if (error) {
+		setFlash({ type: 'error', message: error.message }, event.cookies);
+		return fail(500, { message: error.message, form });
 	}
 
 	getTenants().refresh();
+
+	return redirect(302, '/tenants');
 });
 
-export const getTenant = query(z.number(), async (id) => {
+export const getTenant = query(z.number(), async (id): Promise<Tenant> => {
 	const event = getRequestEvent();
 
 	const { data: tenant, error: tenantError } = await event.locals.supabase
 		.from('tenants')
-		.select('*')
+		.select('*, address:addresses(*)')
 		.eq('id', id)
 		.single();
 
@@ -79,20 +94,64 @@ export const getTenant = query(z.number(), async (id) => {
 	return tenant;
 });
 
-export const updateTenant = form(
-	createTenantFormSchema.extend({ id: z.number() }),
-	async ({ id, ...data }) => {
-		const event = getRequestEvent();
+export const updateTenant = form(createTenantSchema, async (data) => {
+	const event = getRequestEvent();
 
-		const { error: updateError } = await event.locals.supabase
-			.from('tenants')
-			.update(data)
-			.eq('id', id);
+	const { address: addressData, ...tenantData } = data;
+	const { id: addressId, ...addressFields } = addressData;
 
-		if (updateError) {
-			return fail(500, { message: updateError.message, form });
+	if (addressId) {
+		const { error: addressError } = await event.locals.supabase
+			.from('addresses')
+			.update(addressFields)
+			.eq('id', addressId);
+
+		if (addressError) {
+			setFlash(
+				{
+					type: 'error',
+					message: addressError.message,
+				},
+				event.cookies
+			);
+			return fail(500, {
+				message: addressError.message,
+				form,
+			});
+		}
+	} else {
+		const { data: address, error: addressError } = await event.locals.supabase
+			.from('addresses')
+			.insert(addressFields)
+			.select('id')
+			.single();
+
+		if (addressError) {
+			setFlash(
+				{
+					type: 'error',
+					message: addressError.message,
+				},
+				event.cookies
+			);
+			return fail(500, {
+				message: addressError.message,
+				form,
+			});
 		}
 
-		getTenants().refresh();
+		Object.assign(tenantData, { address_id: address?.id });
 	}
-);
+
+	const { error } = await event.locals.supabase
+		.from('tenants')
+		.update(tenantData)
+		.eq('id', Number(event.params.id));
+
+	if (error) {
+		setFlash({ type: 'error', message: error.message }, event.cookies);
+		return fail(500, { message: error.message, form });
+	}
+
+	getTenants().refresh();
+});

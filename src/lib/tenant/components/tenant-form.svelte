@@ -1,19 +1,4 @@
 <script lang="ts">
-<<<<<<<< HEAD:src/lib/tenants/components/tenant-form.svelte
-	import * as Select from '$lib/components/ui/select';
-	import { Button, buttonVariants } from '@/components/ui/button';
-	import { Calendar } from '@/components/ui/calendar';
-	import * as Form from '@/components/ui/form';
-	import { Input } from '@/components/ui/input';
-	import * as Popover from '@/components/ui/popover';
-	import { Separator } from '@/components/ui/separator';
-	import * as Sheet from '@/components/ui/sheet';
-	import { genderOptions } from '@/schemas/gender';
-	import { maritalStatusOptions } from '@/schemas/marital-status';
-	import { createTenantSchema, type CreateTenantSchema } from '@/tenants/schemas/tenant';
-	import { cn } from '@/utils';
-	import { DateFormatter, getLocalTimeZone, parseDate } from '@internationalized/date';
-========
 	import * as Select from '@/shared/components/ui/select';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
@@ -25,7 +10,6 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
->>>>>>>> origin/master:src/lib/tenant/components/tenant-form.svelte
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';

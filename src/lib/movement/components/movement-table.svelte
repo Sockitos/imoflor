@@ -1,20 +1,13 @@
 <script lang="ts">
-<<<<<<<< HEAD:src/lib/movements/components/movement-table.svelte
-	import { Button } from '@/components/ui/button';
-	import { createSvelteTable, FlexRender } from '@/components/ui/data-table';
-	import { Input } from '@/components/ui/input';
-	import * as Table from '@/components/ui/table';
-	import type { Movement } from '@/types/types';
-========
 	import { createSvelteTable, FlexRender } from '@/shared/components/ui/data-table';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
->>>>>>>> origin/master:src/lib/movement/components/movement-table.svelte
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
 	import { PlusCircle } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { Movement } from '../types';
 	import { columns } from './movement-columns';
+	import { Button } from '@/shared/components/ui/button';
 
 	interface Props {
 		movements: Movement[];

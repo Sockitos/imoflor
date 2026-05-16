@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { genderValues, maritalStatusValues } from './types';
 
-export const idSchema = z.coerce.number().int().positive();
+export const idSchema = z.number().int().positive();
 
 export const deleteByIdSchema = z.object({
 	id: idSchema,
