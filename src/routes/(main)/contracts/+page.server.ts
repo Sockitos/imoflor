@@ -1,6 +1,7 @@
-import { createContractSchema, deleteContractSchema } from '@/schemas/contract';
-import type { Contract, IdWithLabel } from '@/types/types';
-import { handleFormAction } from '@/utils';
+import { createContractSchema, deleteContractSchema } from '@/contract/schemas';
+import type { Contract } from '@/contract/types';
+import type { IdAndLabel } from '@/shared/types';
+import { handleFormAction } from '@/shared/utils';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -11,7 +12,7 @@ export const load = async (event) => {
 		const { data: contracts, error: contractsError } = await event.locals.supabase
 			.from('contracts_view')
 			.select(
-				'*, tenants:tenants!inner (id, label:name), fraction:fractions_view!inner (id, label:address_full)'
+				'*, tenants:tenants!inner (id, label:name), property:properties!inner (id, ...addresses(label:address))'
 			)
 			.returns<Contract[]>(); // TODO: try not to use returns
 
@@ -21,18 +22,18 @@ export const load = async (event) => {
 		return contracts;
 	}
 
-	async function getFractionOptions(): Promise<IdWithLabel[]> {
-		const { data: fractions, error: fractionsError } = await event.locals.supabase
-			.from('fractions_view')
-			.select('id, label:address_full');
+	async function getPropertyOptions(): Promise<IdAndLabel[]> {
+		const { data: properties, error: propertiesError } = await event.locals.supabase
+			.from('properties')
+			.select('id, ...addresses(label:address)');
 
-		if (fractionsError) {
-			return error(500, 'Error fetching fractions, please try again later.');
+		if (propertiesError) {
+			return error(500, 'Error fetching properties, please try again later.');
 		}
-		return fractions;
+		return properties;
 	}
 
-	async function getTenantOptions() {
+	async function getTenantOptions(): Promise<IdAndLabel[]> {
 		const { data: tenants, error: tenantsError } = await event.locals.supabase
 			.from('tenants')
 			.select('id, label:name');
@@ -45,7 +46,7 @@ export const load = async (event) => {
 
 	return {
 		contracts: await getContracts(),
-		fractionOptions: await getFractionOptions(),
+		propertyOptions: await getPropertyOptions(),
 		tenantOptions: await getTenantOptions(),
 		createContractForm: await superValidate(zod4(createContractSchema), {
 			id: 'create-contract',
@@ -66,7 +67,7 @@ export const actions = {
 				const { data, error } = await event.locals.supabase
 					.from('contracts_view')
 					.insert({
-						fraction_id: form.data.fraction_id,
+						property_id: form.data.property_id,
 						start_date: form.data.start_date,
 						end_date: form.data.end_date,
 						type: form.data.type,

@@ -1,5 +1,5 @@
-import { signInSchema } from '@/schemas/sign-in';
-import { handleFormAction } from '@/utils';
+import { signInSchema } from '@/auth/schemas';
+import { handleFormAction } from '@/shared/utils';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';

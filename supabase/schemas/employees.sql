@@ -22,7 +22,7 @@ CREATE TABLE public.employees(
   id_number text NOT NULL,
   tax_id_number text NOT NULL,
   ss_number text NOT NULL,
-  address_id bigint,
+  address_id bigint NOT NULL,
   email text,
   mobile text,
   phone text,

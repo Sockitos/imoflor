@@ -12,7 +12,6 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
-	{ ignores: ['src/lib/components/ui/**'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,
@@ -42,6 +41,7 @@ export default defineConfig(
 		// 'svelte/button-has-type': 'error'
 		rules: {
 			'@typescript-eslint/no-unused-vars': 'error',
+			'svelte/no-navigation-without-resolve': 'warn',
 		},
 	}
 );

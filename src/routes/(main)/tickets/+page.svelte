@@ -1,8 +1,10 @@
 <script lang="ts">
-	import PageSubtitle from '@/components/page-subtitle.svelte';
-	import PageTitle from '@/components/page-title.svelte';
-	import { Button } from '@/components/ui/button';
-	import { Separator } from '@/components/ui/separator';
+	import TicketForm from '@/ticket/components/ticket-form.svelte';
+	import TicketTable from '@/ticket/components/ticket-table.svelte';
+	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
+	import PageTitle from '@/shared/components/page-title.svelte';
+	import { Button } from '@/shared/components/ui/button';
+	import { Separator } from '@/shared/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
 	import KanbanBoard from '@/components/kanban-board.svelte';
 	import TicketForm from './_components/ticket-form.svelte';

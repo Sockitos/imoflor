@@ -15,7 +15,7 @@ CREATE TABLE public.tenants(
   id_expiration_date timestamp with time zone,
   id_number text NOT NULL,
   tax_id_number text NOT NULL,
-  address_id bigint,
+  address_id bigint NOT NULL,
   email text,
   mobile text,
   phone text,
