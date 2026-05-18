@@ -3,11 +3,9 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
-	import { PlusCircle } from 'lucide-svelte';
 	import { writable } from 'svelte/store';
 	import type { Movement } from '../types';
 	import { columns } from './movement-columns';
-	import { Button } from '@/shared/components/ui/button';
 
 	interface Props {
 		movements: Movement[];
@@ -37,20 +35,6 @@
 </script>
 
 <div class="flex flex-col gap-y-4">
-	<div class="flex items-start justify-between">
-		<div>
-			<h2 class="text-lg font-semibold">Movements</h2>
-			<p class="text-sm text-muted-foreground">
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-				labore et dolore magna aliqua.
-			</p>
-		</div>
-		<Button>
-			<PlusCircle class="mr-2 h-4 w-4" />
-			Movement
-		</Button>
-	</div>
-
 	<div class="flex flex-row items-center">
 		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
 	</div>

@@ -10,7 +10,7 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
-	import { Pencil, Trash } from 'lucide-svelte';
+	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 	import { getTenant } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
@@ -154,6 +154,19 @@
 				</Card.Root>
 			</div>
 			<div class="col-span-2 flex flex-col gap-y-6">
+				<div class="flex items-start justify-between">
+					<div>
+						<h2 class="text-lg font-semibold">Movements</h2>
+						<p class="text-sm text-muted-foreground">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+							incididunt ut labore et dolore magna aliqua.
+						</p>
+					</div>
+					<Button>
+						<PlusCircle class="mr-2 h-4 w-4" />
+						Movement
+					</Button>
+				</div>
 				<svelte:boundary>
 					<MovementTable movements={(await getMovements((await tenant).tax_id_number)) ?? []} />
 
