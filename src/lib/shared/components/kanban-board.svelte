@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Card, CardContent, CardHeader } from '@/components/ui/card';
-	import { Badge } from '@/components/ui/badge';
-	import { Button } from '@/components/ui/button';
+	import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
+	import { Badge } from '@/shared/components/ui/badge';
+	import { Button } from '@/shared/components/ui/button';
 	import {
 		GripVertical,
 		Plus,
@@ -13,8 +13,8 @@
 		ArrowRightIcon,
 		ArrowUpIcon,
 	} from 'lucide-svelte';
-	import type { Ticket, TicketStatus } from '@/types/types';
 	import type { Component } from 'svelte';
+	import type { Ticket, TicketStatus } from '@/ticket/types';
 
 	const mockTickets: Ticket[] = [
 		{
@@ -26,7 +26,6 @@
 			description:
 				'Tenant reported a leaking pipe under the kitchen sink. Needs urgent inspection.',
 			property: { id: 1, label: '12 Maple Street' },
-			fraction: { id: 3, label: 'Unit 3B' },
 		},
 		{
 			id: 2,
@@ -37,7 +36,6 @@
 			description:
 				'Window latch on the second floor bedroom is broken and cannot be locked properly.',
 			property: { id: 2, label: '45 Oak Avenue' },
-			fraction: { id: 7, label: 'Unit 1A' },
 		},
 		{
 			id: 3,
@@ -48,7 +46,6 @@
 			description:
 				'Hallway walls on the third floor need a fresh coat of paint. Tenant requested neutral color.',
 			property: { id: 1, label: '12 Maple Street' },
-			fraction: null,
 		},
 		{
 			id: 4,
@@ -59,7 +56,6 @@
 			description:
 				'Residents are confused about visitor parking rules. A new sign is needed at the entrance.',
 			property: { id: 3, label: '8 Pine Road' },
-			fraction: null,
 		},
 		{
 			id: 5,
@@ -69,7 +65,6 @@
 			title: 'Elevator annual maintenance',
 			description: 'Scheduled yearly elevator inspection and maintenance by certified technician.',
 			property: { id: 2, label: '45 Oak Avenue' },
-			fraction: null,
 		},
 		{
 			id: 6,
@@ -79,7 +74,6 @@
 			title: 'HVAC filter replacement',
 			description: 'All HVAC units across floors 2–5 are due for filter replacement this month.',
 			property: { id: 1, label: '12 Maple Street' },
-			fraction: { id: 12, label: 'Unit 2C' },
 		},
 		{
 			id: 7,
@@ -90,7 +84,6 @@
 			description:
 				'New tenants have moved in and the intercom directory listing needs to be updated.',
 			property: { id: 3, label: '8 Pine Road' },
-			fraction: null,
 		},
 		{
 			id: 8,
@@ -101,7 +94,6 @@
 			description:
 				'Old water heater in the basement was replaced with a new energy-efficient unit.',
 			property: { id: 2, label: '45 Oak Avenue' },
-			fraction: null,
 		},
 		{
 			id: 9,
@@ -112,7 +104,6 @@
 			description:
 				'Garage door sensor was misaligned causing it to stay open. Sensor realigned and tested.',
 			property: { id: 3, label: '8 Pine Road' },
-			fraction: null,
 		},
 		{
 			id: 10,
@@ -123,7 +114,6 @@
 			description:
 				'Proposal to add seating to the rooftop area was cancelled due to budget constraints this quarter.',
 			property: { id: 1, label: '12 Maple Street' },
-			fraction: null,
 		},
 	];
 
@@ -155,19 +145,50 @@
 	const ALL_STATUSES: TicketStatus[] = ['open', 'in_progress', 'resolved', 'cancelled'];
 
 	let columnOrder = $state<TicketStatus[]>([...ALL_STATUSES]);
-	let localTickets = $state<Ticket[]>([]);
-
-	$effect(() => {
-		localTickets = [...tickets];
-	});
+	let localTickets = $state<Ticket[]>([...tickets]);
 
 	let draggingCardId = $state<number | null>(null);
 	let draggingColumnId = $state<TicketStatus | null>(null);
 	let dragOverColumnId = $state<TicketStatus | null>(null);
 	let dragOverCardId = $state<number | null>(null);
+	let dragOverPosition = $state<'before' | 'after'>('before');
+
+	let previewTickets = $derived.by(() => {
+		if (draggingCardId === null) return localTickets;
+
+		const draggingTicket = localTickets.find((t) => t.id === draggingCardId);
+		if (!draggingTicket) return localTickets;
+
+		const withoutDragging = localTickets.filter((t) => t.id !== draggingCardId);
+
+		const dragOverCardInColumn =
+			dragOverCardId !== null &&
+			localTickets.find((t) => t.id === dragOverCardId)?.status === dragOverColumnId;
+
+		if (dragOverCardId !== null && dragOverColumnId !== null && dragOverCardInColumn) {
+			const updatedTicket = { ...draggingTicket, status: dragOverColumnId };
+			const targetIndex = withoutDragging.findIndex((t) => t.id === dragOverCardId);
+			if (targetIndex === -1) return localTickets;
+			const insertIndex = dragOverPosition === 'after' ? targetIndex + 1 : targetIndex;
+			const result = [...withoutDragging];
+			result.splice(insertIndex, 0, updatedTicket);
+			return result;
+		} else if (dragOverColumnId !== null) {
+			const updatedTicket = { ...draggingTicket, status: dragOverColumnId };
+			let lastColIndex = -1;
+			for (let i = 0; i < withoutDragging.length; i++) {
+				if (withoutDragging[i].status === dragOverColumnId) lastColIndex = i;
+			}
+			const result = [...withoutDragging];
+			result.splice(lastColIndex + 1, 0, updatedTicket);
+			return result;
+		}
+
+		return localTickets;
+	});
 
 	function ticketsForColumn(status: TicketStatus): Ticket[] {
-		return localTickets.filter((t) => t.status === status);
+		return previewTickets.filter((t) => t.status === status);
 	}
 
 	// --- Card DnD ---
@@ -191,10 +212,18 @@
 
 	function onCardDragOver(e: DragEvent, cardId: number, targetColumn: TicketStatus) {
 		if (draggingColumnId !== null) return;
+		if (cardId === draggingCardId) {
+			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
 		e.preventDefault();
+		e.stopPropagation();
 		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
 		dragOverCardId = cardId;
 		dragOverColumnId = targetColumn;
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		dragOverPosition = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
 	}
 
 	function onCardDrop(e: DragEvent, targetCardId: number, targetColumn: TicketStatus) {
@@ -204,24 +233,7 @@
 		const type = e.dataTransfer.getData('type');
 		if (type !== 'card') return;
 
-		const srcCardId = parseInt(e.dataTransfer.getData('cardId'));
-		if (srcCardId === targetCardId) {
-			dragOverCardId = null;
-			dragOverColumnId = null;
-			return;
-		}
-
-		const srcIndex = localTickets.findIndex((t) => t.id === srcCardId);
-		if (srcIndex === -1) return;
-
-		// Update status and reorder: insert before the target card
-		const movedTicket = { ...localTickets[srcIndex], status: targetColumn };
-		const withoutMoved = localTickets
-			.filter((t) => t.id !== srcCardId)
-			.map((t) => (t.id === srcCardId ? { ...t, status: targetColumn } : t));
-		const targetIndex = withoutMoved.findIndex((t) => t.id === targetCardId);
-		withoutMoved.splice(targetIndex, 0, movedTicket);
-		localTickets = withoutMoved;
+		localTickets = [...previewTickets];
 
 		draggingCardId = null;
 		dragOverCardId = null;
@@ -241,13 +253,7 @@
 		const type = e.dataTransfer.getData('type');
 
 		if (type === 'card') {
-			const srcCardId = parseInt(e.dataTransfer.getData('cardId'));
-			const srcIndex = localTickets.findIndex((t) => t.id === srcCardId);
-			if (srcIndex === -1) return;
-
-			const movedTicket = { ...localTickets[srcIndex], status: targetColumn };
-			const rest = localTickets.filter((t) => t.id !== srcCardId);
-			localTickets = [...rest, movedTicket];
+			localTickets = [...previewTickets];
 		} else if (type === 'column') {
 			const srcColumnId = e.dataTransfer.getData('columnId') as TicketStatus;
 			if (srcColumnId === targetColumn) return;
@@ -297,8 +303,6 @@
 	{#each columnOrder as columnId, index (columnId)}
 		{@const col = statusMap[columnId]}
 		{@const colTickets = ticketsForColumn(columnId)}
-		{@const isDragOverCol =
-			dragOverColumnId === columnId && draggingCardId === null && draggingColumnId !== columnId}
 		{@const isColDragging = draggingColumnId === columnId}
 
 		<div
@@ -306,7 +310,7 @@
 			aria-label={`${col.label} column`}
 			class="flex w-72 shrink-0 flex-col rounded-lg border bg-muted/40 transition-opacity
 				{isColDragging ? 'opacity-40' : ''}
-				{isDragOverCol ? 'ring-2 ring-primary ring-offset-2' : ''}"
+				"
 			ondragover={(e) => {
 				onColumnDragOver(e, columnId);
 				onColumnDropZoneDragOver(e, columnId);
@@ -338,7 +342,6 @@
 			<div class="flex flex-1 flex-col gap-2 px-2 pb-2">
 				{#each colTickets as ticket (ticket.id)}
 					{@const isDragging = draggingCardId === ticket.id}
-					{@const isDropTarget = dragOverCardId === ticket.id && draggingCardId !== ticket.id}
 					{@const priority = priorityMap[ticket.priority]}
 
 					<div
@@ -351,18 +354,14 @@
 						ondragover={(e) => onCardDragOver(e, ticket.id, columnId)}
 						ondrop={(e) => onCardDrop(e, ticket.id, columnId)}
 					>
-						<Card
-							class="cursor-grab bg-background shadow-sm select-none active:cursor-grabbing
-								{isDropTarget ? 'border-primary ring-1 ring-primary' : ''}"
-						>
+						<Card class="cursor-grab bg-background shadow-sm select-none active:cursor-grabbing">
 							<CardHeader class="p-3 pb-1">
 								<p class="line-clamp-1 text-sm leading-snug font-medium">{ticket.title}</p>
 							</CardHeader>
 							<CardContent class="p-3 pt-1">
 								<p class="mb-3 line-clamp-2 text-xs text-muted-foreground">{ticket.description}</p>
 								<div class="flex items-center justify-between gap-2">
-									<span class="truncate text-xs text-muted-foreground">{ticket.property.label}</span
-									>
+									<span class="truncate text-xs text-muted-foreground">{ticket.property.label}</span>
 									<Badge
 										variant={priority.variant}
 										class="flex shrink-0 items-center gap-1 text-xs"
