@@ -121,7 +121,7 @@
 		dragOverPosition = e.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
 	}
 
-	function onCardDrop(e: DragEvent, targetCardId: string | number, targetColumn: string) {
+	function onCardDrop(e: DragEvent) {
 		e.preventDefault();
 		e.stopPropagation();
 		if (!e.dataTransfer) return;
@@ -141,7 +141,7 @@
 		dragOverColumnId = columnId;
 	}
 
-	function onColumnDropZoneDrop(e: DragEvent, targetColumn: string) {
+	function onColumnDropZoneDrop(e: DragEvent) {
 		e.preventDefault();
 		if (!e.dataTransfer) return;
 		const type = e.dataTransfer.getData('type');
@@ -211,7 +211,7 @@
 						onColumnDropZoneDragOver(e, columnId);
 					}
 				}}
-				ondrop={(e) => onColumnDropZoneDrop(e, columnId)}
+				ondrop={onColumnDropZoneDrop}
 			>
 				<!-- Column Header -->
 				<div class="flex items-center gap-1.5 px-3 py-3">
@@ -257,7 +257,7 @@
 							ondragstart={(e) => onCardDragStart(e, item.id, columnId)}
 							ondragend={onCardDragEnd}
 							ondragover={(e) => onCardDragOver(e, item.id, columnId)}
-							ondrop={(e) => onCardDrop(e, item.id, columnId)}
+							ondrop={onCardDrop}
 						>
 							{@render card(item)}
 						</div>
