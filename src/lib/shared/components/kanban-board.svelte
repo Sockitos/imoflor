@@ -152,6 +152,20 @@
 	let dragOverColumnId = $state<TicketStatus | null>(null);
 	let dragOverCardId = $state<number | null>(null);
 	let dragOverPosition = $state<'before' | 'after'>('before');
+	let dragOverColumnPosition = $state<'before' | 'after'>('before');
+
+	let previewColumnOrder = $derived.by(() => {
+		if (draggingColumnId === null || dragOverColumnId === null || dragOverColumnId === draggingColumnId) {
+			return columnOrder;
+		}
+		const without = columnOrder.filter((c) => c !== draggingColumnId);
+		const targetIdx = without.indexOf(dragOverColumnId);
+		if (targetIdx === -1) return columnOrder;
+		const insertIdx = dragOverColumnPosition === 'after' ? targetIdx + 1 : targetIdx;
+		const result = [...without];
+		result.splice(insertIdx, 0, draggingColumnId);
+		return result;
+	});
 
 	let previewTickets = $derived.by(() => {
 		if (draggingCardId === null) return localTickets;
@@ -255,15 +269,7 @@
 		if (type === 'card') {
 			localTickets = [...previewTickets];
 		} else if (type === 'column') {
-			const srcColumnId = e.dataTransfer.getData('columnId') as TicketStatus;
-			if (srcColumnId === targetColumn) return;
-
-			const srcIdx = columnOrder.indexOf(srcColumnId);
-			const tgtIdx = columnOrder.indexOf(targetColumn);
-			const newOrder = [...columnOrder];
-			newOrder.splice(srcIdx, 1);
-			newOrder.splice(tgtIdx, 0, srcColumnId);
-			columnOrder = newOrder;
+			columnOrder = [...previewColumnOrder];
 		}
 
 		draggingCardId = null;
@@ -291,16 +297,23 @@
 	}
 
 	function onColumnDragOver(e: DragEvent, columnId: TicketStatus) {
-		if (draggingColumnId !== null) {
+		if (draggingColumnId === null) return;
+		if (columnId === draggingColumnId) {
 			e.preventDefault();
-			if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-			dragOverColumnId = columnId;
+			e.stopPropagation();
+			return;
 		}
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+		dragOverColumnId = columnId;
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		dragOverColumnPosition = e.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
 	}
 </script>
 
 <div class="flex gap-4 overflow-x-auto pb-4">
-	{#each columnOrder as columnId, index (columnId)}
+	{#each previewColumnOrder as columnId, index (columnId)}
 		{@const col = statusMap[columnId]}
 		{@const colTickets = ticketsForColumn(columnId)}
 		{@const isColDragging = draggingColumnId === columnId}
@@ -312,8 +325,11 @@
 				{isColDragging ? 'opacity-40' : ''}
 				"
 			ondragover={(e) => {
-				onColumnDragOver(e, columnId);
-				onColumnDropZoneDragOver(e, columnId);
+				if (draggingColumnId !== null) {
+					onColumnDragOver(e, columnId);
+				} else {
+					onColumnDropZoneDragOver(e, columnId);
+				}
 			}}
 			ondrop={(e) => onColumnDropZoneDrop(e, columnId)}
 		>
