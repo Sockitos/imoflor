@@ -1,11 +1,14 @@
 import { getRequestEvent, query } from '$app/server';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
+import type { Movement } from './types';
 
-export const getMovements = query(z.string(), async (tax_id_number) => {
-	const event = getRequestEvent();
+export const getMovements = query<z.ZodString, Movement[]>(z.string(), async (tax_id_number) => {
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
-	const { data: movements, error: movementsError } = await event.locals.supabase
+	const { data: movements, error: movementsError } = await supabase
 		.from('movements')
 		.select('*')
 		.eq('tax_id_number', tax_id_number);

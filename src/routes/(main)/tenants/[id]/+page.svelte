@@ -18,17 +18,17 @@
 	let { data } = $props();
 	let { updateTenantForm, deleteTenantForm } = $derived(data);
 
-	const tenant = getTenant(Number(page.params.id));
-
 	let openForm = $state(page.url.searchParams.get('action') === 'edit');
 	let openDeleteDialog = $state(false);
 </script>
 
 <svelte:boundary>
+	{@const tenant = await getTenant(Number(page.params.id))}
+
 	<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
 		<div class="flex flex-row items-start justify-between">
 			<div>
-				<PageTitle>Tenant #{(await tenant).id}</PageTitle>
+				<PageTitle>Tenant #{tenant.id}</PageTitle>
 				<PageSubtitle>Last updated in 01/01/2024</PageSubtitle>
 			</div>
 			<div class="flex flex-row gap-x-4">
@@ -50,46 +50,46 @@
 						<div class="text-lg font-semibold tracking-tight">Identification</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Name</dt>
-							<dd>{(await tenant).name}</dd>
+							<dd>{tenant.name}</dd>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Gender</dt>
-								<dd>{genderOptions[(await tenant).gender]}</dd>
+								<dd>{genderOptions[tenant.gender]}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Marital Status</dt>
-								<dd>{maritalStatusOptions[(await tenant).marital_status]}</dd>
+								<dd>{maritalStatusOptions[tenant.marital_status]}</dd>
 							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Nationality</dt>
-								<dd>{(await tenant).nationality}</dd>
+								<dd>{tenant.nationality}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Birth Date</dt>
-								<dd>{dateFormatter((await tenant).birth_date)}</dd>
+								<dd>{dateFormatter(tenant.birth_date)}</dd>
 							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">ID Type</dt>
-								<dd>{(await tenant).id_type}</dd>
+								<dd>{tenant.id_type}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">ID Expiration Date</dt>
-								<dd>{dateFormatter((await tenant).id_expiration_date)}</dd>
+								<dd>{dateFormatter(tenant.id_expiration_date)}</dd>
 							</div>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">ID Number</dt>
-								<dd>{(await tenant).id_number}</dd>
+								<dd>{tenant.id_number}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Tax ID Number</dt>
-								<dd>{(await tenant).tax_id_number}</dd>
+								<dd>{tenant.tax_id_number}</dd>
 							</div>
 						</div>
 					</div>
@@ -98,25 +98,25 @@
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Country</dt>
-								<dd>{(await tenant).address?.country}</dd>
+								<dd>{tenant.address?.country}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Region</dt>
-								<dd>{(await tenant).address?.region}</dd>
+								<dd>{tenant.address?.region}</dd>
 							</div>
 						</div>
 						<div>
 							<dt class="text-sm text-muted-foreground">Address</dt>
-							<dd>{(await tenant).address?.address}</dd>
+							<dd>{tenant.address?.address}</dd>
 						</div>
 						<div class="grid grid-cols-2 gap-y-2">
 							<div>
 								<dt class="text-sm text-muted-foreground">Postal Code</dt>
-								<dd>{(await tenant).address?.postal_code}</dd>
+								<dd>{tenant.address?.postal_code}</dd>
 							</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">City</dt>
-								<dd>{(await tenant).address?.city}</dd>
+								<dd>{tenant.address?.city}</dd>
 							</div>
 						</div>
 					</div>
@@ -125,16 +125,16 @@
 							<div class="text-lg font-semibold tracking-tight">Contacts</div>
 							<div>
 								<dt class="text-sm text-muted-foreground">Email</dt>
-								<dd>{(await tenant).email}</dd>
+								<dd>{tenant.email}</dd>
 							</div>
 							<div class="grid grid-cols-2 gap-y-2">
 								<div>
 									<dt class="text-sm text-muted-foreground">Mobile</dt>
-									<dd>{(await tenant).phone}</dd>
+									<dd>{tenant.phone}</dd>
 								</div>
 								<div>
 									<dt class="text-sm text-muted-foreground">Phone</dt>
-									<dd>{(await tenant).phone}</dd>
+									<dd>{tenant.phone}</dd>
 								</div>
 							</div>
 						</div>
@@ -168,7 +168,9 @@
 					</Button>
 				</div>
 				<svelte:boundary>
-					<MovementTable movements={(await getMovements((await tenant).tax_id_number)) ?? []} />
+					{@const movements = await getMovements(tenant.tax_id_number)}
+
+					<MovementTable {movements} />
 
 					{#snippet pending()}
 						<div class="flex items-center justify-center px-4 py-6 lg:px-8">
@@ -186,6 +188,7 @@
 			</div>
 		</div>
 	</div>
+
 	<TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
 
 	<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />

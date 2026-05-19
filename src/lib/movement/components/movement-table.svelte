@@ -11,27 +11,25 @@
 		movements: Movement[];
 	}
 
-	const { movements }: Props = $props();
+	let { movements }: Props = $props();
 
 	const globalFilter = writable('');
 
-	const table = $derived(
-		createSvelteTable({
-			get data() {
-				return movements;
+	const table = createSvelteTable({
+		get data() {
+			return movements;
+		},
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		getFilteredRowModel: getFilteredRowModel(),
+		onGlobalFilterChange: globalFilter.set,
+		state: {
+			get globalFilter() {
+				return $globalFilter;
 			},
-			columns,
-			getCoreRowModel: getCoreRowModel(),
-			getSortedRowModel: getSortedRowModel(),
-			getFilteredRowModel: getFilteredRowModel(),
-			onGlobalFilterChange: globalFilter.set,
-			state: {
-				get globalFilter() {
-					return $globalFilter;
-				},
-			},
-		})
-	);
+		},
+	});
 </script>
 
 <div class="flex flex-col gap-y-4">

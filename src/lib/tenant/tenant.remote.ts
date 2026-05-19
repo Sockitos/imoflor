@@ -22,7 +22,7 @@ const createTenantSchema = z.object({
 	phone: z.string().optional(),
 });
 
-export const getTenants = query(async () => {
+export const getTenants = query<Tenant[]>(async () => {
 	const event = getRequestEvent();
 
 	const { data: tenants, error: tenantsError } = await event.locals.supabase
@@ -78,10 +78,12 @@ export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
 	return redirect(302, '/tenants');
 });
 
-export const getTenant = query(z.number(), async (id): Promise<Tenant> => {
-	const event = getRequestEvent();
+export const getTenant = query<z.ZodNumber, Tenant>(z.number(), async (id) => {
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
-	const { data: tenant, error: tenantError } = await event.locals.supabase
+	const { data: tenant, error: tenantError } = await supabase
 		.from('tenants')
 		.select('*, address:addresses(*)')
 		.eq('id', id)

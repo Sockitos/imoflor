@@ -12,8 +12,6 @@
 	let { data } = $props();
 	let { createTenantForm } = $derived(data);
 
-	const tenants = getTenants();
-
 	let openForm = $state(false);
 </script>
 
@@ -22,8 +20,8 @@
 		<div>
 			<PageTitle
 				>Tenants
-				{#if tenants.ready}
-					({tenants.current?.length})
+				{#if getTenants().ready}
+					({getTenants().current?.length})
 				{/if}
 			</PageTitle>
 			<PageSubtitle>Manage your tenants and Lorem Ipsum</PageSubtitle>
@@ -35,7 +33,10 @@
 	</div>
 	<Separator />
 	<svelte:boundary>
-		<TenantTable tenants={(await tenants) ?? []} />
+		{@const tenants = await getTenants()}
+
+		<TenantTable {tenants} />
+
 		{#snippet pending()}
 			<div class="flex items-center justify-center">
 				<Spinner class="size-6" />
