@@ -23,7 +23,9 @@ const createTenantSchema = z.object({
 });
 
 export const getTenants = query<Tenant[]>(async () => {
-	const { locals: { supabase } } = getRequestEvent();
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
 	const { data: tenants, error: tenantsError } = await supabase
 		.from('tenants')
@@ -36,7 +38,10 @@ export const getTenants = query<Tenant[]>(async () => {
 });
 
 export const createTenant = form(createTenantSchema, async (data) => {
-	const { locals: { supabase }, cookies } = getRequestEvent();
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
 
@@ -64,7 +69,10 @@ export const createTenant = form(createTenantSchema, async (data) => {
 });
 
 export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
-	const { locals: { supabase }, cookies } = getRequestEvent();
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
 
 	const { error } = await supabase.from('tenants').delete().eq('id', id);
 
@@ -79,7 +87,9 @@ export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
 });
 
 export const getTenant = query<z.ZodNumber, Tenant>(z.number(), async (id) => {
-	const { locals: { supabase } } = getRequestEvent();
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
 	const { data: tenant, error: tenantError } = await supabase
 		.from('tenants')
@@ -95,7 +105,11 @@ export const getTenant = query<z.ZodNumber, Tenant>(z.number(), async (id) => {
 });
 
 export const updateTenant = form(createTenantSchema, async (data) => {
-	const { locals: { supabase }, cookies, params: { id } } = getRequestEvent();
+	const {
+		locals: { supabase },
+		cookies,
+		params: { id },
+	} = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
 	const { id: addressId, ...addressFields } = addressData;
@@ -143,10 +157,7 @@ export const updateTenant = form(createTenantSchema, async (data) => {
 		Object.assign(tenantData, { address_id: address?.id });
 	}
 
-	const { error } = await supabase
-		.from('tenants')
-		.update(tenantData)
-		.eq('id', Number(id));
+	const { error } = await supabase.from('tenants').update(tenantData).eq('id', Number(id));
 
 	if (error) {
 		setFlash({ type: 'error', message: error.message }, cookies);

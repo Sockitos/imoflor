@@ -4,7 +4,9 @@ import { z } from 'zod';
 import type { Movement } from './types';
 
 export const getMovements = query<z.ZodString, Movement[]>(z.string(), async (tax_id_number) => {
-	const { locals: { supabase } } = getRequestEvent();
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
 	const { data: movements, error: movementsError } = await supabase
 		.from('movements')
