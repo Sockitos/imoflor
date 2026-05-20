@@ -23,9 +23,9 @@ const createTenantSchema = z.object({
 });
 
 export const getTenants = query<Tenant[]>(async () => {
-	const event = getRequestEvent();
+	const { locals: { supabase } } = getRequestEvent();
 
-	const { data: tenants, error: tenantsError } = await event.locals.supabase
+	const { data: tenants, error: tenantsError } = await supabase
 		.from('tenants')
 		.select('*, address:addresses(*)');
 
@@ -36,27 +36,27 @@ export const getTenants = query<Tenant[]>(async () => {
 });
 
 export const createTenant = form(createTenantSchema, async (data) => {
-	const event = getRequestEvent();
+	const { locals: { supabase }, cookies } = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
 
-	const { data: address, error: addressError } = await event.locals.supabase
+	const { data: address, error: addressError } = await supabase
 		.from('addresses')
 		.insert(addressData)
 		.select('id')
 		.single();
 
 	if (addressError) {
-		setFlash({ type: 'error', message: addressError.message }, event.cookies);
+		setFlash({ type: 'error', message: addressError.message }, cookies);
 		return fail(500, { message: addressError.message, form });
 	}
 
-	const { error } = await event.locals.supabase
+	const { error } = await supabase
 		.from('tenants')
 		.insert({ ...tenantData, address_id: address?.id });
 
 	if (error) {
-		setFlash({ type: 'error', message: error.message }, event.cookies);
+		setFlash({ type: 'error', message: error.message }, cookies);
 		return fail(500, { message: error.message, form });
 	}
 
@@ -64,12 +64,12 @@ export const createTenant = form(createTenantSchema, async (data) => {
 });
 
 export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
-	const event = getRequestEvent();
+	const { locals: { supabase }, cookies } = getRequestEvent();
 
-	const { error } = await event.locals.supabase.from('tenants').delete().eq('id', id);
+	const { error } = await supabase.from('tenants').delete().eq('id', id);
 
 	if (error) {
-		setFlash({ type: 'error', message: error.message }, event.cookies);
+		setFlash({ type: 'error', message: error.message }, cookies);
 		return fail(500, { message: error.message, form });
 	}
 
@@ -79,9 +79,7 @@ export const deleteTenant = form(deleteTenantSchema, async ({ id }) => {
 });
 
 export const getTenant = query<z.ZodNumber, Tenant>(z.number(), async (id) => {
-	const {
-		locals: { supabase },
-	} = getRequestEvent();
+	const { locals: { supabase } } = getRequestEvent();
 
 	const { data: tenant, error: tenantError } = await supabase
 		.from('tenants')
@@ -97,13 +95,13 @@ export const getTenant = query<z.ZodNumber, Tenant>(z.number(), async (id) => {
 });
 
 export const updateTenant = form(createTenantSchema, async (data) => {
-	const event = getRequestEvent();
+	const { locals: { supabase }, cookies, params: { id } } = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
 	const { id: addressId, ...addressFields } = addressData;
 
 	if (addressId) {
-		const { error: addressError } = await event.locals.supabase
+		const { error: addressError } = await supabase
 			.from('addresses')
 			.update(addressFields)
 			.eq('id', addressId);
@@ -114,7 +112,7 @@ export const updateTenant = form(createTenantSchema, async (data) => {
 					type: 'error',
 					message: addressError.message,
 				},
-				event.cookies
+				cookies
 			);
 			return fail(500, {
 				message: addressError.message,
@@ -122,7 +120,7 @@ export const updateTenant = form(createTenantSchema, async (data) => {
 			});
 		}
 	} else {
-		const { data: address, error: addressError } = await event.locals.supabase
+		const { data: address, error: addressError } = await supabase
 			.from('addresses')
 			.insert(addressFields)
 			.select('id')
@@ -134,7 +132,7 @@ export const updateTenant = form(createTenantSchema, async (data) => {
 					type: 'error',
 					message: addressError.message,
 				},
-				event.cookies
+				cookies
 			);
 			return fail(500, {
 				message: addressError.message,
@@ -145,13 +143,13 @@ export const updateTenant = form(createTenantSchema, async (data) => {
 		Object.assign(tenantData, { address_id: address?.id });
 	}
 
-	const { error } = await event.locals.supabase
+	const { error } = await supabase
 		.from('tenants')
 		.update(tenantData)
-		.eq('id', Number(event.params.id));
+		.eq('id', Number(id));
 
 	if (error) {
-		setFlash({ type: 'error', message: error.message }, event.cookies);
+		setFlash({ type: 'error', message: error.message }, cookies);
 		return fail(500, { message: error.message, form });
 	}
 
