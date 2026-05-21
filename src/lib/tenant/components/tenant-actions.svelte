@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 	import { Button } from '@/shared/components/ui/button';
 	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
 	import { MoreHorizontal } from 'lucide-svelte';
 	import type { Tenant } from '../types';
 	import TenantDeleteDialog from './tenant-delete-dialog.svelte';
+	import TenantForm from './tenant-form.svelte';
 
 	interface Props {
 		tenant: Tenant;
 	}
 
 	let { tenant }: Props = $props();
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -30,11 +31,12 @@
 			>Open</DropdownMenu.Item
 		>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => goto(resolve(`/tenants/${tenant.id}?action=edit`))}
+		<DropdownMenu.Item onclick={() => (openForm = true)}
 			>Edit</DropdownMenu.Item
 		>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<TenantDeleteDialog data={page.data.deleteTenantForm} bind:open={openDeleteDialog} />
+<TenantForm tenantId={tenant.id} bind:open={openForm} />
+<TenantDeleteDialog tenantId={tenant.id} bind:open={openDeleteDialog} />

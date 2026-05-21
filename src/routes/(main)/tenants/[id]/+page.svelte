@@ -15,10 +15,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
 
-	let { data } = $props();
-	let { updateTenantForm, deleteTenantForm } = $derived(data);
-
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -130,7 +127,7 @@
 							<div class="grid grid-cols-2 gap-y-2">
 								<div>
 									<dt class="text-sm text-muted-foreground">Mobile</dt>
-									<dd>{tenant.phone}</dd>
+									<dd>{tenant.mobile}</dd>
 								</div>
 								<div>
 									<dt class="text-sm text-muted-foreground">Phone</dt>
@@ -189,9 +186,9 @@
 		</div>
 	</div>
 
-	<TenantForm data={updateTenantForm} action="?/update" bind:open={openForm} />
+	<TenantForm tenantId={tenant.id} bind:open={openForm} />
 
-	<TenantDeleteDialog data={deleteTenantForm} bind:open={openDeleteDialog} />
+	<TenantDeleteDialog tenantId={tenant.id} bind:open={openDeleteDialog} />
 
 	{#snippet pending()}
 		<div class="flex items-center justify-center px-4 py-6 lg:px-8">

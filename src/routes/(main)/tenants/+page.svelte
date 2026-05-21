@@ -9,9 +9,6 @@
 	import { getTenants } from '@/tenant/tenant.remote';
 	import Spinner from '@/shared/components/ui/spinner/spinner.svelte';
 
-	let { data } = $props();
-	let { createTenantForm } = $derived(data);
-
 	let openForm = $state(false);
 </script>
 
@@ -52,4 +49,4 @@
 	</svelte:boundary>
 </div>
 
-<TenantForm data={createTenantForm} action="?/create" bind:open={openForm} />
+<TenantForm bind:open={openForm} />
