@@ -14,10 +14,12 @@
 		columns,
 		cards,
 		card,
+		onAddCard,
 	}: {
 		columns: KanbanColumn[];
 		cards: TCard[];
 		card: Snippet<[TCard]>;
+		onAddCard?: (columnId: string) => void;
 	} = $props();
 
 	let columnOrder = $state<string[]>(untrack(() => columns.map((c) => c.id)));
@@ -25,9 +27,7 @@
 	let dragOverColumnId = $state<string | null>(null);
 	let dragOverColumnPosition = $state<'before' | 'after'>('before');
 
-	let localCards = $state<TCard[]>(
-		untrack(() => [...cards, ...cards.map((c) => ({ ...c, id: c.id + 1000 }))])
-	);
+	let localCards = $state<TCard[]>(untrack(() => [...cards]));
 	let draggingCardId = $state<number | null>(null);
 	let dragOverCardId = $state<number | null>(null);
 	let dragOverCardPosition = $state<'before' | 'after'>('before');
@@ -137,13 +137,6 @@
 		}
 	}
 
-	function onColumnDragEnd() {
-		draggingColumnId = null;
-		draggingCardId = null;
-		dragOverColumnId = null;
-		dragOverCardId = null;
-	}
-
 	function onCardDragStart(e: DragEvent, cardId: number) {
 		draggingCardId = cardId;
 		if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
@@ -175,7 +168,7 @@
 		localCards = [...previewCards];
 	}
 
-	function onCardDragEnd() {
+	function onDragEnd() {
 		draggingCardId = null;
 		draggingColumnId = null;
 		dragOverColumnId = null;
@@ -210,7 +203,7 @@
 						draggable="true"
 						class="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
 						ondragstart={(e) => onColumnDragStart(e, columnId)}
-						ondragend={onColumnDragEnd}
+						ondragend={onDragEnd}
 					>
 						<GripVertical class="h-4 w-4" />
 					</div>
@@ -220,7 +213,13 @@
 					</Badge>
 				</div>
 
-				<Button variant="outline" size="icon" aria-label="Add item to {col.label}" class="h-6 w-6">
+				<Button
+					variant="outline"
+					size="icon"
+					aria-label="Add item to {col.label}"
+					class="h-6 w-6"
+					onclick={() => onAddCard?.(columnId)}
+				>
 					<Plus class="h-3.5 w-3.5" />
 				</Button>
 			</div>
@@ -235,7 +234,7 @@
 						draggable="true"
 						class="transition-opacity {isDragging ? 'opacity-30' : ''}"
 						ondragstart={(e) => onCardDragStart(e, item.id)}
-						ondragend={onCardDragEnd}
+						ondragend={onDragEnd}
 						ondragover={(e) => onCardDragOver(e, item.id, columnId)}
 						ondrop={onCardDrop}
 					>
@@ -252,6 +251,7 @@
 				<Button
 					variant="ghost"
 					class="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+					onclick={() => onAddCard?.(columnId)}
 				>
 					<Plus class="h-4 w-4" />
 					Add Task
