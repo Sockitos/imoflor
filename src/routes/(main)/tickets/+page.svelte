@@ -13,7 +13,7 @@
 	let { tickets, createTicketForm } = $derived(data);
 	let openForm = $state(false);
 
-	const kanbanItems = $derived(tickets.map((t) => ({ ...t, columnId: t.status })));
+	const kanbanCards = $derived(tickets.map((t) => ({ ...t, columnId: t.status })));
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
@@ -28,9 +28,9 @@
 		</Button>
 	</div>
 	<Separator />
-	<KanbanBoard columns={ticketKanbanColumns} items={kanbanItems}>
-		{#snippet card(item)}
-			<TicketCard ticket={item} />
+	<KanbanBoard columns={ticketKanbanColumns} cards={kanbanCards}>
+		{#snippet card(c)}
+			<TicketCard ticket={c} />
 		{/snippet}
 	</KanbanBoard>
 </div>
