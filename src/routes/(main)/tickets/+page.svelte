@@ -9,13 +9,14 @@
 	import KanbanBoard from '@/shared/components/kanban-board.svelte';
 	import { ticketKanbanColumns } from '@/ticket/components/ticket-kanban-columns';
 	import type { TicketStatus } from '@/ticket/types';
+	import { getTickets } from '@/ticket/ticket.remote.js';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	let { data } = $props();
-	let { tickets, createTicketForm } = $derived(data);
+	let { createTicketForm } = $derived(data);
+
 	let openForm = $state(false);
 	let defaultStatus = $state<TicketStatus | undefined>(undefined);
-
-	const kanbanCards = $derived(tickets.map((t) => ({ ...t, columnId: t.status })));
 
 	function openTicketForm(status?: TicketStatus) {
 		defaultStatus = status;
@@ -34,7 +35,12 @@
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
 	<div class="flex flex-row items-start justify-between">
 		<div>
-			<PageTitle>Tickets ({tickets.length})</PageTitle>
+			<PageTitle>
+				Tickets
+				{#if getTickets().ready}
+					({getTickets().current?.length})
+				{/if}
+			</PageTitle>
 			<PageSubtitle>Manage your tickets and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={onAddTicket}>
@@ -43,11 +49,28 @@
 		</Button>
 	</div>
 	<Separator />
-	<KanbanBoard columns={ticketKanbanColumns} cards={kanbanCards} {onAddCard}>
-		{#snippet card(c)}
-			<TicketKanbanCard ticket={c} />
+	<svelte:boundary>
+		{@const cards = (await getTickets()).map((t) => ({ ...t, columnId: t.status }))}
+
+		<KanbanBoard columns={ticketKanbanColumns} {cards} {onAddCard}>
+			{#snippet card(ticket)}
+				<TicketKanbanCard {ticket} />
+			{/snippet}
+		</KanbanBoard>
+
+		{#snippet pending()}
+			<div class="flex items-center justify-center">
+				<Spinner class="size-6" />
+			</div>
 		{/snippet}
-	</KanbanBoard>
+
+		{#snippet failed(_, reset)}
+			<div class="flex flex-col items-center gap-y-4">
+				<p class="text-sm text-destructive">Failed to load tickets.</p>
+				<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+			</div>
+		{/snippet}
+	</svelte:boundary>
 </div>
 
 <TicketForm data={createTicketForm} action="?/create" bind:open={openForm} {defaultStatus} />

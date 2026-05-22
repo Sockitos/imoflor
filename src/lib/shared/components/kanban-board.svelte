@@ -22,6 +22,8 @@
 		onAddCard?: (columnId: string) => void;
 	} = $props();
 
+	const enableColumnDrag = false;
+
 	let columnOrder = $state<string[]>(untrack(() => columns.map((c) => c.id)));
 	let draggingColumnId = $state<string | null>(null);
 	let dragOverColumnId = $state<string | null>(null);
@@ -189,24 +191,26 @@
 					{isColDragging ? 'opacity-40' : ''}
 					"
 			ondragover={(e) =>
-				draggingColumnId !== null
+				enableColumnDrag && draggingColumnId !== null
 					? onColumnDragOver(e, columnId)
 					: onColumnDropCardDragOver(e, columnId)}
-			ondrop={onColumnDrop}
+			ondrop={enableColumnDrag ? onColumnDrop : undefined}
 		>
 			<div class="flex flex-row">
 				<div class="flex flex-1 flex-row items-center gap-2">
-					<div
-						role="button"
-						aria-label="Drag to reorder column"
-						tabindex={index}
-						draggable="true"
-						class="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
-						ondragstart={(e) => onColumnDragStart(e, columnId)}
-						ondragend={onDragEnd}
-					>
-						<GripVertical class="h-4 w-4" />
-					</div>
+					{#if enableColumnDrag}
+						<div
+							role="button"
+							aria-label="Drag to reorder column"
+							tabindex={index}
+							draggable="true"
+							class="cursor-grab touch-none text-muted-foreground/50 hover:text-muted-foreground active:cursor-grabbing"
+							ondragstart={(e) => onColumnDragStart(e, columnId)}
+							ondragend={onDragEnd}
+						>
+							<GripVertical class="h-4 w-4" />
+						</div>
+					{/if}
 					<span class="text-sm font-semibold">{col.label}</span>
 					<Badge variant="secondary" class="rounded-full px-2 py-0 text-xs">
 						{colCards.length}
