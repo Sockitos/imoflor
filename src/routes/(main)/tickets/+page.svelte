@@ -9,14 +9,20 @@
 	import KanbanBoard from '@/shared/components/kanban-board.svelte';
 	import { ticketKanbanColumns } from '@/ticket/components/ticket-kanban-columns';
 	import type { TicketStatus } from '@/ticket/types';
-	import { getTickets } from '@/ticket/ticket.remote.js';
+	import { getTickets, updateStatus } from '@/ticket/ticket.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { BASE_62_DIGITS, generateKeyBetween } from 'fractional-indexing';
+	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
 	let { createTicketForm } = $derived(data);
 
 	let openForm = $state(false);
 	let defaultStatus = $state<TicketStatus | undefined>(undefined);
+
+	let tickets = $derived(getTickets());
+
+	let cards = $derived(tickets.current?.map((t) => ({ ...t, columnId: t.status })) ?? []);
 
 	function openTicketForm(status?: TicketStatus) {
 		defaultStatus = status;
@@ -30,6 +36,26 @@
 	function onAddCard(status: String) {
 		openTicketForm(status as TicketStatus);
 	}
+
+	async function onMoveCard(
+		id: number,
+		columnId: string,
+		rank1: string | undefined,
+		rank2: string | undefined
+	) {
+		const status = columnId as TicketStatus;
+		const rank = generateKeyBetween(rank1, rank2, BASE_62_DIGITS);
+
+		try {
+			await updateStatus({ id, status, rank }).updates(
+				getTickets().withOverride((tickets) =>
+					tickets.map((ticket) => (ticket.id === id ? { ...ticket, status, rank } : ticket))
+				)
+			);
+		} catch {
+			toast.error('Failed to move ticket. Please try again.');
+		}
+	}
 </script>
 
 <div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
@@ -37,8 +63,8 @@
 		<div>
 			<PageTitle>
 				Tickets
-				{#if getTickets().ready}
-					({getTickets().current?.length})
+				{#if tickets.ready}
+					({tickets.current?.length})
 				{/if}
 			</PageTitle>
 			<PageSubtitle>Manage your tickets and Lorem Ipsum</PageSubtitle>
@@ -49,28 +75,22 @@
 		</Button>
 	</div>
 	<Separator />
-	<svelte:boundary>
-		{@const cards = (await getTickets()).map((t) => ({ ...t, columnId: t.status }))}
-
-		<KanbanBoard columns={ticketKanbanColumns} {cards} {onAddCard}>
+	{#if tickets.error}
+		<div class="flex flex-col items-center gap-y-4">
+			<p class="text-sm text-destructive">Failed to load tickets.</p>
+			<Button variant="outline" class="w-fit" onclick={() => tickets.refresh()}>Retry</Button>
+		</div>
+	{:else if !tickets.ready}
+		<div class="flex items-center justify-center">
+			<Spinner class="size-6" />
+		</div>
+	{:else}
+		<KanbanBoard columns={ticketKanbanColumns} {cards} {onAddCard} {onMoveCard}>
 			{#snippet card(ticket)}
 				<TicketKanbanCard {ticket} />
 			{/snippet}
 		</KanbanBoard>
-
-		{#snippet pending()}
-			<div class="flex items-center justify-center">
-				<Spinner class="size-6" />
-			</div>
-		{/snippet}
-
-		{#snippet failed(_, reset)}
-			<div class="flex flex-col items-center gap-y-4">
-				<p class="text-sm text-destructive">Failed to load tickets.</p>
-				<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
-			</div>
-		{/snippet}
-	</svelte:boundary>
+	{/if}
 </div>
 
 <TicketForm data={createTicketForm} action="?/create" bind:open={openForm} {defaultStatus} />

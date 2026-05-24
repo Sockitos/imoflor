@@ -818,6 +818,7 @@ export type Database = {
           inserted_at: string
           priority: Database["public"]["Enums"]["ticket_priority"]
           property_id: number
+          rank: string
           status: Database["public"]["Enums"]["ticket_status"]
           title: string
         }
@@ -828,6 +829,7 @@ export type Database = {
           inserted_at?: string
           priority: Database["public"]["Enums"]["ticket_priority"]
           property_id: number
+          rank: string
           status: Database["public"]["Enums"]["ticket_status"]
           title: string
         }
@@ -838,6 +840,7 @@ export type Database = {
           inserted_at?: string
           priority?: Database["public"]["Enums"]["ticket_priority"]
           property_id?: number
+          rank?: string
           status?: Database["public"]["Enums"]["ticket_status"]
           title?: string
         }

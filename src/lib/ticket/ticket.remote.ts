@@ -1,28 +1,28 @@
-import { command, getRequestEvent, query } from '$app/server';
-import { error, } from '@sveltejs/kit';
+import { command, getRequestEvent, query, requested } from '$app/server';
+import { error } from '@sveltejs/kit';
 import { z } from 'zod';
 import { ticketStatusValues, type Ticket } from './types';
 
-
 export const getTickets = query<Ticket[]>(async () => {
-    const {
+	const {
 		locals: { supabase },
-    } = getRequestEvent();
-    
-    const { data: tickets, error: ticketsError } = await supabase
-			.from('tickets')
-			.select('*, property:properties!inner (id, ...addresses(label:address))');
+	} = getRequestEvent();
 
-		if (ticketsError) {
-			return error(500, 'Error fetching tickets, please try again later.');
-    }
-    
-		return tickets;
+	const { data: tickets, error: ticketsError } = await supabase
+		.from('tickets')
+		.select('*, property:properties!inner (id, ...addresses(label:address))');
+
+	if (ticketsError) {
+		error(500, 'Error fetching tickets, please try again later.');
+	}
+
+	return tickets;
 });
 
 const updateStatusSchema = z.object({
 	id: z.number().min(1, 'ID is required'),
 	status: z.enum(ticketStatusValues),
+	rank: z.string().min(1, 'Rank is required'),
 });
 
 export const updateStatus = command(updateStatusSchema, async (data) => {
@@ -32,12 +32,12 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 
 	const { error: updateError } = await supabase
 		.from('tickets')
-		.update(data)
-		.eq('id', data.id)
-		.select();
+		.update({ status: data.status, rank: data.rank })
+		.eq('id', data.id);
 
 	if (updateError) {
-		return error(500, 'Error updating status, please try again later.');
+		error(500, 'Error updating status, please try again later.');
 	}
 
+	await requested(getTickets, 1).refreshAll();
 });

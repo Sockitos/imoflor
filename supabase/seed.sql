@@ -850,7 +850,8 @@ insert into public.tickets (
 		status,
 		title,
 		description,
-		property_id
+		property_id,
+		rank
 	)
 values (
 		1,
@@ -859,7 +860,8 @@ values (
 		'resolved',
 		'Fuga de água na cozinha',
 		'O inquilino reportou humidade junto ao lava-loiça.',
-		5
+		5,
+		'a0'
 	),
 	(
 		2,
@@ -868,7 +870,8 @@ values (
 		'in_progress',
 		'Falha no quadro elétrico',
 		'Disjuntor dispara quando são ligados vários equipamentos.',
-		8
+		8,
+		'a0'
 	),
 	(
 		3,
@@ -877,7 +880,8 @@ values (
 		'open',
 		'Limpeza de terreno',
 		'Vegetação alta junto à entrada da parcela.',
-		4
+		4,
+		'a0'
 	);
 
 insert into public.interventions (
