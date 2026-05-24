@@ -33,7 +33,7 @@
 		openTicketForm();
 	}
 
-	function onAddCard(status: String) {
+	function onAddCard(status: string) {
 		openTicketForm(status as TicketStatus);
 	}
 
