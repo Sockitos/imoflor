@@ -22,9 +22,7 @@
 
 	let interventions = $derived(getInterventions());
 
-	let cards = $derived(
-		interventions.current?.map((i) => ({ ...i, columnId: i.status })) ?? []
-	);
+	let cards = $derived(interventions.current?.map((i) => ({ ...i, columnId: i.status })) ?? []);
 
 	function openInterventionForm(status?: InterventionStatus) {
 		defaultStatus = status;

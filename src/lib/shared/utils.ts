@@ -98,11 +98,9 @@ export async function handleFormAction<
 	}
 }
 
-
 export function generateRankBetween(
 	rank1: string | undefined = undefined,
 	rank2: string | undefined = undefined
 ): string {
 	return generateKeyBetween(rank1, rank2, BASE_62_DIGITS);
 }
-

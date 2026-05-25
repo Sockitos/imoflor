@@ -32,7 +32,9 @@
 	}
 
 	function groupByColumn(cardsList: TCard[], columnIds: string[]): ColumnCards<TCard> {
-		const grouped = Object.fromEntries(columnIds.map((id) => [id, [] as TCard[]])) as ColumnCards<TCard>;
+		const grouped = Object.fromEntries(
+			columnIds.map((id) => [id, [] as TCard[]])
+		) as ColumnCards<TCard>;
 
 		for (const item of cardsList) {
 			if (grouped[item.columnId]) {
