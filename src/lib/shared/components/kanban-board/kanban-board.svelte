@@ -1,15 +1,8 @@
 <script lang="ts" generics="TCard extends { id: number; columnId: string; rank: string }">
-	import { Badge } from '@/shared/components/ui/badge';
-	import { Button } from '@/shared/components/ui/button';
-	import { Plus } from 'lucide-svelte';
 	import type { Snippet } from 'svelte';
-
-	type KanbanColumn = {
-		id: string;
-		label: string;
-	};
-
-	type ColumnCards = Record<string, TCard[]>;
+	import KanbanCard from './kanban-card.svelte';
+	import KanbanColumn from './kanban-column.svelte';
+	import type { ColumnCards, KanbanColumnDef } from './types';
 
 	let {
 		columns,
@@ -18,7 +11,7 @@
 		onAddCard,
 		onMoveCard,
 	}: {
-		columns: KanbanColumn[];
+		columns: KanbanColumnDef[];
 		cards: TCard[];
 		card: Snippet<[TCard]>;
 		onAddCard?: (columnId: string) => void;
@@ -38,8 +31,8 @@
 		});
 	}
 
-	function groupByColumn(cardsList: TCard[], columnIds: string[]): ColumnCards {
-		const grouped = Object.fromEntries(columnIds.map((id) => [id, [] as TCard[]])) as ColumnCards;
+	function groupByColumn(cardsList: TCard[], columnIds: string[]): ColumnCards<TCard> {
+		const grouped = Object.fromEntries(columnIds.map((id) => [id, [] as TCard[]])) as ColumnCards<TCard>;
 
 		for (const item of cardsList) {
 			if (grouped[item.columnId]) {
@@ -54,10 +47,10 @@
 		return grouped;
 	}
 
-	function cloneColumnCards(grouped: ColumnCards): ColumnCards {
+	function cloneColumnCards(grouped: ColumnCards<TCard>): ColumnCards<TCard> {
 		return Object.fromEntries(
 			Object.entries(grouped).map(([columnId, columnCards]) => [columnId, [...columnCards]])
-		) as ColumnCards;
+		) as ColumnCards<TCard>;
 	}
 
 	function insertIndexForDrop(
@@ -85,7 +78,7 @@
 
 	let columnCardsByColumn = $derived(groupByColumn(cards, columnIds));
 
-	let previewColumnCards = $derived.by((): ColumnCards => {
+	let previewColumnCards = $derived.by((): ColumnCards<TCard> => {
 		if (draggingCardId === null || dragOverColumnId === null) {
 			return columnCardsByColumn;
 		}
@@ -223,65 +216,25 @@
 	{#each columns as col (col.id)}
 		{@const colCards = columnCards(col.id)}
 
-		<div
-			role="region"
-			aria-label={`${col.label} column`}
-			class="flex w-72 shrink-0 flex-col gap-4 rounded-lg border bg-muted/40 px-2 py-4"
-			ondragover={(e) => onColumnDragOver(e, col.id)}
-			ondrop={onColumnDrop}
+		<KanbanColumn
+			column={col}
+			cardCount={colCards.length}
+			{onAddCard}
+			onColumnDragOver={(e) => onColumnDragOver(e, col.id)}
+			{onColumnDrop}
 		>
-			<div class="flex flex-row">
-				<div class="flex flex-1 flex-row items-center gap-2">
-					<span class="text-sm font-semibold">{col.label}</span>
-					<Badge variant="secondary" class="rounded-full px-2 py-0 text-xs">
-						{colCards.length}
-					</Badge>
-				</div>
-
-				<Button
-					variant="outline"
-					size="icon"
-					aria-label="Add item to {col.label}"
-					class="h-6 w-6"
-					onclick={() => onAddCard?.(col.id)}
+			{#each colCards as item (item.id)}
+				<KanbanCard
+					itemId={item.id}
+					isDragging={draggingCardId === item.id}
+					onDragStart={(e) => onCardDragStart(e, item.id)}
+					onDragOver={(e) => onCardDragOver(e, item.id, col.id)}
+					onDrop={onCardDrop}
+					{onDragEnd}
 				>
-					<Plus class="h-3.5 w-3.5" />
-				</Button>
-			</div>
-
-			<div class="flex flex-1 flex-col gap-3">
-				{#each colCards as item (item.id)}
-					{@const isDragging = draggingCardId === item.id}
-
-					<div
-						role="region"
-						aria-label={`Card ${item.id}`}
-						draggable="true"
-						class="transition-opacity {isDragging ? 'opacity-30' : ''}"
-						ondragstart={(e) => onCardDragStart(e, item.id)}
-						ondragend={onDragEnd}
-						ondragover={(e) => onCardDragOver(e, item.id, col.id)}
-						ondrop={onCardDrop}
-					>
-						{@render card(item)}
-					</div>
-				{/each}
-
-				{#if colCards.length === 0}
-					<div class="flex flex-col items-center rounded-md border border-dashed py-8 text-center">
-						<p class="text-xs text-muted-foreground">No tasks here.</p>
-					</div>
-				{/if}
-
-				<Button
-					variant="ghost"
-					class="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-					onclick={() => onAddCard?.(col.id)}
-				>
-					<Plus class="h-4 w-4" />
-					Add Task
-				</Button>
-			</div>
-		</div>
+					{@render card(item)}
+				</KanbanCard>
+			{/each}
+		</KanbanColumn>
 	{/each}
 </div>

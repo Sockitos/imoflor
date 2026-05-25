@@ -6,7 +6,7 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { PlusCircle } from 'lucide-svelte';
-	import KanbanBoard from '@/shared/components/kanban-board.svelte';
+	import KanbanBoard from '@/shared/components/kanban-board';
 	import { ticketKanbanColumns } from '@/ticket/components/ticket-kanban-columns';
 	import type { TicketStatus } from '@/ticket/types';
 	import { getTickets, updateStatus } from '@/ticket/ticket.remote.js';
