@@ -1,7 +1,7 @@
 import { createInterventionSchema, deleteInterventionSchema } from '@/intervention/schemas';
 import type { Intervention } from '@/intervention/types';
 import type { IdAndLabel } from '@/shared/types';
-import { handleFormAction } from '@/shared/utils';
+import { handleFormAction, generateRankBetween } from '@/shared/utils';
 import { error, fail } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -63,7 +63,9 @@ export const actions = {
 			createInterventionSchema,
 			'create-intervention',
 			async (event, userId, form) => {
-				const { error } = await event.locals.supabase.from('interventions').insert(form.data);
+				const { error } = await event.locals.supabase
+					.from('interventions')
+					.insert({ ...form.data, rank: generateRankBetween() });
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

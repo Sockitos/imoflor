@@ -424,6 +424,7 @@ export type Database = {
           id: number
           inserted_at: string
           property_id: number
+          rank: string
           start_date: string | null
           status: Database["public"]["Enums"]["intervention_status"]
           ticket_id: number | null
@@ -435,6 +436,7 @@ export type Database = {
           id?: number
           inserted_at?: string
           property_id: number
+          rank: string
           start_date?: string | null
           status: Database["public"]["Enums"]["intervention_status"]
           ticket_id?: number | null
@@ -446,6 +448,7 @@ export type Database = {
           id?: number
           inserted_at?: string
           property_id?: number
+          rank?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["intervention_status"]
           ticket_id?: number | null

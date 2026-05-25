@@ -33,8 +33,8 @@
 			{ticket.title}
 		</button>
 	</CardHeader>
-	<CardContent class="p-0">
+	<CardContent class="flex flex-col gap-4 p-0">
 		<p class="text-xs text-muted-foreground">{ticket.description}</p>
-		<span class="mt-4 block text-xs font-medium">{ticket.property.label}</span>
+		<p class="text-xs font-medium">{ticket.property.label}</p>
 	</CardContent>
 </Card>

@@ -1,12 +1,8 @@
+import type { KanbanColumnDef } from '@/shared/components/kanban-board/types';
 import { ticketStatusValues } from '../types';
 import { statusMap } from './ticket-status-map';
 
-export type KanbanColumn = {
-	id: string;
-	label: string;
-};
-
-export const ticketKanbanColumns: KanbanColumn[] = ticketStatusValues.map((status) => ({
+export const ticketKanbanColumns: KanbanColumnDef[] = ticketStatusValues.map((status) => ({
 	id: status,
 	label: statusMap[status].label,
 }));

@@ -892,7 +892,8 @@ insert into public.interventions (
 		end_date,
 		description,
 		property_id,
-		ticket_id
+		ticket_id,
+		rank
 	)
 values (
 		1,
@@ -902,7 +903,8 @@ values (
 		'2026-03-20 12:00:00+00',
 		'Substituição de sifão e vedação de tubagem.',
 		5,
-		1
+		1,
+		'a0'
 	),
 	(
 		2,
@@ -912,7 +914,8 @@ values (
 		'2026-02-13 18:00:00+00',
 		'Pintura geral após saída de inquilino.',
 		8,
-		NULL
+		NULL,
+		'a0'
 	),
 	(
 		3,
@@ -922,7 +925,8 @@ values (
 		NULL,
 		'Diagnóstico e substituição de quadro elétrico.',
 		8,
-		2
+		2,
+		'a0'
 	);
 
 insert into public.intervention_payments (
