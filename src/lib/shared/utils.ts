@@ -6,6 +6,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
+import { BASE_62_DIGITS, generateKeyBetween } from 'fractional-indexing';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -96,3 +97,12 @@ export async function handleFormAction<
 		return result;
 	}
 }
+
+
+export function generateRankBetween(
+	rank1: string | undefined = undefined,
+	rank2: string | undefined = undefined
+): string {
+	return generateKeyBetween(rank1, rank2, BASE_62_DIGITS);
+}
+

@@ -11,7 +11,7 @@
 	import type { TicketStatus } from '@/ticket/types';
 	import { getTickets, updateStatus } from '@/ticket/ticket.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { BASE_62_DIGITS, generateKeyBetween } from 'fractional-indexing';
+	import { generateRankBetween } from '@/shared/utils';
 	import { toast } from 'svelte-sonner';
 
 	let { data } = $props();
@@ -44,7 +44,7 @@
 		rank2: string | undefined
 	) {
 		const status = columnId as TicketStatus;
-		const rank = generateKeyBetween(rank1, rank2, BASE_62_DIGITS);
+		const rank = generateRankBetween(rank1, rank2);
 
 		try {
 			await updateStatus({ id, status, rank }).updates(

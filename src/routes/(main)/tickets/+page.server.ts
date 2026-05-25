@@ -3,7 +3,7 @@ import { handleFormAction } from '@/shared/utils';
 import { createTicketSchema, deleteTicketSchema } from '@/ticket/schemas';
 import type { Ticket } from '@/ticket/types';
 import { error, fail } from '@sveltejs/kit';
-import { BASE_62_DIGITS, generateKeyBetween } from 'fractional-indexing';
+import { generateRankBetween } from '@/shared/utils';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 
@@ -47,8 +47,7 @@ export const actions = {
 		handleFormAction(event, createTicketSchema, 'create-ticket', async (event, userId, form) => {
 			const { error } = await event.locals.supabase
 				.from('tickets')
-				// TODO: Need to check this rank generation, it might not be correct
-				.insert({ ...form.data, rank: generateKeyBetween(undefined, undefined, BASE_62_DIGITS) });
+				.insert({ ...form.data, rank: generateRankBetween() });
 
 			if (error) {
 				return fail(500, {
