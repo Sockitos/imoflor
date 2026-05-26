@@ -5,11 +5,12 @@
 	import { priorityMap } from './ticket-priority-map';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { dateFormatter } from '@/shared/formatters';
 
 	let { ticket }: { ticket: Ticket } = $props();
 
 	const priority = $derived(priorityMap[ticket.priority]);
-	const formattedDate = $derived(ticket.date.split('T')[0].split('-').reverse().join('/'));
+	const formattedDate = $derived(dateFormatter(ticket.date));
 
 	function handleClick() {
 		goto(resolve(`/tickets/${ticket.id}`));

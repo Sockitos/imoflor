@@ -99,8 +99,8 @@ export async function handleFormAction<
 }
 
 export function generateRankBetween(
-	rank1: string | undefined = undefined,
-	rank2: string | undefined = undefined
+	upperRank: string | undefined = undefined,
+	bottomRank: string | undefined = undefined
 ): string {
-	return generateKeyBetween(rank1, rank2, BASE_62_DIGITS);
+	return generateKeyBetween(upperRank, bottomRank, BASE_62_DIGITS);
 }

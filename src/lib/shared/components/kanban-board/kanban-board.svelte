@@ -18,8 +18,8 @@
 		onMoveCard?: (
 			cardId: number,
 			columnId: string,
-			rank1: string | undefined,
-			rank2: string | undefined
+			upperRank: string | undefined,
+			bottomRank: string | undefined
 		) => void;
 	} = $props();
 

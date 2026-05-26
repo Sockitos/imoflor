@@ -5,14 +5,13 @@
 	import { typeMap } from './intervention-type-map';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { dateFormatter } from '@/shared/formatters';
 
 	let { intervention }: { intervention: Intervention } = $props();
 
 	const interventionType = $derived(typeMap[intervention.type]);
 	const formattedStartDate = $derived(
-		intervention.start_date
-			? intervention.start_date.split('T')[0].split('-').reverse().join('/')
-			: null
+		intervention.start_date ? dateFormatter(intervention.start_date) : null
 	);
 
 	function handleClick() {

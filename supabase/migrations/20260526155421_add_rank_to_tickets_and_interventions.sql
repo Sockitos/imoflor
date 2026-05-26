@@ -18,6 +18,10 @@ where t.id = ranked.id
 
 alter table "public"."tickets" alter column "rank" set not null;
 
+CREATE UNIQUE INDEX uq_tickets_status_rank ON public.tickets USING btree (status, rank);
+
+alter table "public"."tickets" add constraint "uq_tickets_status_rank" UNIQUE using index "uq_tickets_status_rank";
+
 alter table "public"."interventions" add column "rank" text;
 
 update "public"."interventions" as i
@@ -37,3 +41,7 @@ where i.id = ranked.id
   and i.rank is null;
 
 alter table "public"."interventions" alter column "rank" set not null;
+
+CREATE UNIQUE INDEX uq_interventions_status_rank ON public.interventions USING btree (status, rank);
+
+alter table "public"."interventions" add constraint "uq_interventions_status_rank" UNIQUE using index "uq_interventions_status_rank";

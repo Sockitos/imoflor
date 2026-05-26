@@ -915,7 +915,7 @@ values (
 		'Pintura geral após saída de inquilino.',
 		8,
 		NULL,
-		'a0'
+		'a1'
 	),
 	(
 		3,

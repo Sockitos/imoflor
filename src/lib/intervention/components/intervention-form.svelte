@@ -45,6 +45,7 @@
 
 	$effect(() => {
 		if (open) {
+			// TODO: Fix this with new forms feature
 			$formData.status = defaultStatus ?? 'not_started';
 		}
 	});

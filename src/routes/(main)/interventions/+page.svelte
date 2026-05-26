@@ -40,11 +40,11 @@
 	async function onMoveCard(
 		id: number,
 		columnId: string,
-		rank1: string | undefined,
-		rank2: string | undefined
+		upperRank: string | undefined,
+		bottomRank: string | undefined
 	) {
 		const status = columnId as InterventionStatus;
-		const rank = generateRankBetween(rank1, rank2);
+		const rank = generateRankBetween(upperRank, bottomRank);
 
 		try {
 			await updateStatus({ id, status, rank }).updates(
