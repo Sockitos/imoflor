@@ -64,11 +64,11 @@ export const actions = {
 			'create-intervention',
 			async (event, _, form) => {
 				const { data: interventions } = await event.locals.supabase
-				.from('interventions')
-				.select('rank')
-				.eq('status', form.data.status)
-				.order('rank', { ascending: true });
-				
+					.from('interventions')
+					.select('rank')
+					.eq('status', form.data.status)
+					.order('rank', { ascending: true });
+
 				const bottomRank = interventions?.[0]?.rank;
 				const rank = generateRankBetween(undefined, bottomRank);
 

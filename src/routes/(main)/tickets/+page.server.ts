@@ -57,11 +57,11 @@ export const actions = {
 
 			const { error } = await event.locals.supabase
 				.from('tickets')
-				.insert({ ...form.data, rank:rank });
+				.insert({ ...form.data, rank: rank });
 
 			if (error) {
-					setFlash({ type: 'error', message: error.message }, event.cookies);
-					return fail(500, { message: error.message, form });
+				setFlash({ type: 'error', message: error.message }, event.cookies);
+				return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };
