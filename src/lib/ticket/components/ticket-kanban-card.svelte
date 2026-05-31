@@ -3,7 +3,6 @@
 	import { Badge } from '@/shared/components/ui/badge';
 	import type { Ticket } from '@/ticket/types';
 	import { priorityMap } from './ticket-priority-map';
-	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { dateFormatter } from '@/shared/formatters';
 
