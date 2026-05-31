@@ -8,31 +8,24 @@
 	import { dateFormatter } from '@/shared/formatters';
 
 	let { ticket }: { ticket: Ticket } = $props();
-
-	const priority = $derived(priorityMap[ticket.priority]);
-	const formattedDate = $derived(dateFormatter(ticket.date));
-
-	function handleClick() {
-		goto(resolve(`/tickets/${ticket.id}`));
-	}
 </script>
 
 <Card class="cursor-grab gap-4 bg-background p-4 select-none active:cursor-grabbing">
 	<CardHeader class="gap-2 px-0">
+		{@const priority = priorityMap[ticket.priority]}
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-muted-foreground">{formattedDate}</span>
+			<span class="text-xs text-muted-foreground">{dateFormatter(ticket.date)}</span>
 			<Badge variant={priority.variant} class="flex shrink-0 items-center gap-1 text-xs">
 				<priority.icon class="h-3 w-3" />
 				{priority.label}
 			</Badge>
 		</div>
-		<button
-			type="button"
-			onclick={handleClick}
+		<a
+			href={resolve(`/tickets/${ticket.id}`)}
 			class="w-fit cursor-pointer text-left text-sm font-medium hover:underline"
 		>
 			{ticket.title}
-		</button>
+		</a>
 	</CardHeader>
 	<CardContent class="flex flex-col gap-4 p-0">
 		<p class="text-xs text-muted-foreground">{ticket.description}</p>

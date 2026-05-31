@@ -26,7 +26,7 @@ CREATE TABLE public.interventions(
   description text NOT NULL,
   property_id bigint NOT NULL,
   ticket_id bigint,
-  rank text NOT NULL,
+  rank text collate "C" NOT NULL,
   CONSTRAINT pk_interventions PRIMARY KEY (id),
   CONSTRAINT fk_interventions_property_id FOREIGN KEY (property_id) REFERENCES public.properties(id) ON DELETE CASCADE,
   CONSTRAINT fk_interventions_ticket_id FOREIGN KEY (ticket_id) REFERENCES public.tickets(id),

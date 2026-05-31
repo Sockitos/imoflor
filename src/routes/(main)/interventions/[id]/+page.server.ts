@@ -12,13 +12,13 @@ export const load = async (event) => {
 		const { data: interventions, error: interventionsError } = await event.locals.supabase
 			.from('interventions')
 			.select(
-				'*, ticket:tickets!inner (id, label:title), property:properties!inner (id, ...addresses(label:address))'
+				'*, ticket:tickets (id, label:title), property:properties!inner (id, ...addresses(label:address))'
 			)
 			.eq('id', Number(event.params.id))
 			.single();
 
 		if (interventionsError) {
-			return error(500, 'Error fetching interventions, please try again later.');
+			return error(500, 'Error fetching intervention, please try again later.');
 		}
 		return interventions;
 	}

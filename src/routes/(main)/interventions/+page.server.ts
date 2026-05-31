@@ -62,10 +62,19 @@ export const actions = {
 			event,
 			createInterventionSchema,
 			'create-intervention',
-			async (event, userId, form) => {
+			async (event, _, form) => {
+				const { data: interventions } = await event.locals.supabase
+				.from('interventions')
+				.select('rank')
+				.eq('status', form.data.status)
+				.order('rank', { ascending: true });
+				
+				const bottomRank = interventions?.[0]?.rank;
+				const rank = generateRankBetween(undefined, bottomRank);
+
 				const { error } = await event.locals.supabase
 					.from('interventions')
-					.insert({ ...form.data, rank: generateRankBetween() });
+					.insert({ ...form.data, rank: rank });
 
 				if (error) {
 					setFlash({ type: 'error', message: error.message }, event.cookies);

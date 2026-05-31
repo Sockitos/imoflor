@@ -20,6 +20,10 @@
 		onColumnDragOver: (e: DragEvent) => void;
 		onColumnDrop: (e: DragEvent) => void;
 	} = $props();
+
+	function handleAddCard() {
+		onAddCard?.(column.id);
+	}
 </script>
 
 <div
@@ -39,12 +43,11 @@
 
 		<Button
 			variant="outline"
-			size="icon"
+			size="icon-xs"
 			aria-label="Add item to {column.label}"
-			class="h-6 w-6"
-			onclick={() => onAddCard?.(column.id)}
+			onclick={handleAddCard}
 		>
-			<Plus class="h-3.5 w-3.5" />
+			<Plus />
 		</Button>
 	</div>
 
@@ -60,9 +63,9 @@
 		<Button
 			variant="ghost"
 			class="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-			onclick={() => onAddCard?.(column.id)}
+			onclick={handleAddCard}
 		>
-			<Plus class="h-4 w-4" />
+			<Plus />
 			Add Task
 		</Button>
 	</div>

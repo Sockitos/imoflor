@@ -6,6 +6,7 @@ import { error, fail } from '@sveltejs/kit';
 import { generateRankBetween } from '@/shared/utils';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
+import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load = async (event) => {
 	async function getTickets(): Promise<Ticket[]> {
@@ -44,17 +45,23 @@ export const load = async (event) => {
 
 export const actions = {
 	create: async (event) =>
-		handleFormAction(event, createTicketSchema, 'create-ticket', async (event, userId, form) => {
+		handleFormAction(event, createTicketSchema, 'create-ticket', async (event, _, form) => {
+			const { data: tickets } = await event.locals.supabase
+				.from('tickets')
+				.select('rank')
+				.eq('status', form.data.status)
+				.order('rank', { ascending: true });
+
+			const bottomRank = tickets?.[0]?.rank;
+			const rank = generateRankBetween(undefined, bottomRank);
+
 			const { error } = await event.locals.supabase
 				.from('tickets')
-				.insert({ ...form.data, rank: generateRankBetween() });
+				.insert({ ...form.data, rank:rank });
 
 			if (error) {
-				return fail(500, {
-					message: error.message,
-					success: false,
-					form,
-				});
+					setFlash({ type: 'error', message: error.message }, event.cookies);
+					return fail(500, { message: error.message, form });
 			}
 
 			return { success: true, form };

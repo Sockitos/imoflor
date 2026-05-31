@@ -1,8 +1,8 @@
-<script lang="ts" generics="TCard extends { id: number; columnId: string; rank: string }">
+<script lang="ts" generics="TCard extends KanbanCardDef">
 	import type { Snippet } from 'svelte';
 	import KanbanCard from './kanban-card.svelte';
 	import KanbanColumn from './kanban-column.svelte';
-	import type { ColumnCards, KanbanColumnDef } from './types';
+	import type { ColumnCards, KanbanCardDef, KanbanColumnDef } from './types';
 
 	let {
 		columns,

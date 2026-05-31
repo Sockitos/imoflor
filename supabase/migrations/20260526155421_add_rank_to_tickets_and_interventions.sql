@@ -1,4 +1,4 @@
-alter table "public"."tickets" add column "rank" text;
+alter table "public"."tickets" add column "rank" text collate "C";
 
 update "public"."tickets" as t
 set "rank" = ranked.rank
@@ -22,7 +22,7 @@ CREATE UNIQUE INDEX uq_tickets_status_rank ON public.tickets USING btree (status
 
 alter table "public"."tickets" add constraint "uq_tickets_status_rank" UNIQUE using index "uq_tickets_status_rank";
 
-alter table "public"."interventions" add column "rank" text;
+alter table "public"."interventions" add column "rank" text collate "C";
 
 update "public"."interventions" as i
 set "rank" = ranked.rank
