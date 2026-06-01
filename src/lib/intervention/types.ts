@@ -31,6 +31,7 @@ export type Intervention = {
 	description: string;
 	property: IdAndLabel;
 	ticket?: IdAndLabel | null;
+	rank: string;
 };
 
 export type InterventionPayment = {

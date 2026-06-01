@@ -136,10 +136,10 @@
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
+				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:p-1.5!">
 					{#snippet child({ props })}
 						<a href={resolve('/(main)')} {...props}>
-							<HomeIcon class="!size-5" />
+							<HomeIcon class="size-5!" />
 							<span class="text-base font-semibold">Imoflor</span>
 						</a>
 					{/snippet}

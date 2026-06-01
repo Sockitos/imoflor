@@ -25,7 +25,9 @@ CREATE TABLE public.tickets(
   title text NOT NULL,
   description text NOT NULL,
   property_id bigint NOT NULL,
+  rank text collate "C" NOT NULL,
   CONSTRAINT pk_tickets PRIMARY KEY (id),
-  CONSTRAINT fk_tickets_property_id FOREIGN KEY (property_id) REFERENCES public.properties(id) ON DELETE CASCADE
+  CONSTRAINT fk_tickets_property_id FOREIGN KEY (property_id) REFERENCES public.properties(id) ON DELETE CASCADE,
+  CONSTRAINT uq_tickets_status_rank UNIQUE (status, rank)
 );
 
