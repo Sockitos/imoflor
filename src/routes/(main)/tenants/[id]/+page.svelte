@@ -186,7 +186,7 @@
 		</div>
 	</div>
 
-	<TenantForm tenantId={tenant.id} bind:open={openForm} />
+	<TenantForm {tenant} bind:open={openForm} />
 
 	<TenantDeleteDialog tenantId={tenant.id} bind:open={openDeleteDialog} />
 

@@ -1,13 +1,8 @@
-import {
-	addressSchema,
-	deleteByIdSchema,
-	genderSchema,
-	idSchema,
-	maritalStatusSchema,
-} from '@/shared/schemas';
+import { addressSchema, genderSchema, idSchema, maritalStatusSchema } from '@/shared/schemas';
 import { z } from 'zod';
 
-const tenantSchema = z.object({
+export const tenantSchema = z.object({
+	id: idSchema.optional(),
 	name: z.string().min(1, 'Name is required'),
 	gender: genderSchema,
 	marital_status: maritalStatusSchema,
@@ -23,14 +18,4 @@ const tenantSchema = z.object({
 	phone: z.string().optional(),
 });
 
-export const createTenantSchema = tenantSchema;
-
-export const updateTenantSchema = tenantSchema.extend({
-	id: idSchema,
-});
-export const deleteTenantSchema = deleteByIdSchema;
-
-export type CreateTenantSchema = typeof createTenantSchema;
-export type UpdateTenantSchema = typeof updateTenantSchema;
-export type DeleteTenantSchema = typeof deleteTenantSchema;
-
+export type TenantSchema = typeof tenantSchema;

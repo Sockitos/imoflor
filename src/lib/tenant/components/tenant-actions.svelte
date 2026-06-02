@@ -31,12 +31,10 @@
 			>Open</DropdownMenu.Item
 		>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => (openForm = true)}
-			>Edit</DropdownMenu.Item
-		>
+		<DropdownMenu.Item onclick={() => (openForm = true)}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<TenantForm tenantId={tenant.id} bind:open={openForm} />
+<TenantForm {tenant} bind:open={openForm} />
 <TenantDeleteDialog tenantId={tenant.id} bind:open={openDeleteDialog} />
