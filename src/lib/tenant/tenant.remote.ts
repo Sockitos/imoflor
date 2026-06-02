@@ -23,9 +23,11 @@ export const getTenants = query<Tenant[]>(async () => {
 });
 
 export const getTenant = query(z.number(), async (id): Promise<Tenant> => {
-	const event = getRequestEvent();
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
 
-	const { data: tenant, error: tenantError } = await event.locals.supabase
+	const { data: tenant, error: tenantError } = await supabase
 		.from('tenants')
 		.select('*, address:addresses(*)')
 		.eq('id', id)

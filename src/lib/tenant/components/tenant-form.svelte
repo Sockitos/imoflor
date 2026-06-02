@@ -192,9 +192,7 @@
 													? parseAbsolute(tenant.birth_date, getLocalTimeZone())
 													: undefined}
 											onValueChange={(v) => {
-												form.fields.birth_date.set(
-													v ? v.toDate(getLocalTimeZone()).toISOString() : undefined
-												);
+												form.fields.birth_date.set(v?.toDate(getLocalTimeZone()).toISOString());
 											}}
 										/>
 									</Popover.Content>
@@ -264,7 +262,7 @@
 													: undefined}
 											onValueChange={(v) => {
 												form.fields.id_expiration_date.set(
-													v ? v.toDate(getLocalTimeZone()).toISOString() : undefined
+													v?.toDate(getLocalTimeZone()).toISOString()
 												);
 											}}
 										/>
