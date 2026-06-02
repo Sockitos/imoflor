@@ -25,4 +25,5 @@ export type Ticket = {
 	title: string;
 	description: string;
 	property: IdAndLabel;
+	rank: string;
 };

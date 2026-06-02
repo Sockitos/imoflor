@@ -16,15 +16,20 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { createInterventionSchema, type CreateInterventionSchema } from '../schemas';
-	import { interventionStatusOptions, interventionTypeOptions } from '../types';
+	import {
+		interventionStatusOptions,
+		interventionTypeOptions,
+		type InterventionStatus,
+	} from '../types';
 
 	interface Props {
 		open?: boolean;
 		data: SuperValidated<Infer<CreateInterventionSchema>>;
 		action: string;
+		defaultStatus?: InterventionStatus;
 	}
 
-	let { open = $bindable(false), data, action }: Props = $props();
+	let { open = $bindable(false), data, action, defaultStatus }: Props = $props();
 
 	const form = superForm(data, {
 		validators: zod4Client(createInterventionSchema),
@@ -37,6 +42,13 @@
 	});
 
 	const { form: formData, enhance, submitting } = form;
+
+	$effect(() => {
+		if (open) {
+			// TODO: Fix this with new forms feature
+			$formData.status = defaultStatus ?? 'not_started';
+		}
+	});
 
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long',
