@@ -5,20 +5,15 @@ import { interventionStatusValues, interventionTypeValues } from './types';
 export const interventionTypeSchema = z.enum(interventionTypeValues);
 export const interventionStatusSchema = z.enum(interventionStatusValues);
 
-const interventionSchema = z.object({
+export const interventionSchema = z.object({
+	id: idSchema.optional(),
 	type: interventionTypeSchema,
 	status: interventionStatusSchema,
-	start_date: z.string().nullish(),
-	end_date: z.string().nullish(),
+	start_date: z.string().optional(),
+	end_date: z.string().optional(),
 	description: z.string().min(1, 'Description is required'),
 	property_id: idSchema,
-	ticket_id: idSchema.nullish(),
-});
-
-export const createInterventionSchema = interventionSchema;
-
-export const updateInterventionSchema = interventionSchema.partial().extend({
-	id: idSchema,
+	ticket_id: idSchema.optional(),
 });
 
 export const deleteInterventionSchema = deleteByIdSchema;
@@ -29,7 +24,6 @@ export const interventionPaymentSchema = z.object({
 	movement_id: idSchema,
 });
 
-export type CreateInterventionSchema = typeof createInterventionSchema;
-export type UpdateInterventionSchema = typeof updateInterventionSchema;
+export type InterventionSchema = typeof interventionSchema;
 export type DeleteInterventionSchema = typeof deleteInterventionSchema;
 export type InterventionPaymentSchema = typeof interventionPaymentSchema;
