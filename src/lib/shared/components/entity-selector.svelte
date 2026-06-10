@@ -42,7 +42,7 @@
 				variant="outline"
 				role="combobox"
 				aria-expanded={open}
-				class="w-full flex-1 justify-between px-3 font-normal"
+				class="w-full justify-between px-3 font-normal"
 			>
 				{selectedValue}
 				<CaretSort class="ml-2 h-4 w-4 shrink-0 opacity-50" />
