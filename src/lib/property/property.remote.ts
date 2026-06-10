@@ -1,8 +1,6 @@
-import {  getRequestEvent, query  } from '$app/server';
+import { getRequestEvent, query } from '$app/server';
 import type { IdAndLabel } from '@/shared/types';
 import { error } from '@sveltejs/kit';
-
-
 
 export const getPropertyOptions = query<IdAndLabel[]>(async () => {
 	const {
