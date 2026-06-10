@@ -76,10 +76,7 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 	if (data.id) {
 		const { id, ...fields } = data;
 
-		const { error: updateError } = await supabase
-			.from('interventions')
-			.update(fields)
-			.eq('id', id);
+		const { error: updateError } = await supabase.from('interventions').update(fields).eq('id', id);
 
 		if (updateError) {
 			setFlash({ type: 'error', message: updateError.message }, cookies);
@@ -99,9 +96,7 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 		const bottomRank = existing?.[0]?.rank;
 		const rank = generateRankBetween(undefined, bottomRank);
 
-		const { error: insertError } = await supabase
-			.from('interventions')
-			.insert({ ...data, rank });
+		const { error: insertError } = await supabase.from('interventions').insert({ ...data, rank });
 
 		if (insertError) {
 			setFlash({ type: 'error', message: insertError.message }, cookies);

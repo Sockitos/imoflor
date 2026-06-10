@@ -43,7 +43,6 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 	await requested(getTickets, 1).refreshAll();
 });
 
-
 export const getTicketOptions = query<IdAndLabel[]>(async () => {
 	const {
 		locals: { supabase },
