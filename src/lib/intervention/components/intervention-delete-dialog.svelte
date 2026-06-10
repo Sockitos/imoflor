@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteIntervention } from '../intervention.remote';
-	import { Loader2 } from 'lucide-svelte';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -41,7 +41,7 @@
 				onclick={() => formElement?.requestSubmit()}
 			>
 				{#if deleteForm.pending}
-					<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+					<Spinner />
 				{/if}
 				Continue
 			</AlertDialog.Action>

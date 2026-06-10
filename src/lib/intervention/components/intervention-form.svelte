@@ -10,7 +10,7 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
+	import { CalendarIcon } from 'lucide-svelte';
 	import { interventionSchema } from '../schemas';
 	import { upsertIntervention } from '../intervention.remote';
 	import {
@@ -341,7 +341,7 @@
 				</Button>
 				<Button type="submit" disabled={!!form.pending}>
 					{#if form.pending}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Button>
