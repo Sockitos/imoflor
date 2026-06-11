@@ -9,9 +9,11 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { getMovements } from '@/movement/movement.remote.js';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	let { data } = $props();
-	let { vendor, movements, updateVendorForm, deleteVendorForm } = $derived(data);
+	let { vendor, updateVendorForm, deleteVendorForm } = $derived(data);
 
 	let openForm = $state(page.url.searchParams.get('action') === 'edit');
 	let openDeleteDialog = $state(false);
@@ -128,12 +130,32 @@
 						incididunt ut labore et dolore magna aliqua.
 					</p>
 				</div>
-				<Button>
-					<PlusCircle class="mr-2 h-4 w-4" />
-					Movement
-				</Button>
+				{#if getMovements(vendor.tax_id_number).ready}
+					<Button>
+						<PlusCircle class="mr-2 h-4 w-4" />
+						Movement
+					</Button>
+				{/if}
 			</div>
-			<MovementTable {movements} />
+
+			<svelte:boundary>
+				{@const movements = await getMovements(vendor.tax_id_number)}
+
+				<MovementTable {movements} />
+
+				{#snippet pending()}
+					<div class="flex items-center justify-center px-4 py-6 lg:px-8">
+						<Spinner class="size-6" />
+					</div>
+				{/snippet}
+
+				{#snippet failed(_, reset)}
+					<div class="flex flex-col items-center gap-y-4 px-4 py-6 lg:px-8">
+						<p class="text-sm text-destructive">Failed to load movements.</p>
+						<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+					</div>
+				{/snippet}
+			</svelte:boundary>
 		</div>
 	</div>
 </div>
