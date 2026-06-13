@@ -2,7 +2,12 @@ import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
-import { deleteFractionSchema, deletePropertySchema, fractionSchema, propertySchema } from './schemas';
+import {
+	deleteFractionSchema,
+	deletePropertySchema,
+	fractionSchema,
+	propertySchema,
+} from './schemas';
 import type { Fraction, Property } from './types';
 
 export const getProperties = query<Property[]>(async () => {
@@ -129,7 +134,6 @@ export const getFractions = query(z.number(), async (parentId): Promise<Fraction
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
-
 
 	const { data: fractions, error: fractionsError } = await supabase
 		.from('properties')

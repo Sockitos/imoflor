@@ -135,7 +135,11 @@
 
 	<FractionForm {property} {fraction} bind:open={openForm} />
 
-	<FractionDeleteDialog fractionId={fraction.id} parentId={fraction.parent_id} bind:open={openDeleteDialog} />
+	<FractionDeleteDialog
+		fractionId={fraction.id}
+		parentId={fraction.parent_id}
+		bind:open={openDeleteDialog}
+	/>
 
 	{#snippet pending()}
 		<div class="flex items-center justify-center px-4 py-6 lg:px-8">
