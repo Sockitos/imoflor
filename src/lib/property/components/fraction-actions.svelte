@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 	import { Button } from '@/shared/components/ui/button';
 	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
-	import { MoreHorizontal } from 'lucide-svelte';
+	import { Ellipsis } from 'lucide-svelte';
 	import type { Fraction } from '../types';
 	import FractionDeleteDialog from './fraction-delete-dialog.svelte';
 
@@ -20,7 +19,7 @@
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
 			<Button variant="ghost" size="icon" {...props}>
-				<MoreHorizontal class="h-4 w-4" />
+				<Ellipsis />
 				<span class="sr-only">Open menu</span>
 			</Button>
 		{/snippet}
@@ -43,7 +42,7 @@
 </DropdownMenu.Root>
 
 <FractionDeleteDialog
-	propertyId={fraction.parent_id}
-	data={page.data.deleteFractionForm}
+	fractionId={fraction.id}
+	parentId={fraction.parent_id}
 	bind:open={openDeleteDialog}
 />
