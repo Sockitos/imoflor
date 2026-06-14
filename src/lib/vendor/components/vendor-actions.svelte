@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
 	import { Button } from '@/shared/components/ui/button';
 	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
-	import { MoreHorizontal } from 'lucide-svelte';
+	import { Ellipsis } from 'lucide-svelte';
 	import type { Vendor } from '../types';
 	import VendorDeleteDialog from './vendor-delete-dialog.svelte';
 
@@ -20,7 +19,7 @@
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
 			<Button variant="ghost" size="icon" {...props}>
-				<MoreHorizontal class="h-4 w-4" />
+				<Ellipsis />
 				<span class="sr-only">Open menu</span>
 			</Button>
 		{/snippet}
@@ -37,4 +36,4 @@
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<VendorDeleteDialog data={page.data.deleteVendorForm} bind:open={openDeleteDialog} />
+<VendorDeleteDialog vendorId={vendor.id} bind:open={openDeleteDialog} />
