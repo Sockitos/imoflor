@@ -2,7 +2,6 @@ import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
-import type { Movement } from '@/movement/types';
 import { deleteVendorSchema, vendorSchema } from './schemas';
 import type { Vendor } from './types';
 
