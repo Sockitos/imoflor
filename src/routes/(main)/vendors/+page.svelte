@@ -23,10 +23,12 @@
 			</PageTitle>
 			<PageSubtitle>Manage your vendors and Lorem Ipsum</PageSubtitle>
 		</div>
-		<Button onclick={() => (openForm = true)}>
-			<PlusCircle class="mr-2 h-4 w-4" />
-			Add Vendor
-		</Button>
+		{#if getVendors().ready}
+			<Button onclick={() => (openForm = true)}>
+				<PlusCircle class="mr-2 h-4 w-4" />
+				Add Vendor
+			</Button>
+		{/if}
 	</div>
 	<Separator />
 	<svelte:boundary>
