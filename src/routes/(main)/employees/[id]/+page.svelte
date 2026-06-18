@@ -16,7 +16,7 @@
 	import { salaryTypeOptions } from '@/employee/types';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 

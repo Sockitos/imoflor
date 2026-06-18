@@ -6,12 +6,14 @@
 	import { Ellipsis } from 'lucide-svelte';
 	import type { Employee } from '../types';
 	import EmployeeDeleteDialog from './employee-delete-dialog.svelte';
+	import EmployeeForm from './employee-form.svelte';
 
 	interface Props {
 		employee: Employee;
 	}
 
 	let { employee }: Props = $props();
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -29,11 +31,10 @@
 			Open
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => goto(resolve(`/employees/${employee.id}?action=edit`))}>
-			Edit
-		</DropdownMenu.Item>
+		<DropdownMenu.Item onclick={() => (openForm = true)}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
+<EmployeeForm {employee} bind:open={openForm} />
 <EmployeeDeleteDialog employeeId={employee.id} bind:open={openDeleteDialog} />
