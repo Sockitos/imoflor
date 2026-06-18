@@ -14,7 +14,7 @@
 	import { dateFormatter } from '@/shared/formatters';
 	import { Link, Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
