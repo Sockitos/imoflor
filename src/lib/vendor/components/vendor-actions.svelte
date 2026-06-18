@@ -6,12 +6,14 @@
 	import { Ellipsis } from 'lucide-svelte';
 	import type { Vendor } from '../types';
 	import VendorDeleteDialog from './vendor-delete-dialog.svelte';
+	import VendorForm from './vendor-form.svelte';
 
 	interface Props {
 		vendor: Vendor;
 	}
 
 	let { vendor }: Props = $props();
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -29,11 +31,10 @@
 			>Open</DropdownMenu.Item
 		>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => goto(resolve(`/vendors/${vendor.id}?action=edit`))}
-			>Edit</DropdownMenu.Item
-		>
+		<DropdownMenu.Item onclick={() => (openForm = true)}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
+<VendorForm {vendor} bind:open={openForm} />
 <VendorDeleteDialog vendorId={vendor.id} bind:open={openDeleteDialog} />

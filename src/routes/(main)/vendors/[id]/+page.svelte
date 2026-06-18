@@ -13,7 +13,7 @@
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 	import { getMovements } from '@/movement/movement.remote';
 
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
