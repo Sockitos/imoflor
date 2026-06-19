@@ -30,12 +30,10 @@
 					<Pencil class="mr-2 h-4 w-4" />
 					Edit
 				</Button>
-				{#if !ticket.has_intervention}
-					<Button onclick={() => (openDeleteDialog = true)} variant="destructive">
-						<Trash class="mr-2 h-4 w-4" />
-						Delete
-					</Button>
-				{/if}
+				<Button onclick={() => (openDeleteDialog = true)} variant="destructive">
+					<Trash class="mr-2 h-4 w-4" />
+					Delete
+				</Button>
 			</div>
 		</div>
 		<Separator />

@@ -29,7 +29,7 @@ export const getTicket = query(z.number(), async (id): Promise<Ticket> => {
 
 	const { data: ticket, error: ticketError } = await supabase
 		.from('tickets')
-		.select('*, property:properties!inner (id, ...addresses(label:address)), interventions(id)')
+		.select('*, property:properties!inner (id, ...addresses(label:address))')
 		.eq('id', id)
 		.single();
 
@@ -37,9 +37,7 @@ export const getTicket = query(z.number(), async (id): Promise<Ticket> => {
 		error(500, 'Error fetching ticket, please try again later.');
 	}
 
-	const { interventions, ...rest } = ticket;
-
-	return { ...rest, has_intervention: interventions.length > 0 };
+	return ticket;
 });
 
 const updateStatusSchema = z.object({

@@ -26,5 +26,4 @@ export type Ticket = {
 	description: string;
 	property: IdAndLabel;
 	rank: string;
-	has_intervention?: boolean;
 };
