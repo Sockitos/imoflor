@@ -15,7 +15,7 @@
 	import { areaFormatter, currencyFormatter } from '@/shared/formatters';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
 
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 	let openFractionForm = $state(false);
 
@@ -175,11 +175,11 @@
 		</div>
 	</div>
 
-	<PropertyForm {property} bind:open={openForm} />
+	<PropertyForm bind:open={openForm} {property} />
 
-	<PropertyDeleteDialog propertyId={property.id} bind:open={openDeleteDialog} />
+	<PropertyDeleteDialog bind:open={openDeleteDialog} propertyId={property.id} />
 
-	<FractionForm {property} bind:open={openFractionForm} />
+	<FractionForm bind:open={openFractionForm} {property} />
 
 	{#snippet pending()}
 		<div class="flex items-center justify-center px-4 py-6 lg:px-8">

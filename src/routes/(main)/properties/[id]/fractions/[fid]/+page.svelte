@@ -13,7 +13,7 @@
 	import { areaFormatter, currencyFormatter } from '@/shared/formatters';
 	import { Pencil, Trash } from 'lucide-svelte';
 
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -133,12 +133,12 @@
 		</div>
 	</div>
 
-	<FractionForm {property} {fraction} bind:open={openForm} />
+	<FractionForm bind:open={openForm} {fraction} />
 
 	<FractionDeleteDialog
+		bind:open={openDeleteDialog}
 		fractionId={fraction.id}
 		parentId={fraction.parent_id}
-		bind:open={openDeleteDialog}
 	/>
 
 	{#snippet pending()}

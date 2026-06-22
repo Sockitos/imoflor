@@ -6,12 +6,14 @@
 	import { Ellipsis } from 'lucide-svelte';
 	import type { Property } from '../types';
 	import PropertyDeleteDialog from './property-delete-dialog.svelte';
+	import PropertyForm from './property-form.svelte';
 
 	interface Props {
 		property: Property;
 	}
 
 	let { property }: Props = $props();
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -29,11 +31,10 @@
 			>Open</DropdownMenu.Item
 		>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item onclick={() => goto(resolve(`/properties/${property.id}?action=edit`))}
-			>Edit</DropdownMenu.Item
-		>
+		<DropdownMenu.Item onclick={() => (openForm = true)}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
 
-<PropertyDeleteDialog propertyId={property.id} bind:open={openDeleteDialog} />
+<PropertyForm bind:open={openForm} {property} />
+<PropertyDeleteDialog bind:open={openDeleteDialog} propertyId={property.id} />

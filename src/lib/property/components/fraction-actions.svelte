@@ -6,12 +6,14 @@
 	import { Ellipsis } from 'lucide-svelte';
 	import type { Fraction } from '../types';
 	import FractionDeleteDialog from './fraction-delete-dialog.svelte';
+	import FractionForm from './fraction-form.svelte';
 
 	interface Props {
 		fraction: Fraction;
 	}
 
 	let { fraction }: Props = $props();
+	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
 
@@ -31,15 +33,12 @@
 			Open
 		</DropdownMenu.Item>
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item
-			onclick={() =>
-				goto(resolve(`/properties/${fraction.parent_id}/fractions/${fraction.id}?action=edit`))}
-		>
-			Edit
-		</DropdownMenu.Item>
+		<DropdownMenu.Item onclick={() => (openForm = true)}>Edit</DropdownMenu.Item>
 		<DropdownMenu.Item onclick={() => (openDeleteDialog = true)}>Delete</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>
+
+<FractionForm bind:open={openForm} {fraction} />
 
 <FractionDeleteDialog
 	fractionId={fraction.id}
