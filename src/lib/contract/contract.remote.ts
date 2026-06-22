@@ -22,7 +22,7 @@ export const getContracts = query<Contract[]>(async () => {
 		.from('contracts_view')
 		.select(
 			'*, tenants:tenants!inner (id, label:name), property:properties!inner (id, ...addresses(label:address))'
-	)
+		)
 		.returns<Contract[]>();
 
 	if (contractsError) {
@@ -32,7 +32,7 @@ export const getContracts = query<Contract[]>(async () => {
 	return contracts;
 });
 
-export const getContract = query<z.ZodNumber,Contract>(z.number(), async (id) => {
+export const getContract = query<z.ZodNumber, Contract>(z.number(), async (id) => {
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
@@ -53,24 +53,27 @@ export const getContract = query<z.ZodNumber,Contract>(z.number(), async (id) =>
 	return contract;
 });
 
-export const getContractAccount = query<z.ZodNumber,ContractAccountItem[]>(z.number(), async (contractId) => {
-	const {
-		locals: { supabase },
-	} = getRequestEvent();
+export const getContractAccount = query<z.ZodNumber, ContractAccountItem[]>(
+	z.number(),
+	async (contractId) => {
+		const {
+			locals: { supabase },
+		} = getRequestEvent();
 
-	const { data: contractAccount, error: contractAccountError } = await supabase
-		.from('contracts_accounts_view')
-		.select('*')
-		.eq('contract_id', contractId);
+		const { data: contractAccount, error: contractAccountError } = await supabase
+			.from('contracts_accounts_view')
+			.select('*')
+			.eq('contract_id', contractId);
 
-	if (contractAccountError) {
-		error(500, 'Error fetching contract account, please try again later.');
+		if (contractAccountError) {
+			error(500, 'Error fetching contract account, please try again later.');
+		}
+
+		return contractAccount;
 	}
+);
 
-	return contractAccount;
-});
-
-export const getRentUpdates = query<z.ZodNumber,RentUpdate[]>(z.number(), async (contractId) => {
+export const getRentUpdates = query<z.ZodNumber, RentUpdate[]>(z.number(), async (contractId) => {
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
@@ -88,23 +91,26 @@ export const getRentUpdates = query<z.ZodNumber,RentUpdate[]>(z.number(), async 
 	return rentUpdates;
 });
 
-export const getInstallmentUpdates = query<z.ZodNumber,InstallmentUpdate[]>(z.number(), async (contractId) => {
-	const {
-		locals: { supabase },
-	} = getRequestEvent();
+export const getInstallmentUpdates = query<z.ZodNumber, InstallmentUpdate[]>(
+	z.number(),
+	async (contractId) => {
+		const {
+			locals: { supabase },
+		} = getRequestEvent();
 
-	const { data: installmentUpdates, error: installmentUpdatesError } = await supabase
-		.from('installment_updates')
-		.select('*')
-		.eq('contract_id', contractId)
-		.order('update_date');
+		const { data: installmentUpdates, error: installmentUpdatesError } = await supabase
+			.from('installment_updates')
+			.select('*')
+			.eq('contract_id', contractId)
+			.order('update_date');
 
-	if (installmentUpdatesError) {
-		error(500, 'Error fetching installment updates, please try again later.');
+		if (installmentUpdatesError) {
+			error(500, 'Error fetching installment updates, please try again later.');
+		}
+
+		return installmentUpdates;
 	}
-
-	return installmentUpdates;
-});
+);
 
 export const upsertContract = form(contractSchema, async (data) => {
 	const {
@@ -196,27 +202,30 @@ export const deleteContract = form(deleteContractSchema, async ({ id }) => {
 	return redirect(302, '/contracts');
 });
 
-export const createRentUpdate = form(createRentUpdateSchema, async ({ contract_id, rent, update_date }) => {
-	const {
-		locals: { supabase },
-		cookies,
-	} = getRequestEvent();
+export const createRentUpdate = form(
+	createRentUpdateSchema,
+	async ({ contract_id, rent, update_date }) => {
+		const {
+			locals: { supabase },
+			cookies,
+		} = getRequestEvent();
 
-	const { error: insertError } = await supabase.from('rent_updates').insert({
-		contract_id,
-		rent,
-		update_date,
-	});
+		const { error: insertError } = await supabase.from('rent_updates').insert({
+			contract_id,
+			rent,
+			update_date,
+		});
 
-	if (insertError) {
-		setFlash({ type: 'error', message: insertError.message }, cookies);
-		error(500, insertError.message);
+		if (insertError) {
+			setFlash({ type: 'error', message: insertError.message }, cookies);
+			error(500, insertError.message);
+		}
+
+		setFlash({ type: 'success', message: 'Rent update created successfully' }, cookies);
+		getRentUpdates(contract_id).refresh();
+		getContract(contract_id).refresh();
 	}
-
-	setFlash({ type: 'success', message: 'Rent update created successfully' }, cookies);
-	getRentUpdates(contract_id).refresh();
-	getContract(contract_id).refresh();
-});
+);
 
 export const createInstallmentUpdate = form(
 	createInstallmentUpdateSchema,

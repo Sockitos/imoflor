@@ -1,4 +1,4 @@
-import {  getRequestEvent, query } from '$app/server';
+import { getRequestEvent, query } from '$app/server';
 import { error } from '@sveltejs/kit';
 import type { IdAndLabel } from '@/shared/types';
 
