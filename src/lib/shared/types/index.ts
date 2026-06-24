@@ -32,3 +32,7 @@ export type IdAndLabel = {
 	id: Id;
 	label: string;
 };
+
+export type EntityOption = {
+	id: Id;
+}

@@ -67,3 +67,11 @@ export type Fraction = {
 	parent_id: Id;
 	sold: boolean;
 };
+
+export type PropertyOption = {
+	id: Id;
+	matrix: string;
+	type: PropertyType;
+	address: string;
+	children?: PropertyOption[] ;
+};
