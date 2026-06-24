@@ -73,5 +73,5 @@ export type PropertyOption = {
 	matrix: string;
 	type: PropertyType;
 	address: string;
-	children?: PropertyOption[] ;
+	children?: PropertyOption[];
 };

@@ -10,7 +10,7 @@ export const getPropertyOptions = query<PropertyOption[]>(async () => {
 	const { data: properties, error: propertiesError } = await supabase
 		.from('properties')
 		.select(
-			'id, matrix, type, ...addresses(address), children:properties!parent_id(id, matrix, type, ...addresses(address))',
+			'id, matrix, type, ...addresses(address), children:properties!parent_id(id, matrix, type, ...addresses(address))'
 		)
 		.is('parent_id', null);
 
