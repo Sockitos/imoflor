@@ -11,14 +11,8 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
-	import { getMovements } from '@/movement/movement.remote.js';
-	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
 
-	let { data } = $props();
-	let { vendor, updateVendorForm, deleteVendorForm } = $derived(data);
-
-	let openForm = $state(page.url.searchParams.get('action') === 'edit');
 	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
@@ -144,7 +138,7 @@
 						</Button>
 					{/if}
 				</div>
-			</dl>
+			</div>
 		</div>
 		<div class="col-span-2 flex flex-col gap-y-6">
 			<div class="flex items-start justify-between">
