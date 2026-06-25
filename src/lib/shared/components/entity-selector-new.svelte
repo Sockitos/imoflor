@@ -67,15 +67,13 @@
 					<Command.Item
 						value={option.id.toString()}
 						class="aria-selected:bg-primary aria-selected:text-primary-foreground"
+						data-checked={entityId === option.id}
 						onSelect={() => {
 							entityId = option.id;
 							closeAndFocusTrigger(triggerId);
 						}}
 					>
 						{@render children(option)}
-						<Check
-							class={cn('ml-auto h-4 w-4', entityId === option.id ? 'opacity-100' : 'opacity-0')}
-						/>
 					</Command.Item>
 				{/each}
 			</Command.List>
