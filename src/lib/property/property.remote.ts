@@ -239,3 +239,19 @@ export const deleteFraction = form(deleteFractionSchema, async ({ id, parent_id 
 
 	return redirect(302, `/properties/${parent_id}`);
 });
+
+export const getPropertyOptions = query<IdAndLabel[]>(async () => {
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
+
+	const { data: properties, error: propertiesError } = await supabase
+		.from('properties')
+		.select('id, ...addresses(label:address)');
+
+	if (propertiesError) {
+		error(500, 'Error fetching properties, please try again later.');
+	}
+
+	return properties;
+});

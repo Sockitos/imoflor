@@ -14,7 +14,7 @@ export const getMovements = query<z.ZodString, Movement[]>(z.string(), async (ta
 		.eq('tax_id_number', tax_id_number);
 
 	if (movementsError) {
-		return error(500, 'Error fetching movements, please try again later.');
+		error(500, 'Error fetching movements, please try again later.');
 	}
 
 	return movements;
