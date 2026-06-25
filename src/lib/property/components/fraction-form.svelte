@@ -1,59 +1,105 @@
 <script lang="ts">
 	import { Button } from '@/shared/components/ui/button';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { Loader2 } from 'lucide-svelte';
-	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import { superForm } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { createFractionSchema, type CreateFractionSchema } from '../schemas';
-	import { fractionTypeOptions, propertyClassOptions } from '../types';
+	import { fractionSchema } from '../schemas';
+	import { upsertFraction } from '../property.remote';
+	import {
+		fractionTypeOptions,
+		propertyClassOptions,
+		type FractionType,
+		type PropertyClass,
+	} from '../types';
+	import type { Fraction, Property } from '../types';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
-	interface Props {
-		open?: boolean;
-		data: SuperValidated<Infer<CreateFractionSchema>>;
-		action: string;
+	type Props =
+		| {
+				open?: boolean;
+				property: Property;
+				fraction?: never;
+		  }
+		| {
+				open?: boolean;
+				property?: never;
+				fraction: Fraction;
+		  };
+
+	let { open = $bindable(false), ...propertyOrFraction }: Props = $props();
+
+	const form = $derived(
+		propertyOrFraction.fraction != null
+			? upsertFraction.for(propertyOrFraction.fraction.id)
+			: upsertFraction
+	);
+	const isEdit = $derived(propertyOrFraction.fraction != null);
+
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
 	}
-
-	let { open = $bindable(false), data, action }: Props = $props();
-
-	const form = superForm(data, {
-		validators: zod4Client(createFractionSchema),
-		dataType: 'json',
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
-
-	const { form: formData, enhance, submitting } = form;
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content class="overflow-y-auto sm:max-w-3xl">
+	<Sheet.Content class="overflow-y-auto data-[side=right]:sm:max-w-2xl">
 		<Sheet.Header>
-			<Sheet.Title>Add new fraction</Sheet.Title>
-			<Sheet.Description>Fill the form below to add a new fraction.</Sheet.Description>
+			<Sheet.Title>{isEdit ? 'Edit fraction' : 'Add new fraction'}</Sheet.Title>
+			<Sheet.Description>
+				{isEdit
+					? 'Update the fraction details below.'
+					: 'Fill the form below to add a new fraction.'}
+			</Sheet.Description>
 		</Sheet.Header>
-		<Separator class="my-5" />
-		<form method="POST" use:enhance {action} class="px-4">
-			<input hidden bind:value={$formData.parent_id} name="parent_id" />
-			<div class="mb-5 space-y-3">
-				<h3 class="text-lg font-medium">Information</h3>
-				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="class">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Class</Form.Label>
-								<Select.Root {...props} type="single" bind:value={$formData.class}>
-									<Select.Trigger {...props}>
-										{propertyClassOptions[$formData.class] ?? 'Select'}
+		<Separator />
+		<form
+			{...form.preflight(fractionSchema).enhance(async (f) => {
+				try {
+					if (await f.submit()) {
+						open = false;
+						if (!isEdit) f.form.reset();
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			})}
+			class="flex flex-col gap-8 px-4"
+		>
+			{#if propertyOrFraction.fraction?.id != null}
+				<input hidden {...form.fields.id.as('number', propertyOrFraction.fraction.id)} />
+			{/if}
+			<input
+				hidden
+				{...form.fields.parent_id.as(
+					'number',
+					propertyOrFraction.fraction?.parent_id ?? propertyOrFraction.property!.id
+				)}
+			/>
+
+			<Field.FieldSet>
+				<Field.FieldLegend>Information</Field.FieldLegend>
+				<Field.FieldGroup>
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.class.issues())}>
+							<Field.FieldLabel>Class</Field.FieldLabel>
+							<Field.FieldContent>
+								<Select.Root
+									type="single"
+									value={form.fields.class.value() ??
+										propertyOrFraction.fraction?.class ??
+										propertyOrFraction.property!.class}
+									onValueChange={(v) => {
+										if (v) form.fields.class.set(v as PropertyClass);
+									}}
+								>
+									<Select.Trigger>
+										{form.fields.class.value()
+											? propertyClassOptions[form.fields.class.value()!]
+											: propertyClassOptions[
+													propertyOrFraction.fraction?.class ?? propertyOrFraction.property!.class
+												]}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(propertyClassOptions) as [value, label] (value)}
@@ -61,18 +107,33 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input hidden bind:value={$formData.class} name={props.name} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="type">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Type</Form.Label>
-								<Select.Root {...props} type="single" bind:value={$formData.type}>
-									<Select.Trigger {...props}>
-										{fractionTypeOptions[$formData.type] ?? 'Select'}
+								<input
+									hidden
+									{...form.fields.class.as(
+										'text',
+										propertyOrFraction.fraction?.class ?? propertyOrFraction.property!.class
+									)}
+								/>
+								<Field.FieldError errors={form.fields.class.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.type.issues())}>
+							<Field.FieldLabel>Type</Field.FieldLabel>
+							<Field.FieldContent>
+								<Select.Root
+									type="single"
+									value={form.fields.type.value() ?? propertyOrFraction.fraction?.type}
+									onValueChange={(v) => {
+										if (v) form.fields.type.set(v as FractionType);
+									}}
+								>
+									<Select.Trigger>
+										{form.fields.type.value()
+											? fractionTypeOptions[form.fields.type.value()!]
+											: propertyOrFraction.fraction?.type
+												? fractionTypeOptions[propertyOrFraction.fraction.type]
+												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(fractionTypeOptions) as [value, label] (value)}
@@ -80,175 +141,242 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input hidden bind:value={$formData.type} name={props.name} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="matrix">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Matrix</Form.Label>
-								<Input {...props} bind:value={$formData.matrix} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="conservatory">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Conservatory</Form.Label>
-								<Input {...props} bind:value={$formData.conservatory} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<Form.Field {form} name="area">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Area</Form.Label>
-							<Input type="number" {...props} bind:value={$formData.area} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="tipology">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Tipology</Form.Label>
-							<Input {...props} bind:value={$formData.tipology} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="description">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Description</Form.Label>
-							<Textarea {...props} bind:value={$formData.description} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="patrimonial_value">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Patrimonial Value</Form.Label>
+								<input
+									hidden
+									{...propertyOrFraction.fraction != null
+										? form.fields.type.as('text', propertyOrFraction.fraction.type)
+										: form.fields.type.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.type.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.matrix.issues())}>
+							<Field.FieldLabel>Matrix</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									type="number"
+									{...form.fields.matrix.as(
+										'text',
+										propertyOrFraction.fraction?.matrix ?? propertyOrFraction.property!.matrix
+									)}
+								/>
+								<Field.FieldError errors={form.fields.matrix.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.conservatory.issues())}>
+							<Field.FieldLabel>Conservatory</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...form.fields.conservatory.as(
+										'text',
+										propertyOrFraction.fraction?.conservatory ??
+											propertyOrFraction.property!.conservatory
+									)}
+								/>
+								<Field.FieldError errors={form.fields.conservatory.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<Field.Field data-invalid={isInvalid(form.fields.area.issues())}>
+						<Field.FieldLabel>Area</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...(propertyOrFraction.fraction?.area ?? propertyOrFraction.property!.area) != null
+									? form.fields.area.as(
+											'number',
+											(propertyOrFraction.fraction?.area ?? propertyOrFraction.property!.area)!
+										)
+									: form.fields.area.as('number')}
+							/>
+							<Field.FieldError errors={form.fields.area.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<Field.Field data-invalid={isInvalid(form.fields.tipology.issues())}>
+						<Field.FieldLabel>Tipology</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...(propertyOrFraction.fraction?.tipology ??
+									propertyOrFraction.property!.tipology) != null
+									? form.fields.tipology.as(
+											'text',
+											(propertyOrFraction.fraction?.tipology ??
+												propertyOrFraction.property!.tipology)!
+										)
+									: form.fields.tipology.as('text')}
+							/>
+							<Field.FieldError errors={form.fields.tipology.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
+						<Field.FieldLabel>Description</Field.FieldLabel>
+						<Field.FieldContent>
+							<Textarea
+								{...(propertyOrFraction.fraction?.description ??
+									propertyOrFraction.property!.description) != null
+									? form.fields.description.as(
+											'text',
+											(propertyOrFraction.fraction?.description ??
+												propertyOrFraction.property!.description)!
+										)
+									: form.fields.description.as('text')}
+							/>
+							<Field.FieldError errors={form.fields.description.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.patrimonial_value.issues())}>
+							<Field.FieldLabel>Patrimonial Value</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
 									step="any"
-									{...props}
-									bind:value={$formData.patrimonial_value}
+									{...(propertyOrFraction.fraction?.patrimonial_value ??
+										propertyOrFraction.property!.patrimonial_value) != null
+										? form.fields.patrimonial_value.as(
+												'number',
+												(propertyOrFraction.fraction?.patrimonial_value ??
+													propertyOrFraction.property!.patrimonial_value)!
+											)
+										: form.fields.patrimonial_value.as('number')}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="market_value">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Market Value</Form.Label>
-								<Input type="number" step="any" {...props} bind:value={$formData.market_value} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-			</div>
-			<div class="mb-5 space-y-3">
-				<h3 class="text-lg font-medium">Address</h3>
-				<input hidden bind:value={$formData.address.id} name="address.id" />
-				<div class="grid grid-cols-2 items-start gap-x-4 gap-y-3">
-					<Form.Field {form} name="address.country">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Country</Form.Label>
+								<Field.FieldError errors={form.fields.patrimonial_value.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.market_value.issues())}>
+							<Field.FieldLabel>Market Value</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									{...props}
-									readonly
-									bind:value={$formData.address.country}
-									class="cursor-default bg-muted/40 text-muted-foreground"
+									step="any"
+									{...(propertyOrFraction.fraction?.market_value ??
+										propertyOrFraction.property!.market_value) != null
+										? form.fields.market_value.as(
+												'number',
+												(propertyOrFraction.fraction?.market_value ??
+													propertyOrFraction.property!.market_value)!
+											)
+										: form.fields.market_value.as('number')}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="address.region">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Region</Form.Label>
+								<Field.FieldError errors={form.fields.market_value.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+				</Field.FieldGroup>
+			</Field.FieldSet>
+
+			<Field.FieldSet>
+				<Field.FieldLegend>Address</Field.FieldLegend>
+				<Field.FieldGroup>
+					<input
+						hidden
+						{...form.fields.address.id.as(
+							'number',
+							(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address).id
+						)}
+					/>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field>
+							<Field.FieldLabel>Country</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									{...props}
 									readonly
-									bind:value={$formData.address.region}
 									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...form.fields.address.country.as(
+										'text',
+										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
+											.country
+									)}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<div class="grid grid-cols-2 items-start gap-x-4 gap-y-3">
-					<Form.Field {form} name="address.address">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Street address</Form.Label>
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field>
+							<Field.FieldLabel>Region</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									{...props}
 									readonly
-									bind:value={$formData.address.address}
 									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...form.fields.address.region.as(
+										'text',
+										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
+											.region
+									)}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="fraction">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Fraction</Form.Label>
-								<Input {...props} bind:value={$formData.fraction} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<div class="grid grid-cols-2 items-start gap-x-4 gap-y-3">
-					<Form.Field {form} name="address.postal_code">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Postal code</Form.Label>
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field>
+							<Field.FieldLabel>Street Address</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									{...props}
 									readonly
-									bind:value={$formData.address.postal_code}
 									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...form.fields.address.address.as(
+										'text',
+										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
+											.address
+									)}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="address.city">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>City</Form.Label>
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.fraction.issues())}>
+							<Field.FieldLabel>Fraction</Field.FieldLabel>
+							<Field.FieldContent>
 								<Input
-									{...props}
-									readonly
-									bind:value={$formData.address.city}
-									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...propertyOrFraction.fraction?.fraction != null
+										? form.fields.fraction.as('text', propertyOrFraction.fraction!.fraction)
+										: form.fields.fraction.as('text')}
 								/>
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-			</div>
-			<div class="flex flex-row items-center justify-end gap-4">
+								<Field.FieldError errors={form.fields.fraction.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field>
+							<Field.FieldLabel>Postal Code</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									readonly
+									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...form.fields.address.postal_code.as(
+										'text',
+										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
+											.postal_code
+									)}
+								/>
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field>
+							<Field.FieldLabel>City</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									readonly
+									class="cursor-default bg-muted/40 text-muted-foreground"
+									{...form.fields.address.city.as(
+										'text',
+										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
+											.city
+									)}
+								/>
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+				</Field.FieldGroup>
+			</Field.FieldSet>
+
+			<Sheet.Footer class="flex flex-row items-center justify-end gap-4 px-0 pt-0">
 				<Button
 					variant="ghost"
 					onclick={(e) => {
@@ -258,13 +386,13 @@
 				>
 					Cancel
 				</Button>
-				<Form.Button disabled={$submitting}>
-					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				<Button type="submit" disabled={!!form.pending}>
+					{#if form.pending}
+						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
-			</div>
+				</Button>
+			</Sheet.Footer>
 		</form>
 	</Sheet.Content>
 </Sheet.Root>
