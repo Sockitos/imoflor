@@ -5,6 +5,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { deleteTicketSchema, ticketSchema } from './schemas';
 import { ticketStatusValues, type Ticket } from './types';
+import type { IdAndLabel } from '@/shared/types';
 
 export const getTickets = query<Ticket[]>(async () => {
 	const {
@@ -121,4 +122,20 @@ export const deleteTicket = form(deleteTicketSchema, async ({ id }) => {
 	getTickets().refresh();
 
 	return redirect(302, '/tickets');
+});
+
+export const getTicketOptions = query<IdAndLabel[]>(async () => {
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
+
+	const { data: tickets, error: ticketsError } = await supabase
+		.from('tickets')
+		.select('id, label:title');
+
+	if (ticketsError) {
+		error(500, 'Error fetching tickets, please try again later.');
+	}
+
+	return tickets;
 });
