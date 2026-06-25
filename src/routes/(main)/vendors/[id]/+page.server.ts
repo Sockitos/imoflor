@@ -1,4 +1,3 @@
-import type { Movement } from '@/movement/types';
 import { deleteVendorSchema, updateVendorSchema } from '@/vendor/schemas';
 import type { Vendor } from '@/vendor/types';
 import { handleFormAction } from '@/shared/utils';
@@ -21,24 +20,11 @@ export const load = async (event) => {
 		return vendor;
 	}
 
-	async function getMovements(tax_id_number: string): Promise<Movement[]> {
-		const { data: movements, error: movementsError } = await event.locals.supabase
-			.from('movements')
-			.select('*')
-			.eq('tax_id_number', tax_id_number);
-
-		if (movementsError) {
-			return error(500, 'Error fetching movements, please try again later.');
-		}
-		return movements;
-	}
-
 	const vendor = await getVendor();
 	const vendorFormData = { ...vendor, address: vendor.address ?? {} };
 
 	return {
 		vendor: vendor,
-		movements: await getMovements(vendor.tax_id_number),
 		updateVendorForm: await superValidate(vendorFormData, zod4(updateVendorSchema), {
 			id: 'update-vendor',
 		}),
