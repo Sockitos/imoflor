@@ -15,6 +15,8 @@
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { salaryTypeOptions } from '@/employee/types';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { getMovements } from '@/movement/movement.remote.js';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	let openForm = $state(false);
 	let openDeleteDialog = $state(false);

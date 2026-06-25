@@ -5,7 +5,8 @@ import { ticketPriorityValues, ticketStatusValues } from './types';
 export const ticketPrioritySchema = z.enum(ticketPriorityValues).default('low');
 export const ticketStatusSchema = z.enum(ticketStatusValues).default('open');
 
-const ticketFieldsSchema = z.object({
+export const ticketSchema = z.object({
+	id: idSchema.optional(),
 	date: z.string().min(1, 'Date is required'),
 	description: z.string().min(1, 'Description is required'),
 	priority: ticketPrioritySchema,
@@ -14,14 +15,7 @@ const ticketFieldsSchema = z.object({
 	title: z.string().min(1, 'Title is required'),
 });
 
-export const createTicketSchema = ticketFieldsSchema;
-
-export const updateTicketSchema = ticketFieldsSchema.partial().extend({
-	id: idSchema,
-});
-
 export const deleteTicketSchema = deleteByIdSchema;
 
-export type CreateTicketSchema = typeof createTicketSchema;
-export type UpdateTicketSchema = typeof updateTicketSchema;
+export type TicketSchema = typeof ticketSchema;
 export type DeleteTicketSchema = typeof deleteTicketSchema;

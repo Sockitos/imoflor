@@ -14,9 +14,6 @@
 	import { generateRankBetween } from '@/shared/utils';
 	import { toast } from 'svelte-sonner';
 
-	let { data } = $props();
-	let { createInterventionForm } = $derived(data);
-
 	let openForm = $state(false);
 	let defaultStatus = $state<InterventionStatus | undefined>(undefined);
 
@@ -95,9 +92,4 @@
 	{/if}
 </div>
 
-<InterventionForm
-	data={createInterventionForm}
-	action="?/create"
-	bind:open={openForm}
-	{defaultStatus}
-/>
+<InterventionForm bind:open={openForm} {defaultStatus} />
