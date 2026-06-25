@@ -1,6 +1,5 @@
 import { deleteEmployeeSchema, updateEmployeeSchema } from '@/employee/schemas';
 import type { Employee } from '@/employee/types';
-import type { Movement } from '@/movement/types';
 import { handleFormAction } from '@/shared/utils';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -21,24 +20,11 @@ export const load = async (event) => {
 		return employee;
 	}
 
-	async function getMovements(tax_id_number: string): Promise<Movement[]> {
-		const { data: movements, error: movementsError } = await event.locals.supabase
-			.from('movements')
-			.select('*')
-			.eq('tax_id_number', tax_id_number);
-
-		if (movementsError) {
-			return error(500, 'Error fetching movements, please try again later.');
-		}
-		return movements;
-	}
-
 	const employee = await getEmployee();
 	const employeeFormData = { ...employee, address: employee.address ?? {} };
 
 	return {
 		employee: employee,
-		movements: await getMovements(employee.tax_id_number),
 		updateEmployeeForm: await superValidate(employeeFormData, zod4(updateEmployeeSchema), {
 			id: 'update-employee',
 		}),

@@ -1,38 +1,50 @@
 <script lang="ts">
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
-	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { deleteTicketSchema, type DeleteTicketSchema } from '../schemas';
+	import { deleteTicket } from '../ticket.remote';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
-		data: SuperValidated<Infer<DeleteTicketSchema>>;
+		ticketId: number;
 	}
 
-	let { open = $bindable(false), data }: Props = $props();
+	let { open = $bindable(false), ticketId }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(deleteTicketSchema),
-	});
+	const deleteForm = $derived(deleteTicket.for(ticketId));
 
-	const { form: formData, enhance } = form;
+	let formElement: HTMLFormElement | undefined = $state();
 </script>
 
 <AlertDialog.Root bind:open>
-	<form method="POST" action="/tickets/{$formData.id}?/delete" use:enhance>
-		<input type="hidden" name="id" bind:value={$formData.id} />
+	<form
+		bind:this={formElement}
+		{...deleteForm.enhance(async (f) => {
+			if (await f.submit()) {
+				open = false;
+			}
+		})}
+	>
+		<input hidden {...deleteForm.fields.id.as('number', ticketId)} />
 	</form>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
 			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete this ticket and remove their data
+				This action cannot be undone. This will permanently delete this ticket and remove its data
 				from our servers.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={form.submit}>Continue</AlertDialog.Action>
+			<AlertDialog.Action
+				disabled={!!deleteForm.pending}
+				onclick={() => formElement?.requestSubmit()}
+			>
+				{#if deleteForm.pending}
+					<Spinner />
+				{/if}
+				Continue
+			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

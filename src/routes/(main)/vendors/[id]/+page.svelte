@@ -11,8 +11,14 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { getMovements } from '@/movement/movement.remote.js';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
 
+	let { data } = $props();
+	let { vendor, updateVendorForm, deleteVendorForm } = $derived(data);
+
+	let openForm = $state(page.url.searchParams.get('action') === 'edit');
 	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
 </script>
@@ -138,6 +144,23 @@
 						</Button>
 					{/if}
 				</div>
+			</dl>
+		</div>
+		<div class="col-span-2 flex flex-col gap-y-6">
+			<div class="flex items-start justify-between">
+				<div>
+					<h2 class="text-lg font-semibold">Movements</h2>
+					<p class="text-sm text-muted-foreground">
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+						incididunt ut labore et dolore magna aliqua.
+					</p>
+				</div>
+				{#if getMovements(vendor.tax_id_number).ready}
+					<Button>
+						<PlusCircle class="mr-2 h-4 w-4" />
+						Movement
+					</Button>
+				{/if}
 
 				<svelte:boundary>
 					{@const movements = await getMovements(vendor.tax_id_number)}
@@ -158,6 +181,25 @@
 					{/snippet}
 				</svelte:boundary>
 			</div>
+
+			<svelte:boundary>
+				{@const movements = await getMovements(vendor.tax_id_number)}
+
+				<MovementTable {movements} />
+
+				{#snippet pending()}
+					<div class="flex items-center justify-center px-4 py-6 lg:px-8">
+						<Spinner class="size-6" />
+					</div>
+				{/snippet}
+
+				{#snippet failed(_, reset)}
+					<div class="flex flex-col items-center gap-y-4 px-4 py-6 lg:px-8">
+						<p class="text-sm text-destructive">Failed to load movements.</p>
+						<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+					</div>
+				{/snippet}
+			</svelte:boundary>
 		</div>
 	</div>
 
