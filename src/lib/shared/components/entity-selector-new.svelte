@@ -4,11 +4,9 @@
 	import { Button } from '@/shared/components/ui/button';
 	import * as Command from '@/shared/components/ui/command';
 	import * as Popover from '@/shared/components/ui/popover';
-	import { cn } from '@/shared/utils';
 	import { useId } from 'bits-ui';
 	import { tick, type Snippet } from 'svelte';
 	import CaretSort from 'svelte-radix/CaretSort.svelte';
-	import Check from 'svelte-radix/Check.svelte';
 	import type { EntityOption } from '../types';
 	import type { Id } from '../types';
 
