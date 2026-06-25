@@ -2,6 +2,7 @@ import { command, getRequestEvent, query, requested } from '$app/server';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
 import { ticketStatusValues, type Ticket } from './types';
+import type { IdAndLabel } from '@/shared/types';
 
 export const getTickets = query<Ticket[]>(async () => {
 	const {
@@ -40,4 +41,20 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 	}
 
 	await requested(getTickets, 1).refreshAll();
+});
+
+export const getTicketOptions = query<IdAndLabel[]>(async () => {
+	const {
+		locals: { supabase },
+	} = getRequestEvent();
+
+	const { data: tickets, error: ticketsError } = await supabase
+		.from('tickets')
+		.select('id, label:title');
+
+	if (ticketsError) {
+		error(500, 'Error fetching tickets, please try again later.');
+	}
+
+	return tickets;
 });

@@ -1,86 +1,109 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import * as Popover from '@/shared/components/ui/popover';
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
-	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import { superForm } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { createInterventionSchema, type CreateInterventionSchema } from '../schemas';
+	import { CalendarIcon } from 'lucide-svelte';
+	import { interventionSchema } from '../schemas';
+	import { upsertIntervention } from '../intervention.remote';
 	import {
 		interventionStatusOptions,
 		interventionTypeOptions,
 		type InterventionStatus,
+		type InterventionType,
 	} from '../types';
+	import type { Intervention } from '../types';
+	import { Spinner } from '@/shared/components/ui/spinner';
+	import { getPropertyOptions } from '@/property/property.remote';
+	import { getTicketOptions } from '@/ticket/ticket.remote';
 
 	interface Props {
 		open?: boolean;
-		data: SuperValidated<Infer<CreateInterventionSchema>>;
-		action: string;
+		intervention?: Intervention;
 		defaultStatus?: InterventionStatus;
 	}
 
-	let { open = $bindable(false), data, action, defaultStatus }: Props = $props();
+	let { open = $bindable(false), intervention, defaultStatus }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createInterventionSchema),
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
+	const form = $derived(
+		intervention != null ? upsertIntervention.for(intervention.id) : upsertIntervention
+	);
+	const isEdit = $derived(intervention != null);
 
-	const { form: formData, enhance, submitting } = form;
+	let propertyId = $state<number | undefined>();
+	let ticketId = $state<number | undefined>();
+
+	const status = $derived(intervention?.status ?? defaultStatus);
 
 	$effect(() => {
 		if (open) {
-			// TODO: Fix this with new forms feature
-			$formData.status = defaultStatus ?? 'not_started';
+			propertyId = intervention?.property.id;
+			ticketId = intervention?.ticket?.id ?? undefined;
 		}
 	});
 
-	const df = new DateFormatter('en-US', {
-		dateStyle: 'long',
-	});
+	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
-	let startDate = $derived(
-		$formData.start_date ? parseAbsolute($formData.start_date, getLocalTimeZone()) : undefined
-	);
-
-	let endDate = $derived(
-		$formData.end_date ? parseAbsolute($formData.end_date, getLocalTimeZone()) : undefined
-	);
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
+	}
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content class="overflow-y-auto sm:max-w-3xl">
+	<Sheet.Content class="overflow-y-auto data-[side=right]:sm:max-w-2xl">
 		<Sheet.Header>
-			<Sheet.Title>Add new intervention</Sheet.Title>
-			<Sheet.Description>Fill the form below to add a new intervention.</Sheet.Description>
+			<Sheet.Title>{isEdit ? 'Edit intervention' : 'Add new intervention'}</Sheet.Title>
+			<Sheet.Description>
+				{isEdit
+					? 'Update the intervention details below.'
+					: 'Fill the form below to add a new intervention.'}
+			</Sheet.Description>
 		</Sheet.Header>
-		<Separator class="my-5" />
-		<form method="POST" use:enhance {action} class="px-4">
-			<div class="mb-5 space-y-3">
-				<h3 class="text-lg font-medium">Information</h3>
-				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="type">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Type</Form.Label>
-								<Select.Root {...props} type="single" bind:value={$formData.type}>
-									<Select.Trigger {...props}>
-										{$formData.type ? interventionTypeOptions[$formData.type] : 'Select'}
+		<Separator />
+		<form
+			{...form.preflight(interventionSchema).enhance(async (f) => {
+				try {
+					if (await f.submit()) {
+						open = false;
+						if (!isEdit) f.form.reset();
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			})}
+			class="flex flex-col gap-8 px-4"
+		>
+			{#if intervention?.id != null}
+				<input hidden {...form.fields.id.as('number', intervention.id)} />
+			{/if}
+
+			<Field.FieldSet>
+				<Field.FieldLegend>Information</Field.FieldLegend>
+				<Field.FieldGroup>
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.type.issues())}>
+							<Field.FieldLabel>Type</Field.FieldLabel>
+							<Field.FieldContent>
+								<Select.Root
+									type="single"
+									value={form.fields.type.value() ?? intervention?.type}
+									onValueChange={(v) => {
+										if (v) form.fields.type.set(v as InterventionType);
+									}}
+								>
+									<Select.Trigger>
+										{form.fields.type.value()
+											? interventionTypeOptions[form.fields.type.value()!]
+											: intervention?.type
+												? interventionTypeOptions[intervention.type]
+												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(interventionTypeOptions) as [value, label] (value)}
@@ -88,18 +111,32 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input hidden bind:value={$formData.type} name={props.name} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="status">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Status</Form.Label>
-								<Select.Root {...props} type="single" bind:value={$formData.status}>
-									<Select.Trigger {...props}>
-										{$formData.status ? interventionStatusOptions[$formData.status] : 'Select'}
+								<input
+									hidden
+									{...intervention != null
+										? form.fields.type.as('text', intervention.type)
+										: form.fields.type.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.type.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.status.issues())}>
+							<Field.FieldLabel>Status</Field.FieldLabel>
+							<Field.FieldContent>
+								<Select.Root
+									type="single"
+									value={form.fields.status.value() ?? status}
+									onValueChange={(v) => {
+										if (v) form.fields.status.set(v as InterventionStatus);
+									}}
+								>
+									<Select.Trigger>
+										{form.fields.status.value()
+											? interventionStatusOptions[form.fields.status.value()!]
+											: status
+												? interventionStatusOptions[status!]
+												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(interventionStatusOptions) as [value, label] (value)}
@@ -107,114 +144,192 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input hidden bind:value={$formData.status} name={props.name} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="start_date">
-						<Form.Control id="start_date">
-							{#snippet children({ props })}
-								<Form.Label for="start_date">Start Date</Form.Label>
+								<input
+									hidden
+									{...intervention != null
+										? form.fields.status.as('text', intervention.status)
+										: defaultStatus != null
+											? form.fields.status.as('text', defaultStatus)
+											: form.fields.status.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.status.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.start_date.issues())}>
+							<Field.FieldLabel for="start_date">Start Date</Field.FieldLabel>
+							<Field.FieldContent>
 								<Popover.Root>
 									<Popover.Trigger
-										{...props}
+										id="start_date"
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!startDate && 'text-muted-foreground'
+											!form.fields.start_date.value() &&
+												!intervention?.start_date &&
+												'text-muted-foreground'
 										)}
 									>
-										{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
+										{form.fields.start_date.value()
+											? df.format(
+													parseAbsolute(
+														form.fields.start_date.value()!,
+														getLocalTimeZone()
+													).toDate()
+												)
+											: intervention?.start_date
+												? df.format(
+														parseAbsolute(intervention.start_date, getLocalTimeZone()).toDate()
+													)
+												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={startDate}
+											value={form.fields.start_date.value()
+												? parseAbsolute(form.fields.start_date.value()!, getLocalTimeZone())
+												: intervention?.start_date
+													? parseAbsolute(intervention.start_date, getLocalTimeZone())
+													: undefined}
 											onValueChange={(v) => {
-												if (v) {
-													$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
-												}
+												form.fields.start_date.set(v?.toDate(getLocalTimeZone()).toISOString());
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<Form.FieldErrors />
-								<input hidden value={$formData.start_date} name={props.name} />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="end_date">
-						<Form.Control id="end_date">
-							{#snippet children({ props })}
-								<Form.Label for="end_date">End Date</Form.Label>
+								<input
+									hidden
+									{...intervention?.start_date != null
+										? form.fields.start_date.as('text', intervention.start_date)
+										: form.fields.start_date.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.start_date.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+
+						<Field.Field data-invalid={isInvalid(form.fields.end_date.issues())}>
+							<Field.FieldLabel for="end_date">End Date</Field.FieldLabel>
+							<Field.FieldContent>
 								<Popover.Root>
 									<Popover.Trigger
-										{...props}
+										id="end_date"
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!endDate && 'text-muted-foreground'
+											!form.fields.end_date.value() &&
+												!intervention?.end_date &&
+												'text-muted-foreground'
 										)}
 									>
-										{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
+										{form.fields.end_date.value()
+											? df.format(
+													parseAbsolute(form.fields.end_date.value()!, getLocalTimeZone()).toDate()
+												)
+											: intervention?.end_date
+												? df.format(
+														parseAbsolute(intervention.end_date, getLocalTimeZone()).toDate()
+													)
+												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={endDate}
+											value={form.fields.end_date.value()
+												? parseAbsolute(form.fields.end_date.value()!, getLocalTimeZone())
+												: intervention?.end_date
+													? parseAbsolute(intervention.end_date, getLocalTimeZone())
+													: undefined}
 											onValueChange={(v) => {
-												if (v) {
-													$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
-												}
+												form.fields.end_date.set(v?.toDate(getLocalTimeZone()).toISOString());
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<Form.FieldErrors />
-								<input hidden value={$formData.end_date} name={props.name} />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				</div>
-				<Form.Field {form} name="description">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Description</Form.Label>
-							<Textarea {...props} bind:value={$formData.description} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="property_id">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Property</Form.Label>
-							<EntitySelector
-								bind:value={$formData.property_id}
-								options={page.data.propertyOptions}
+								<input
+									hidden
+									{...intervention?.end_date != null
+										? form.fields.end_date.as('text', intervention.end_date)
+										: form.fields.end_date.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.end_date.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+
+					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
+						<Field.FieldLabel>Description</Field.FieldLabel>
+						<Field.FieldContent>
+							<Textarea
+								{...intervention?.description != null
+									? form.fields.description.as('text', intervention.description)
+									: form.fields.description.as('text')}
 							/>
-							<input hidden bind:value={$formData.property_id} name={props.name} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="ticket_id">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Ticket</Form.Label>
-							<EntitySelector bind:value={$formData.ticket_id} options={page.data.ticketOptions} />
-							<input hidden bind:value={$formData.ticket_id} name={props.name} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-			</div>
-			<div class="flex flex-row items-center justify-end gap-4">
+							<Field.FieldError errors={form.fields.description.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<Field.Field data-invalid={isInvalid(form.fields.property_id.issues())}>
+						<Field.FieldLabel>Property</Field.FieldLabel>
+						<Field.FieldContent>
+							<svelte:boundary>
+								{@const options = await getPropertyOptions()}
+								<EntitySelector bind:value={propertyId} {options} />
+
+								{#snippet pending()}
+									<div class="flex items-center justify-center">
+										<Spinner class="size-6" />
+									</div>
+								{/snippet}
+
+								{#snippet failed(_, reset)}
+									<div class="flex flex-col items-center gap-y-4">
+										<p class="text-sm text-destructive">Failed to load properties.</p>
+										<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+									</div>
+								{/snippet}
+							</svelte:boundary>
+							{#if propertyId != null}
+								<input hidden {...form.fields.property_id.as('number', propertyId)} />
+							{/if}
+							<Field.FieldError errors={form.fields.property_id.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<Field.Field data-invalid={isInvalid(form.fields.ticket_id.issues())}>
+						<Field.FieldLabel>Ticket</Field.FieldLabel>
+						<Field.FieldContent>
+							<svelte:boundary>
+								{@const options = await getTicketOptions()}
+								<EntitySelector bind:value={ticketId} {options} />
+
+								{#snippet pending()}
+									<div class="flex items-center justify-center">
+										<Spinner class="size-6" />
+									</div>
+								{/snippet}
+
+								{#snippet failed(_, reset)}
+									<div class="flex flex-col items-center gap-y-4">
+										<p class="text-sm text-destructive">Failed to load tickets.</p>
+										<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+									</div>
+								{/snippet}
+							</svelte:boundary>
+
+							{#if ticketId != null}
+								<input hidden {...form.fields.ticket_id.as('number', ticketId)} />
+							{/if}
+							<Field.FieldError errors={form.fields.ticket_id.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+				</Field.FieldGroup>
+			</Field.FieldSet>
+
+			<Sheet.Footer class="flex flex-row items-center justify-end gap-4 px-0 pt-0">
 				<Button
 					variant="ghost"
 					onclick={(e) => {
@@ -224,13 +339,13 @@
 				>
 					Cancel
 				</Button>
-				<Form.Button disabled={$submitting}>
-					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				<Button type="submit" disabled={!!form.pending}>
+					{#if form.pending}
+						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
-			</div>
+				</Button>
+			</Sheet.Footer>
 		</form>
 	</Sheet.Content>
 </Sheet.Root>
