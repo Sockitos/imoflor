@@ -9,6 +9,7 @@ import {
 	propertySchema,
 } from './schemas';
 import type { Fraction, Property } from './types';
+import type { IdAndLabel } from '@/shared/types';
 
 export const getProperties = query<Property[]>(async () => {
 	const {
