@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import EntitySelector from '@/shared/components/entity-selector.svelte';
-	import EntitySelector2 from '@/shared/components/entity-selector-new.svelte';
+	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Field from '@/shared/components/ui/field';
@@ -24,6 +23,8 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getPropertyOptions } from '@/property/property.remote';
 	import { getTicketOptions } from '@/ticket/ticket.remote';
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
+	import TicketOptionItem from '@/ticket/components/ticket-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -278,7 +279,19 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getPropertyOptions()}
-								<EntitySelector bind:value={propertyId} {options} />
+								{@const spreadOptions = options.flatMap((option) => [
+									option,
+									...(option.children ?? []),
+								])}
+
+								<EntitySelectorNew bind:entityId={propertyId} options={spreadOptions}>
+									{#snippet displayOption(option)}
+										<PropertyOptionItem {option} />
+									{/snippet}
+									{#snippet children(option)}
+										<PropertyOptionItem {option} indent={!option.children} />
+									{/snippet}
+								</EntitySelectorNew>
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">
@@ -305,7 +318,14 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getTicketOptions()}
-								<EntitySelector bind:value={ticketId} {options} />
+								<EntitySelectorNew bind:entityId={ticketId} {options}>
+									{#snippet displayOption(option)}
+										<TicketOptionItem {option} />
+									{/snippet}
+									{#snippet children(option)}
+										<TicketOptionItem {option} />
+									{/snippet}
+								</EntitySelectorNew>
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">

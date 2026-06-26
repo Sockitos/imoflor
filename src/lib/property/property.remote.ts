@@ -8,8 +8,7 @@ import {
 	fractionSchema,
 	propertySchema,
 } from './schemas';
-import type { Fraction, Property } from './types';
-import type { IdAndLabel } from '@/shared/types';
+import type { Fraction, Property, PropertyOption } from './types';
 
 export const getProperties = query<Property[]>(async () => {
 	const {
