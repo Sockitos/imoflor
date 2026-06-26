@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import EntitySelector from '@/shared/components/entity-selector.svelte';
+	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Field from '@/shared/components/ui/field';
@@ -23,6 +23,7 @@
 	import type { Ticket } from '../types';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getPropertyOptions } from '@/property/property.remote';
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -225,8 +226,19 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getPropertyOptions()}
+								{@const spreadOptions = options.flatMap((option) => [
+									option,
+									...(option.children ?? []),
+								])}
 
-								<EntitySelector bind:value={propertyId} {options} />
+								<EntitySelectorNew bind:entityId={propertyId} options={spreadOptions}>
+									{#snippet displayOption(option)}
+										<PropertyOptionItem {option} />
+									{/snippet}
+									{#snippet children(option)}
+										<PropertyOptionItem {option} indent={!option.children} />
+									{/snippet}
+								</EntitySelectorNew>
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">

@@ -27,3 +27,8 @@ export type Ticket = {
 	property: IdAndLabel;
 	rank: string;
 };
+
+export type TicketOption = {
+	id: Id;
+	title: string;
+};
