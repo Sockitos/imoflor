@@ -45,7 +45,7 @@
 					</Field.FieldContent>
 				</Field.Field>
 
-				<Button type="submit" class="mt-1" disabled={!!signIn.pending}>
+				<Button type="submit" class="mt-5" disabled={!!signIn.pending}>
 					{#if signIn.pending}
 						<Spinner />
 					{/if}
