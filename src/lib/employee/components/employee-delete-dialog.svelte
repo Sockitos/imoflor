@@ -1,26 +1,29 @@
 <script lang="ts">
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
-	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { deleteEmployeeSchema, type DeleteEmployeeSchema } from '../schemas';
+	import { deleteEmployee } from '../employee.remote';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
-		data: SuperValidated<Infer<DeleteEmployeeSchema>>;
+		employeeId: number;
 	}
 
-	let { open = $bindable(false), data }: Props = $props();
+	let { open = $bindable(false), employeeId }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(deleteEmployeeSchema),
-	});
-
-	const { form: formData, enhance } = form;
+	const deleteForm = $derived(deleteEmployee.for(employeeId));
+	let formElement: HTMLFormElement | undefined = $state();
 </script>
 
 <AlertDialog.Root bind:open>
-	<form method="POST" action="/employees/{$formData.id}?/delete" use:enhance>
-		<input type="hidden" name="id" bind:value={$formData.id} />
+	<form
+		bind:this={formElement}
+		{...deleteForm.enhance(async (f) => {
+			if (await f.submit()) {
+				open = false;
+			}
+		})}
+	>
+		<input hidden {...deleteForm.fields.id.as('number', employeeId)} />
 	</form>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
@@ -32,7 +35,15 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={form.submit}>Continue</AlertDialog.Action>
+			<AlertDialog.Action
+				disabled={!!deleteForm.pending}
+				onclick={() => formElement?.requestSubmit()}
+			>
+				{#if deleteForm.pending}
+					<Spinner />
+				{/if}
+				Continue
+			</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

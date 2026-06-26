@@ -10,34 +10,28 @@ import { salaryTypeValues } from './types';
 
 export const salaryTypeSchema = z.enum(salaryTypeValues);
 
-const employeeSchema = z.object({
+export const employeeSchema = z.object({
+	id: idSchema.optional(),
 	name: z.string().min(1, 'Name is required'),
 	gender: genderSchema,
 	marital_status: maritalStatusSchema,
 	nationality: z.string().min(1, 'Nationality is required'),
-	birth_date: z.string().nullish(),
+	birth_date: z.string().optional(),
 	id_type: z.string().min(1, 'ID Type is required'),
-	id_expiration_date: z.string().nullish(),
+	id_expiration_date: z.string().optional(),
 	id_number: z.string().min(1, 'ID Number is required'),
 	tax_id_number: z.string().min(1, 'Tax ID Number is required'),
 	ss_number: z.string().min(1, 'SS Number is required'),
 	address: addressSchema,
-	email: z.string().nullish(),
-	phone: z.string().nullish(),
-	mobile: z.string().nullish(),
+	email: z.string().optional(),
+	phone: z.string().optional(),
+	mobile: z.string().optional(),
 	position: z.string().min(1, 'Position is required'),
 	salary_type: salaryTypeSchema,
-	salary: z.coerce.number(),
-});
-
-export const createEmployeeSchema = employeeSchema;
-
-export const updateEmployeeSchema = employeeSchema.extend({
-	id: idSchema,
+	salary: z.number(),
 });
 
 export const deleteEmployeeSchema = deleteByIdSchema;
 
-export type CreateEmployeeSchema = typeof createEmployeeSchema;
-export type UpdateEmployeeSchema = typeof updateEmployeeSchema;
+export type EmployeeSchema = typeof employeeSchema;
 export type DeleteEmployeeSchema = typeof deleteEmployeeSchema;
