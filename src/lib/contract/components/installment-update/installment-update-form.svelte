@@ -127,47 +127,51 @@
 			</div>
 		</form>
 		<Separator class="my-5" />
-		<h3 class="mb-4 text-lg font-medium">Update History</h3>
+		<div class="px-4">
+			<h3 class="mb-4 text-lg font-medium">Update History</h3>
 
-		<svelte:boundary>
-			{@const updates = await getInstallmentUpdates(contractId)}
+			<svelte:boundary>
+				{@const updates = await getInstallmentUpdates(contractId)}
 
-			{#each updates as update (update.id)}
-				<div class="flex h-24 flex-row items-stretch gap-4">
-					<div class="flex w-2 flex-col items-center border-primary">
-						<div class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></div>
-						<Separator orientation="vertical" class="flex-1" />
-					</div>
-					<div>
-						<div class="flex items-center">
-							<CalendarIcon class="mr-2 h-4 w-4 text-muted-foreground" />
-							<span class="text-sm text-muted-foreground">{dateFormatter(update.update_date)}</span>
+				{#each updates as update (update.id)}
+					<div class="flex h-24 flex-row items-stretch gap-4">
+						<div class="flex w-2 flex-col items-center border-primary">
+							<div class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></div>
+							<Separator orientation="vertical" class="flex-1" />
 						</div>
-						<span class="text-sm font-medium">Installment:</span>
-						<span class="text-sm text-muted-foreground">
-							{currencyFormatter.format(update.installment)}
-						</span>
-						<br />
-						<span class="text-sm font-medium">Interest:</span>
-						<span class="text-sm text-muted-foreground">
-							{currencyFormatter.format(update.interest)}
-						</span>
+						<div>
+							<div class="flex items-center">
+								<CalendarIcon class="mr-2 h-4 w-4 text-muted-foreground" />
+								<span class="text-sm text-muted-foreground"
+									>{dateFormatter(update.update_date)}</span
+								>
+							</div>
+							<span class="text-sm font-medium">Installment:</span>
+							<span class="text-sm text-muted-foreground">
+								{currencyFormatter.format(update.installment)}
+							</span>
+							<br />
+							<span class="text-sm font-medium">Interest:</span>
+							<span class="text-sm text-muted-foreground">
+								{currencyFormatter.format(update.interest)}
+							</span>
+						</div>
 					</div>
-				</div>
-			{/each}
+				{/each}
 
-			{#snippet pending()}
-				<div class="flex items-center justify-center px-4 py-6 lg:px-8">
-					<Spinner class="size-6" />
-				</div>
-			{/snippet}
+				{#snippet pending()}
+					<div class="flex items-center justify-center px-4 py-6 lg:px-8">
+						<Spinner class="size-6" />
+					</div>
+				{/snippet}
 
-			{#snippet failed(_, reset)}
-				<div class="flex flex-col items-center gap-y-4 px-4 py-6 lg:px-8">
-					<p class="text-sm text-destructive">Failed to load installment updates.</p>
-					<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
-				</div>
-			{/snippet}
-		</svelte:boundary>
+				{#snippet failed(_, reset)}
+					<div class="flex flex-col items-center gap-y-4 px-4 py-6 lg:px-8">
+						<p class="text-sm text-destructive">Failed to load installment updates.</p>
+						<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+					</div>
+				{/snippet}
+			</svelte:boundary>
+		</div>
 	</Sheet.Content>
 </Sheet.Root>

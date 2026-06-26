@@ -301,8 +301,8 @@ export const createRentPayment = form(
 );
 
 export const createInstallmentPayment = form(
-	createInstallmentPaymentSchema.omit({ value: true }),
-	async ({ contract_id, date, amortization, interest, description }) => {
+	createInstallmentPaymentSchema,
+	async ({ contract_id, date, value, amortization, interest, description }) => {
 		const {
 			locals: { supabase },
 			cookies,

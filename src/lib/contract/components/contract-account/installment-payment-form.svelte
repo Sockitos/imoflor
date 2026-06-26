@@ -26,11 +26,9 @@
 	const form = $derived(createInstallmentPayment.for(contractId));
 
 	let paymentDateStr = $state<string | undefined>(new Date().toISOString());
-	let paymentValue = $state(contract.data.installment);
-
-	const initialInterest = $derived(calculateInterest(contract, paymentDateStr));
-	let interest = $state(initialInterest);
-	let amortization = $state(paymentValue - initialInterest);
+	let paymentValue = $derived(contract.data.installment);
+	let interest = $derived(calculateInterest(contract, paymentDateStr));
+	let amortization = $derived(paymentValue - calculateInterest(contract, paymentDateStr));
 
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 	const paymentDate = $derived(
@@ -71,9 +69,7 @@
 					<Field.FieldLabel>Value</Field.FieldLabel>
 					<Field.FieldContent>
 						<Input
-							type="number"
-							step="any"
-							name="value"
+							{...form.fields.value.as('number')}
 							bind:value={paymentValue}
 							oninput={recalculate}
 						/>
@@ -85,11 +81,9 @@
 					<Field.FieldLabel>Interest</Field.FieldLabel>
 					<Field.FieldContent>
 						<Input
-							type="number"
-							step="any"
-							name="interest"
+							{...form.fields.interest.as('number')}
 							bind:value={interest}
-							oninput={recalculate}
+							oninput={() => (amortization = paymentValue - interest)}
 						/>
 						<Field.FieldError errors={form.fields.interest.issues()} />
 					</Field.FieldContent>
@@ -98,7 +92,7 @@
 				<Field.Field data-invalid={isInvalid(form.fields.amortization.issues())}>
 					<Field.FieldLabel>Amortization</Field.FieldLabel>
 					<Field.FieldContent>
-						<Input type="number" step="any" name="amortization" bind:value={amortization} />
+						<Input {...form.fields.amortization.as('number')} bind:value={amortization} />
 						<Field.FieldError errors={form.fields.amortization.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
