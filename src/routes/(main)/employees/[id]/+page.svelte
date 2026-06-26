@@ -3,14 +3,12 @@
 	import { getEmployee } from '@/employee/employee.remote';
 	import EmployeeDeleteDialog from '@/employee/components/employee-delete-dialog.svelte';
 	import EmployeeForm from '@/employee/components/employee-form.svelte';
-	import { getMovements } from '@/movement/movement.remote';
 	import MovementTable from '@/movement/components/movement-table.svelte';
 	import PageSubtitle from '@/shared/components/page-subtitle.svelte';
 	import PageTitle from '@/shared/components/page-title.svelte';
 	import { Button } from '@/shared/components/ui/button';
 	import * as Card from '@/shared/components/ui/card';
 	import { Separator } from '@/shared/components/ui/separator';
-	import { Spinner } from '@/shared/components/ui/spinner';
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { salaryTypeOptions } from '@/employee/types';
