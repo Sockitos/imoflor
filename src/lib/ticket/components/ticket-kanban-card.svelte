@@ -21,6 +21,7 @@
 		</div>
 		<a
 			href={resolve(`/tickets/${ticket.id}`)}
+			draggable="false"
 			class="w-fit cursor-pointer text-left text-sm font-medium hover:underline"
 		>
 			{ticket.title}
