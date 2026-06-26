@@ -14,9 +14,6 @@
 	import { generateRankBetween } from '@/shared/utils';
 	import { toast } from 'svelte-sonner';
 
-	let { data } = $props();
-	let { createTicketForm } = $derived(data);
-
 	let openForm = $state(false);
 	let defaultStatus = $state<TicketStatus | undefined>(undefined);
 
@@ -93,4 +90,4 @@
 	{/if}
 </div>
 
-<TicketForm data={createTicketForm} action="?/create" bind:open={openForm} {defaultStatus} />
+<TicketForm bind:open={openForm} {defaultStatus} />

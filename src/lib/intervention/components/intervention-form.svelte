@@ -24,7 +24,6 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getPropertyOptions } from '@/property/property.remote';
 	import { getTicketOptions } from '@/ticket/ticket.remote';
-	import PropertyItem from '@/property/components/property-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -279,19 +278,7 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getPropertyOptions()}
-								{@const spreadOptions = options.flatMap((option) => [
-									option,
-									...(option.children ?? []),
-								])}
-
-								<EntitySelector2 bind:entityId={propertyId} options={spreadOptions}>
-									{#snippet displayOption(option)}
-										<PropertyItem {option} />
-									{/snippet}
-									{#snippet children(option)}
-										<PropertyItem {option} indent={!option.children} />
-									{/snippet}
-								</EntitySelector2>
+								<EntitySelector bind:value={propertyId} {options} />
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">
