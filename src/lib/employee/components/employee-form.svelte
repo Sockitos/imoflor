@@ -10,7 +10,7 @@
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { DateFormatter, getLocalTimeZone, parseAbsolute, today } from '@internationalized/date';
 	import { CalendarIcon, Loader2 } from 'lucide-svelte';
 	import { employeeSchema } from '../schemas';
 	import { upsertEmployee } from '../employee.remote';
@@ -253,6 +253,8 @@
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
+											captionLayout="dropdown"
+											maxValue={today(getLocalTimeZone()).subtract({ years: 18 })}
 											value={form.fields.birth_date.value()
 												? parseAbsolute(form.fields.birth_date.value()!, getLocalTimeZone())
 												: employee?.birth_date
@@ -319,6 +321,7 @@
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
+											captionLayout="dropdown"
 											value={employee?.id_expiration_date
 												? parseAbsolute(employee.id_expiration_date, getLocalTimeZone())
 												: form.fields.id_expiration_date.value()

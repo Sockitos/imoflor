@@ -30,6 +30,7 @@ CREATE TABLE public.employees(
   salary_type public.salary_type NOT NULL,
   salary double precision NOT NULL,
   CONSTRAINT pk_employees PRIMARY KEY (id),
-  CONSTRAINT fk_employees_address_id FOREIGN KEY (address_id) REFERENCES public.addresses(id)
+  CONSTRAINT fk_employees_address_id FOREIGN KEY (address_id) REFERENCES public.addresses(id),
+  CONSTRAINT chk_employees_birth_date_at_least_18_years_old CHECK (birth_date IS NULL OR (birth_date IS NOT NULL AND extract(YEAR FROM age(birth_date)) >= 18))
 );
 
