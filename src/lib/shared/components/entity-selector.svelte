@@ -55,13 +55,12 @@
 		{/snippet}
 	</Popover.Trigger>
 	<Popover.Content class="w-full p-0 md:w-[300px] lg:w-[400px]">
-		<Command.Root>
+		<Command.Root class="gap-2">
 			<Command.Input placeholder="Search options..." />
 			<Command.List>
 				<Command.Empty>No options found.</Command.Empty>
 				{#each options as option (option.id)}
 					<Command.Item
-						value={option.id.toString()}
 						class="aria-selected:bg-primary aria-selected:text-primary-foreground"
 						data-checked={entityId === option.id}
 						onSelect={() => {
