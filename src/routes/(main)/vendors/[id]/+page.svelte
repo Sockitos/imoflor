@@ -10,7 +10,7 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { Pencil, CirclePlus, Trash } from 'lucide-svelte';
 	import { getMovements } from '@/movement/movement.remote';
 
 	let openForm = $state(false);
@@ -133,7 +133,7 @@
 					</div>
 					{#if getMovements(vendor.tax_id_number).ready}
 						<Button>
-							<PlusCircle class="mr-2 h-4 w-4" />
+							<CirclePlus class="mr-2 h-4 w-4" />
 							Movement
 						</Button>
 					{/if}

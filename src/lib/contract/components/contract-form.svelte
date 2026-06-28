@@ -11,11 +11,12 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { cn } from '@/shared/utils';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
+	import { CalendarIcon } from 'lucide-svelte';
 	import type { Infer, SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { createContractSchema, type CreateContractSchema } from '../schemas';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -233,7 +234,7 @@
 				</Button>
 				<Form.Button disabled={$submitting}>
 					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Form.Button>

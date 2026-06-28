@@ -11,10 +11,11 @@
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
+	import { CalendarIcon } from 'lucide-svelte';
 	import { tenantSchema } from '../schemas';
 	import { upsertTenant } from '../tenant.remote';
 	import type { Tenant } from '../types';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -435,7 +436,7 @@
 				</Button>
 				<Button type="submit" disabled={!!form.pending}>
 					{#if form.pending}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Button>

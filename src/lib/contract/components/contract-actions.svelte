@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { Button } from '@/shared/components/ui/button';
 	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
-	import { MoreHorizontal } from 'lucide-svelte';
+	import { Ellipsis } from 'lucide-svelte';
 	import type { Contract } from '../types';
 	import ContractDeleteDialog from './contract-delete-dialog.svelte';
 
@@ -20,7 +20,7 @@
 	<DropdownMenu.Trigger>
 		{#snippet child({ props })}
 			<Button variant="ghost" size="icon" {...props}>
-				<MoreHorizontal class="h-4 w-4" />
+				<Ellipsis class="h-4 w-4" />
 				<span class="sr-only">Open menu</span>
 			</Button>
 		{/snippet}

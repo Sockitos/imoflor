@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { currencyFormatter } from '@/shared/formatters';
-	import { AlertTriangle } from 'lucide-svelte';
+	import { TriangleAlert } from 'lucide-svelte';
 
 	interface Props {
 		balance: number;
@@ -14,6 +14,6 @@
 <div class="flex flex-row items-center">
 	{formatted}
 	{#if balance < 0}
-		<AlertTriangle class="ml-2 h-4 w-4 text-destructive"></AlertTriangle>
+		<TriangleAlert class="ml-2 h-4 w-4 text-destructive" />
 	{/if}
 </div>
