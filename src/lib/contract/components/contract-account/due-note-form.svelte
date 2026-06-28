@@ -7,10 +7,11 @@
 	import * as Popover from '@/shared/components/ui/popover';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
+	import { CalendarIcon } from 'lucide-svelte';
 	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 	import { createDueNoteSchema, type CreateDueNoteSchema } from '../../schemas';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -105,7 +106,7 @@
 				</Button>
 				<Form.Button disabled={$submitting}>
 					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Form.Button>

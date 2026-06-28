@@ -3,7 +3,7 @@
 	import * as Card from '@/shared/components/ui/card';
 	import * as Form from '@/shared/components/ui/form';
 	import { Input } from '@/shared/components/ui/input';
-	import { Loader2 } from 'lucide-svelte';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client } from 'sveltekit-superforms/adapters';
 
@@ -44,7 +44,7 @@
 				</Form.Field>
 				<Form.Button class="mt-5" disabled={$submitting}>
 					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Form.Button>

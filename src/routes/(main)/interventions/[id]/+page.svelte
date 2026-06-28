@@ -12,7 +12,7 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { dateFormatter } from '@/shared/formatters';
-	import { Link, Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { Link, Pencil, CirclePlus, Trash } from 'lucide-svelte';
 
 	let openForm = $state(false);
 	let openDeleteDialog = $state(false);
@@ -105,7 +105,7 @@
 						</p>
 					</div>
 					<Button>
-						<PlusCircle class="mr-2 h-4 w-4" />
+						<CirclePlus class="mr-2 h-4 w-4" />
 						Expense
 					</Button>
 				</div>
