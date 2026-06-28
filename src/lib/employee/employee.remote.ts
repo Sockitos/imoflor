@@ -73,6 +73,13 @@ export const upsertEmployee = form(employeeSchema, async (data) => {
 		addressId = insertedAddress.id;
 	}
 
+	if (employeeData.birth_date?.length == 0) {
+		employeeData.birth_date = undefined;
+	}
+	if (employeeData.id_expiration_date?.length == 0) {
+		employeeData.id_expiration_date = undefined;
+	}
+
 	if (employeeData.id) {
 		const { id, ...fields } = employeeData;
 
