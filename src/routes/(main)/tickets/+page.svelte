@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
+<div class="flex min-h-0 flex-1 flex-col gap-y-6 px-4 py-6 lg:px-8">
 	<div class="flex flex-row items-start justify-between">
 		<div>
 			<PageTitle>
