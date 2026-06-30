@@ -4,8 +4,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { tenantSchema } from './schemas';
-import type { Tenant } from './types';
-import type { IdAndLabel } from '@/shared/types';
+import type { Tenant, TenantOption } from './types';
 
 export const getTenants = query<Tenant[]>(async () => {
 	const {
@@ -123,14 +122,12 @@ export const deleteTenant = form(deleteByIdSchema, async ({ id }) => {
 	return redirect(302, '/tenants');
 });
 
-export const getTenantOptions = query<IdAndLabel[]>(async () => {
+export const getTenantOptions = query<TenantOption[]>(async () => {
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
 
-	const { data: tenants, error: tenantsError } = await supabase
-		.from('tenants')
-		.select('id, label:name');
+	const { data: tenants, error: tenantsError } = await supabase.from('tenants').select('id, name');
 
 	if (tenantsError) {
 		error(500, 'Error fetching tenants, please try again later.');

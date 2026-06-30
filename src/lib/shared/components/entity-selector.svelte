@@ -1,24 +1,25 @@
-<script lang="ts">
+<script lang="ts" generics="TEntity extends EntityOption">
 	import { Button } from '@/shared/components/ui/button';
 	import * as Command from '@/shared/components/ui/command';
 	import * as Popover from '@/shared/components/ui/popover';
-	import type { IdAndLabel } from '@/shared/types';
-	import { cn } from '@/shared/utils';
 	import { useId } from 'bits-ui';
-	import { tick } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import CaretSort from 'svelte-radix/CaretSort.svelte';
-	import Check from 'svelte-radix/Check.svelte';
+	import type { EntityOption } from '../types';
+	import type { Id } from '../types';
 
 	interface Props {
-		options: IdAndLabel[];
-		value: number | undefined | null;
+		entityId?: Id;
+		options: TEntity[];
+		displayOption: Snippet<[TEntity]>;
+		children: Snippet<[TEntity]>;
 	}
 
-	let { options, value = $bindable() }: Props = $props();
+	let { entityId = $bindable(), options, displayOption, children }: Props = $props();
 
 	let open = $state(false);
 
-	let selectedValue = $derived(options.find((p) => p.id === value)?.label ?? 'Select...');
+	let selectedValue = $derived(options.find((p) => p.id === entityId));
 
 	let triggerId = useId();
 
@@ -44,12 +45,16 @@
 				aria-expanded={open}
 				class="w-full justify-between px-3 font-normal"
 			>
-				{selectedValue}
+				{#if selectedValue != null}
+					{@render displayOption(selectedValue)}
+				{:else}
+					Select...
+				{/if}
 				<CaretSort class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 			</Button>
 		{/snippet}
 	</Popover.Trigger>
-	<Popover.Content class="w-full p-0 md:w-[200px] lg:w-[300px]">
+	<Popover.Content class="w-full p-0 md:w-[300px] lg:w-[400px]">
 		<Command.Root>
 			<Command.Input placeholder="Search options..." />
 			<Command.List>
@@ -58,15 +63,13 @@
 					<Command.Item
 						value={option.id.toString()}
 						class="aria-selected:bg-primary aria-selected:text-primary-foreground"
+						data-checked={entityId === option.id}
 						onSelect={() => {
-							value = option.id;
+							entityId = option.id;
 							closeAndFocusTrigger(triggerId);
 						}}
 					>
-						{option.label}
-						<Check
-							class={cn('ml-auto h-4 w-4', value === option.id ? 'opacity-100' : 'opacity-0')}
-						/>
+						{@render children(option)}
 					</Command.Item>
 				{/each}
 			</Command.List>
