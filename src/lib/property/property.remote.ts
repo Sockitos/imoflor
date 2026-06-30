@@ -8,8 +8,7 @@ import {
 	fractionSchema,
 	propertySchema,
 } from './schemas';
-import type { Fraction, Property } from './types';
-import type { IdAndLabel } from '@/shared/types';
+import type { Fraction, Property, PropertyOption } from './types';
 
 export const getProperties = query<Property[]>(async () => {
 	const {
@@ -241,18 +240,21 @@ export const deleteFraction = form(deleteFractionSchema, async ({ id, parent_id 
 	return redirect(302, `/properties/${parent_id}`);
 });
 
-export const getPropertyOptions = query<IdAndLabel[]>(async () => {
+export const getPropertyOptions = query<PropertyOption[]>(async () => {
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
 
 	const { data: properties, error: propertiesError } = await supabase
 		.from('properties')
-		.select('id, ...addresses(label:address)');
+		.select(
+			'id, matrix, type, ...addresses(address), children:properties!parent_id(id, matrix, type, ...addresses(address))'
+		)
+		.is('parent_id', null);
 
 	if (propertiesError) {
 		error(500, 'Error fetching properties, please try again later.');
 	}
 
-	return properties;
+	return properties as unknown as PropertyOption[];
 });
