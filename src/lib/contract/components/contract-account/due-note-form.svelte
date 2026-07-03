@@ -2,43 +2,32 @@
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Dialog from '@/shared/components/ui/dialog';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { createDueNoteSchema, type CreateDueNoteSchema } from '../../schemas';
+	import { createDueNoteSchema } from '../../schemas';
+	import { createDueNote } from '../../contract.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
-		data: SuperValidated<Infer<CreateDueNoteSchema>>;
+		contractId: number;
 	}
 
-	let { open = $bindable(false), data }: Props = $props();
+	let { open = $bindable(false), contractId }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createDueNoteSchema),
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
+	const form = $derived(createDueNote.for(contractId));
 
-	const { form: formData, enhance, submitting } = form;
+	let dueDateStr = $state<string | undefined>(new Date().toISOString());
+	const df = new DateFormatter('en-US', { dateStyle: 'long' });
+	const dueDate = $derived(dueDateStr ? parseAbsolute(dueDateStr, getLocalTimeZone()) : undefined);
 
-	const df = new DateFormatter('en-US', {
-		dateStyle: 'long',
-	});
-
-	let dueDate = $derived(
-		$formData.due_date ? parseAbsolute($formData.due_date, getLocalTimeZone()) : undefined
-	);
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
+	}
 </script>
 
 <Dialog.Root bind:open>
@@ -47,52 +36,61 @@
 			<Dialog.Title>Add Due Note</Dialog.Title>
 			<Dialog.Description>Add a due note to the contract.</Dialog.Description>
 		</Dialog.Header>
-		<form method="POST" use:enhance action="?/createDueNote">
+		<form
+			{...form.preflight(createDueNoteSchema).enhance(async (f) => {
+				try {
+					if (await f.submit()) {
+						open = false;
+						f.form.reset();
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			})}
+		>
+			<input hidden {...form.fields.contract_id.as('number', contractId)} />
 			<div class="grid gap-4 py-4">
-				<Form.Field {form} name="value">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Value</Form.Label>
-							<Input type="number" step="any" {...props} bind:value={$formData.value} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="due_date">
-					<Form.Control id="due_date">
-						{#snippet children({ props })}
-							<Form.Label for="due_date">Due Date</Form.Label>
-							<Popover.Root>
-								<Popover.Trigger
-									{...props}
-									class={cn(
-										buttonVariants({ variant: 'outline' }),
-										'w-full justify-start pl-4 text-left font-normal',
-										!dueDate && 'text-muted-foreground'
-									)}
-								>
-									{dueDate ? df.format(dueDate.toDate()) : 'Pick a date'}
-									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-								</Popover.Trigger>
-								<Popover.Content class="w-auto p-0" side="top">
-									<Calendar
-										type="single"
-										value={dueDate}
-										onValueChange={(v) => {
-											if (v) {
-												$formData.due_date = v.toDate(getLocalTimeZone()).toISOString();
-											} else {
-												$formData.due_date = '';
-											}
-										}}
-									/>
-								</Popover.Content>
-							</Popover.Root>
-							<Form.FieldErrors />
-							<input hidden value={$formData.due_date} name={props.name} />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
+				<Field.Field data-invalid={isInvalid(form.fields.value.issues())}>
+					<Field.FieldLabel>Value</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input {...form.fields.value.as('number')} />
+						<Field.FieldError errors={form.fields.value.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(form.fields.due_date.issues())}>
+					<Field.FieldLabel>Due Date</Field.FieldLabel>
+					<Field.FieldContent>
+						<Popover.Root>
+							<Popover.Trigger
+								class={cn(
+									buttonVariants({ variant: 'outline' }),
+									'w-full justify-start pl-4 text-left font-normal',
+									!dueDate && 'text-muted-foreground'
+								)}
+							>
+								{dueDate ? df.format(dueDate.toDate()) : 'Pick a date'}
+								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+							</Popover.Trigger>
+							<Popover.Content class="w-auto p-0" side="top">
+								<Calendar
+									type="single"
+									value={dueDate}
+									onValueChange={(v) => {
+										dueDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+									}}
+								/>
+							</Popover.Content>
+						</Popover.Root>
+						<input
+							hidden
+							{...dueDateStr
+								? form.fields.due_date.as('text', dueDateStr)
+								: form.fields.due_date.as('text')}
+						/>
+						<Field.FieldError errors={form.fields.due_date.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
 			</div>
 			<div class="flex flex-row items-center justify-end gap-4">
 				<Button
@@ -104,12 +102,12 @@
 				>
 					Cancel
 				</Button>
-				<Form.Button disabled={$submitting}>
-					{#if $submitting}
+				<Button type="submit" disabled={!!form.pending}>
+					{#if form.pending}
 						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
+				</Button>
 			</div>
 		</form>
 	</Dialog.Content>

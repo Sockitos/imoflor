@@ -16,3 +16,8 @@ export type Tenant = {
 	mobile?: string | null;
 	phone?: string | null;
 };
+
+export type TenantOption = {
+	id: number;
+	name: string;
+};

@@ -1,53 +1,56 @@
 <script lang="ts">
-	import { signInSchema } from '@/auth/schemas';
+	import { signIn } from '@/auth/auth.remote';
 	import * as Card from '@/shared/components/ui/card';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
+	import { Button } from '@/shared/components/ui/button';
+	import { signInSchema } from '@/auth/schemas';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { superForm } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
 
-	let { data } = $props();
-
-	const form = superForm(data.form, {
-		validators: zod4Client(signInSchema),
-	});
-
-	const { form: formData, enhance, submitting } = form;
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
+	}
 </script>
 
-<div class="container flex h-screen w-screen flex-col items-center justify-center">
+<div class="container mx-auto flex h-screen flex-col items-center justify-center">
 	<Card.Root class="w-96">
 		<Card.Header>
 			<Card.Title>Welcome!</Card.Title>
 			<Card.Description>Login to enter the dashboard</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<form method="POST" use:enhance>
-				<Form.Field {form} name="email">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Email</Form.Label>
-							<Input {...props} bind:value={$formData.email} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="password">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Password</Form.Label>
-							<Input type="password" {...props} bind:value={$formData.password} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Button class="mt-5" disabled={$submitting}>
-					{#if $submitting}
+			<form
+				{...signIn.preflight(signInSchema).enhance(async (f) => {
+					try {
+						await f.submit();
+					} catch (err) {
+						console.error(err);
+					}
+				})}
+				class="flex flex-col gap-4"
+			>
+				<Field.Field data-invalid={isInvalid(signIn.fields.email.issues())}>
+					<Field.FieldLabel>Email</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input type="email" {...signIn.fields.email.as('text')} />
+						<Field.FieldError errors={signIn.fields.email.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(signIn.fields.password.issues())}>
+					<Field.FieldLabel>Password</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input type="password" {...signIn.fields.password.as('text')} />
+						<Field.FieldError errors={signIn.fields.password.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Button type="submit" class="mt-5" disabled={!!signIn.pending}>
+					{#if signIn.pending}
 						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
+				</Button>
 			</form>
 		</Card.Content>
 	</Card.Root>
