@@ -17,8 +17,8 @@
 	import { getPropertyOptions } from '@/property/property.remote';
 	import { getTenantOptions } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
 	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
+	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -119,20 +119,20 @@
 					<Field.FieldLabel>Property</Field.FieldLabel>
 					<Field.FieldContent>
 						<svelte:boundary>
-							{@const propertyOptions = await getPropertyOptions()}
-							{@const spreadOptions = propertyOptions.flatMap((option) => [
+							{@const options = await getPropertyOptions()}
+							{@const spreadOptions = options.flatMap((option) => [
 								option,
 								...(option.children ?? []),
 							])}
 
-							<EntitySelectorNew bind:entityId={propertyId} options={spreadOptions}>
+							<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
 								{#snippet displayOption(option)}
 									<PropertyOptionItem {option} />
 								{/snippet}
 								{#snippet children(option)}
 									<PropertyOptionItem {option} indent={!option.children} />
 								{/snippet}
-							</EntitySelectorNew>
+							</EntitySelector>
 
 							{#snippet pending()}
 								<div class="flex items-center justify-center">
@@ -163,7 +163,14 @@
 						<svelte:boundary>
 							{@const tenantOptions = await getTenantOptions()}
 
-							<EntitySelector bind:value={tenantId} options={tenantOptions} />
+							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
+								{#snippet displayOption(option)}
+									<TenantOptionItem {option} />
+								{/snippet}
+								{#snippet children(option)}
+									<TenantOptionItem {option} />
+								{/snippet}
+							</EntitySelector>
 
 							{#snippet pending()}
 								<div class="flex items-center justify-center">

@@ -284,14 +284,14 @@
 									...(option.children ?? []),
 								])}
 
-								<EntitySelectorNew bind:entityId={propertyId} options={spreadOptions}>
+								<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
 									{#snippet displayOption(option)}
 										<PropertyOptionItem {option} />
 									{/snippet}
 									{#snippet children(option)}
 										<PropertyOptionItem {option} indent={!option.children} />
 									{/snippet}
-								</EntitySelectorNew>
+								</EntitySelector>
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">
@@ -318,14 +318,14 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getTicketOptions()}
-								<EntitySelectorNew bind:entityId={ticketId} {options}>
+								<EntitySelector bind:entityId={ticketId} {options}>
 									{#snippet displayOption(option)}
 										<TicketOptionItem {option} />
 									{/snippet}
 									{#snippet children(option)}
 										<TicketOptionItem {option} />
 									{/snippet}
-								</EntitySelectorNew>
+								</EntitySelector>
 
 								{#snippet pending()}
 									<div class="flex items-center justify-center">
