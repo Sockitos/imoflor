@@ -1,5 +1,5 @@
 import type { PropertyType } from '../types';
-import { Building2, Home, LandPlot, Store, Warehouse, type Icon } from 'lucide-svelte';
+import { Building2, House, LandPlot, Store, Warehouse, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 
 export const typeMap: Record<PropertyType, { label: string; icon: ComponentType<Icon> }> = {
@@ -13,7 +13,7 @@ export const typeMap: Record<PropertyType, { label: string; icon: ComponentType<
 	},
 	house: {
 		label: 'House',
-		icon: Home,
+		icon: House,
 	},
 	garages: {
 		label: 'Garages',

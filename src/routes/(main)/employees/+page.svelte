@@ -7,7 +7,7 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { PlusCircle } from 'lucide-svelte';
+	import { CirclePlus } from 'lucide-svelte';
 
 	let openForm = $state(false);
 </script>
@@ -24,7 +24,7 @@
 			<PageSubtitle>Manage your employees and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={() => (openForm = true)}>
-			<PlusCircle class="mr-2 h-4 w-4" />
+			<CirclePlus class="mr-2 h-4 w-4" />
 			Add Employee
 		</Button>
 	</div>

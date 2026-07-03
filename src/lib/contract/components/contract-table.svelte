@@ -3,7 +3,6 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
-	import { writable } from 'svelte/store';
 	import type { Contract } from '../types';
 	import { columns } from './contract-columns';
 
@@ -13,7 +12,7 @@
 
 	let { contracts }: Props = $props();
 
-	const globalFilter = writable('');
+	let globalFilter = $state<string>('');
 
 	const table = createSvelteTable({
 		get data() {
@@ -23,10 +22,10 @@
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		onGlobalFilterChange: globalFilter.set,
+		onGlobalFilterChange: (value) => (globalFilter = value),
 		state: {
 			get globalFilter() {
-				return $globalFilter;
+				return globalFilter;
 			},
 		},
 	});
@@ -34,7 +33,7 @@
 
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center">
-		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
+		<Input placeholder="Search..." bind:value={globalFilter} class="w-[150px] lg:w-[250px]" />
 	</div>
 	<div class="rounded-md border">
 		<Table.Root>

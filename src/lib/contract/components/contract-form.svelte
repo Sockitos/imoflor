@@ -1,227 +1,340 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import * as Tabs from '@/shared/components/ui/tabs';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import * as Tabs from '@/shared/components/ui/tabs';
 	import { cn } from '@/shared/utils';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
-	import type { Infer, SuperValidated } from 'sveltekit-superforms';
-	import { superForm } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import { createContractSchema, type CreateContractSchema } from '../schemas';
+	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { CalendarIcon } from 'lucide-svelte';
+	import { contractSchema } from '../schemas';
+	import { upsertContract } from '../contract.remote';
+	import { contractTypeValues, type Contract, type ContractType } from '../types';
+	import { getPropertyOptions } from '@/property/property.remote';
+	import { getTenantOptions } from '@/tenant/tenant.remote';
+	import { Spinner } from '@/shared/components/ui/spinner';
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
+	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
-		data: SuperValidated<Infer<CreateContractSchema>>;
-		action: string;
+		contract?: Contract;
 	}
 
-	let { open = $bindable(false), data, action }: Props = $props();
+	let { open = $bindable(false), contract }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createContractSchema),
-		dataType: 'json',
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
+	const form = $derived(contract != null ? upsertContract.for(contract.id) : upsertContract);
+	const isEdit = $derived(contract != null);
+
+	const rentingContract = $derived(contract?.type === 'renting' ? contract : undefined);
+	const lendingContract = $derived(contract?.type === 'lending' ? contract : undefined);
+
+	type FormFields = typeof form.fields;
+	const rentingFields = $derived(form.fields as Extract<FormFields, { rent: unknown }>);
+	const lendingFields = $derived(form.fields as Extract<FormFields, { sale_value: unknown }>);
+
+	let contractType = $state<ContractType>('renting');
+
+	let propertyId = $state<number | undefined>();
+	let tenantId = $state<number | undefined>();
+
+	let startDateStr = $state<string | undefined>();
+	let endDateStr = $state<string | undefined>();
+
+	const startDate = $derived(
+		startDateStr ? parseAbsolute(startDateStr, getLocalTimeZone()) : undefined
+	);
+	const endDate = $derived(endDateStr ? parseAbsolute(endDateStr, getLocalTimeZone()) : undefined);
+
+	$effect(() => {
+		if (contract?.type) {
+			contractType = contract.type;
+		}
+
+		if (contract?.property?.id) {
+			propertyId = contract.property.id;
+		}
+
+		if (contract?.tenants?.[0]?.id) {
+			tenantId = contract.tenants[0].id;
+		}
+
+		if (contract?.start_date) {
+			startDateStr = contract.start_date;
+		}
+
+		if (contract?.end_date) {
+			endDateStr = contract.end_date;
+		}
 	});
 
-	const { form: formData, enhance, submitting } = form;
-
-	const df = new DateFormatter('en-US', {
-		dateStyle: 'long',
-	});
-
-	let startDate = $derived(
-		$formData.start_date ? parseAbsolute($formData.start_date, getLocalTimeZone()) : undefined
-	);
-
-	let endDate = $derived(
-		$formData.end_date ? parseAbsolute($formData.end_date, getLocalTimeZone()) : undefined
-	);
+	const df = new DateFormatter('en-US', { dateStyle: 'long' });
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
+	}
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content class="overflow-y-auto sm:max-w-3xl">
+	<Sheet.Content class="overflow-y-auto data-[side=right]:sm:max-w-2xl">
 		<Sheet.Header>
-			<Sheet.Title>Add new contract</Sheet.Title>
-			<Sheet.Description>Fill the form below to add a new contract.</Sheet.Description>
+			<Sheet.Title>{isEdit ? 'Edit contract' : 'Add new contract'}</Sheet.Title>
+			<Sheet.Description>
+				{isEdit
+					? 'Update the contract details below.'
+					: 'Fill the form below to add a new contract.'}
+			</Sheet.Description>
 		</Sheet.Header>
-		<Separator class="my-5" />
-		<Tabs.Root bind:value={$formData.type} class="mb-5">
+		<Separator />
+		<Tabs.Root bind:value={contractType} class="mb-5">
 			<Tabs.List class="grid w-full grid-cols-2">
-				<Tabs.Trigger value="renting">Renting</Tabs.Trigger>
-				<Tabs.Trigger value="lending">Lending</Tabs.Trigger>
+				{#each contractTypeValues as type (type)}
+					<Tabs.Trigger value={type} class="capitalize">{type}</Tabs.Trigger>
+				{/each}
 			</Tabs.List>
 		</Tabs.Root>
-		<form method="POST" use:enhance {action} class="px-4">
-			<input hidden value={$formData.type} name="type" />
-			<div class="mb-5 space-y-3">
-				<h3 class="text-lg font-medium">Information</h3>
-				<Form.Field {form} name="property_id">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Property</Form.Label>
-							<EntitySelector
-								bind:value={$formData.property_id}
-								options={page.data.propertyOptions}
-							/>
-							<input hidden bind:value={$formData.property_id} name={props.name} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="tenant_id">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Tenant</Form.Label>
-							<EntitySelector bind:value={$formData.tenant_id} options={page.data.tenantOptions} />
-							<input hidden bind:value={$formData.tenant_id} name={props.name} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
+		<form
+			{...form.preflight(contractSchema).enhance(async (f) => {
+				try {
+					if (await f.submit()) {
+						open = false;
+						if (!isEdit) f.form.reset();
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			})}
+			class="flex flex-col gap-6 px-4 pb-4"
+		>
+			{#if contract?.id != null}
+				<input hidden {...form.fields.id.as('number', contract.id)} />
+			{/if}
+			<input hidden name="type" value={contractType} />
+
+			<Field.FieldGroup>
+				<Field.Field data-invalid={isInvalid(form.fields.property_id.issues())}>
+					<Field.FieldLabel>Property</Field.FieldLabel>
+					<Field.FieldContent>
+						<svelte:boundary>
+							{@const options = await getPropertyOptions()}
+							{@const spreadOptions = options.flatMap((option) => [
+								option,
+								...(option.children ?? []),
+							])}
+
+							<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
+								{#snippet displayOption(option)}
+									<PropertyOptionItem {option} />
+								{/snippet}
+								{#snippet children(option)}
+									<PropertyOptionItem {option} indent={!option.children} />
+								{/snippet}
+							</EntitySelector>
+
+							{#snippet pending()}
+								<div class="flex items-center justify-center">
+									<Spinner class="size-6" />
+								</div>
+							{/snippet}
+
+							{#snippet failed(_, reset)}
+								<div class="flex flex-col items-center gap-y-4">
+									<p class="text-sm text-destructive">Failed to load properties.</p>
+									<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+								</div>
+							{/snippet}
+						</svelte:boundary>
+						<input
+							hidden
+							{...propertyId != null
+								? form.fields.property_id.as('number', propertyId)
+								: form.fields.property_id.as('number')}
+						/>
+						<Field.FieldError errors={form.fields.property_id.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(form.fields.tenant_id.issues())}>
+					<Field.FieldLabel>Tenant</Field.FieldLabel>
+					<Field.FieldContent>
+						<svelte:boundary>
+							{@const tenantOptions = await getTenantOptions()}
+
+							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
+								{#snippet displayOption(option)}
+									<TenantOptionItem {option} />
+								{/snippet}
+								{#snippet children(option)}
+									<TenantOptionItem {option} />
+								{/snippet}
+							</EntitySelector>
+
+							{#snippet pending()}
+								<div class="flex items-center justify-center">
+									<Spinner class="size-6" />
+								</div>
+							{/snippet}
+
+							{#snippet failed(_, reset)}
+								<div class="flex flex-col items-center gap-y-4">
+									<p class="text-sm text-destructive">Failed to load tenants.</p>
+									<Button variant="outline" class="w-fit" onclick={reset}>Retry</Button>
+								</div>
+							{/snippet}
+						</svelte:boundary>
+						<input
+							hidden
+							{...tenantId != null
+								? form.fields.tenant_id.as('number', tenantId)
+								: form.fields.tenant_id.as('number')}
+						/>
+						<Field.FieldError errors={form.fields.tenant_id.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
 				<div class="grid grid-cols-2 items-start gap-x-4">
-					<Form.Field {form} name="start_date">
-						<Form.Control id="start_date">
-							{#snippet children({ props })}
-								<Form.Label for="start_date">Start Date</Form.Label>
-								<Popover.Root>
-									<Popover.Trigger
-										{...props}
-										class={cn(
-											buttonVariants({ variant: 'outline' }),
-											'w-full justify-start pl-4 text-left font-normal',
-											!startDate && 'text-muted-foreground'
-										)}
-									>
-										{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
-										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-									</Popover.Trigger>
-									<Popover.Content class="w-auto p-0" side="top">
-										<Calendar
-											type="single"
-											value={startDate}
-											onValueChange={(v) => {
-												if (v) {
-													$formData.start_date = v.toDate(getLocalTimeZone()).toISOString();
-												}
-											}}
-										/>
-									</Popover.Content>
-								</Popover.Root>
-								<Form.FieldErrors />
-								<input hidden value={$formData.start_date} name={props.name} />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-					<Form.Field {form} name="end_date">
-						<Form.Control id="end_date">
-							{#snippet children({ props })}
-								<Form.Label for="end_date">End Date</Form.Label>
-								<Popover.Root>
-									<Popover.Trigger
-										{...props}
-										class={cn(
-											buttonVariants({ variant: 'outline' }),
-											'w-full justify-start pl-4 text-left font-normal',
-											!endDate && 'text-muted-foreground'
-										)}
-									>
-										{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
-										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-									</Popover.Trigger>
-									<Popover.Content class="w-auto p-0" side="top">
-										<Calendar
-											type="single"
-											value={endDate}
-											onValueChange={(v) => {
-												if (v) {
-													$formData.end_date = v.toDate(getLocalTimeZone()).toISOString();
-												}
-											}}
-										/>
-									</Popover.Content>
-								</Popover.Root>
-								<Form.FieldErrors />
-								<input hidden value={$formData.end_date} name={props.name} />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
+					<Field.Field data-invalid={isInvalid(form.fields.start_date.issues())}>
+						<Field.FieldLabel>Start Date</Field.FieldLabel>
+						<Field.FieldContent>
+							<Popover.Root>
+								<Popover.Trigger
+									class={cn(
+										buttonVariants({ variant: 'outline' }),
+										'w-full justify-start pl-4 text-left font-normal',
+										!startDate && 'text-muted-foreground'
+									)}
+								>
+									{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
+									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-auto p-0" side="top">
+									<Calendar
+										type="single"
+										value={startDate}
+										onValueChange={(v) => {
+											startDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										}}
+									/>
+								</Popover.Content>
+							</Popover.Root>
+							<input
+								hidden
+								{...startDateStr
+									? form.fields.start_date.as('text', startDateStr)
+									: form.fields.start_date.as('text')}
+							/>
+							<Field.FieldError errors={form.fields.start_date.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+
+					<Field.Field>
+						<Field.FieldLabel>End Date</Field.FieldLabel>
+						<Field.FieldContent>
+							<Popover.Root>
+								<Popover.Trigger
+									class={cn(
+										buttonVariants({ variant: 'outline' }),
+										'w-full justify-start pl-4 text-left font-normal',
+										!endDate && 'text-muted-foreground'
+									)}
+								>
+									{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
+									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+								</Popover.Trigger>
+								<Popover.Content class="w-auto p-0" side="top">
+									<Calendar
+										type="single"
+										value={endDate}
+										onValueChange={(v) => {
+											endDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										}}
+									/>
+								</Popover.Content>
+							</Popover.Root>
+							<input hidden name="end_date" value={endDateStr} />
+						</Field.FieldContent>
+					</Field.Field>
 				</div>
-				{#if $formData.type === 'renting'}
-					<Form.Field {form} name="rent">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Rent</Form.Label>
-								<Input type="number" step="any" {...props} bind:value={$formData.rent} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
-				{:else if $formData.type === 'lending'}
+
+				{#if contractType === 'renting'}
+					<Field.Field data-invalid={isInvalid(rentingFields.rent.issues())}>
+						<Field.FieldLabel>Rent</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...rentingContract?.data.rent !== undefined
+									? rentingFields.rent.as('number', rentingContract?.data.rent)
+									: rentingFields.rent.as('number')}
+							/>
+							<Field.FieldError errors={rentingFields.rent.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+				{:else}
 					<div class="grid grid-cols-2 items-start gap-x-4">
-						<Form.Field {form} name="sale_value">
-							<Form.Control>
-								{#snippet children({ props })}
-									<Form.Label>Sale Value</Form.Label>
-									<Input type="number" step="any" {...props} bind:value={$formData.sale_value} />
-									<Form.FieldErrors />
-								{/snippet}
-							</Form.Control>
-						</Form.Field>
-						<Form.Field {form} name="down_payment">
-							<Form.Control>
-								{#snippet children({ props })}
-									<Form.Label>Down Payment</Form.Label>
-									<Input type="number" step="any" {...props} bind:value={$formData.down_payment} />
-									<Form.FieldErrors />
-								{/snippet}
-							</Form.Control>
-						</Form.Field>
+						<Field.Field data-invalid={isInvalid(lendingFields.sale_value.issues())}>
+							<Field.FieldLabel>Sale Value</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.sale_value !== undefined
+										? lendingFields.sale_value.as('number', lendingContract?.data.sale_value)
+										: lendingFields.sale_value.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.sale_value.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+						<Field.Field data-invalid={isInvalid(lendingFields.down_payment.issues())}>
+							<Field.FieldLabel>Down Payment</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.down_payment !== undefined
+										? lendingFields.down_payment.as('number', lendingContract?.data.down_payment)
+										: lendingFields.down_payment.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.down_payment.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
 					</div>
-					<Form.Field {form} name="installment">
-						<Form.Control>
-							{#snippet children({ props })}
-								<Form.Label>Installment</Form.Label>
-								<Input type="number" step="any" {...props} bind:value={$formData.installment} />
-								<Form.FieldErrors />
-							{/snippet}
-						</Form.Control>
-					</Form.Field>
+					<Field.Field data-invalid={isInvalid(lendingFields.installment.issues())}>
+						<Field.FieldLabel>Installment</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...lendingContract?.data.installment !== undefined
+									? lendingFields.installment.as('number', lendingContract?.data.installment)
+									: lendingFields.installment.as('number')}
+							/>
+							<Field.FieldError errors={lendingFields.installment.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
 					<div class="grid grid-cols-2 items-start gap-x-4">
-						<Form.Field {form} name="yearly_raise">
-							<Form.Control>
-								{#snippet children({ props })}
-									<Form.Label>Yearly Raise</Form.Label>
-									<Input type="number" step="any" {...props} bind:value={$formData.yearly_raise} />
-									<Form.FieldErrors />
-								{/snippet}
-							</Form.Control>
-						</Form.Field>
-						<Form.Field {form} name="interest">
-							<Form.Control>
-								{#snippet children({ props })}
-									<Form.Label>Interest</Form.Label>
-									<Input type="number" step="any" {...props} bind:value={$formData.interest} />
-									<Form.FieldErrors />
-								{/snippet}
-							</Form.Control>
-						</Form.Field>
+						<Field.Field data-invalid={isInvalid(lendingFields.yearly_raise.issues())}>
+							<Field.FieldLabel>Yearly Raise</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.yearly_raise !== undefined
+										? lendingFields.yearly_raise.as('number', lendingContract?.data.yearly_raise)
+										: lendingFields.yearly_raise.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.yearly_raise.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+						<Field.Field data-invalid={isInvalid(lendingFields.interest.issues())}>
+							<Field.FieldLabel>Interest</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.interest !== undefined
+										? lendingFields.interest.as('number', lendingContract?.data.interest)
+										: lendingFields.interest.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.interest.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
 					</div>
 				{/if}
-			</div>
-			<div class="flex flex-row items-center justify-end gap-4">
+			</Field.FieldGroup>
+
+			<Sheet.Footer class="flex flex-row items-center justify-end gap-4 px-0 pt-0">
 				<Button
 					variant="ghost"
 					onclick={(e) => {
@@ -231,13 +344,13 @@
 				>
 					Cancel
 				</Button>
-				<Form.Button disabled={$submitting}>
-					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				<Button type="submit" disabled={!!form.pending}>
+					{#if form.pending}
+						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
-			</div>
+				</Button>
+			</Sheet.Footer>
 		</form>
 	</Sheet.Content>
 </Sheet.Root>

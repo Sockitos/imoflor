@@ -27,6 +27,7 @@
 		</div>
 		<a
 			href={resolve(`/interventions/${intervention.id}`)}
+			draggable="false"
 			class="w-fit cursor-pointer text-left text-sm font-medium hover:underline"
 		>
 			{intervention.description}
