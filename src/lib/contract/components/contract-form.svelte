@@ -17,8 +17,6 @@
 	import { getPropertyOptions } from '@/property/property.remote';
 	import { getTenantOptions } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
-	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -119,20 +117,9 @@
 					<Field.FieldLabel>Property</Field.FieldLabel>
 					<Field.FieldContent>
 						<svelte:boundary>
-							{@const options = await getPropertyOptions()}
-							{@const spreadOptions = options.flatMap((option) => [
-								option,
-								...(option.children ?? []),
-							])}
+							{@const propertyOptions = await getPropertyOptions()}
 
-							<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
-								{#snippet displayOption(option)}
-									<PropertyOptionItem {option} />
-								{/snippet}
-								{#snippet children(option)}
-									<PropertyOptionItem {option} indent={!option.children} />
-								{/snippet}
-							</EntitySelector>
+							<EntitySelector bind:value={propertyId} options={propertyOptions} />
 
 							{#snippet pending()}
 								<div class="flex items-center justify-center">
@@ -163,14 +150,7 @@
 						<svelte:boundary>
 							{@const tenantOptions = await getTenantOptions()}
 
-							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
-								{#snippet displayOption(option)}
-									<TenantOptionItem {option} />
-								{/snippet}
-								{#snippet children(option)}
-									<TenantOptionItem {option} />
-								{/snippet}
-							</EntitySelector>
+							<EntitySelector bind:value={tenantId} options={tenantOptions} />
 
 							{#snippet pending()}
 								<div class="flex items-center justify-center">
@@ -293,6 +273,41 @@
 										: lendingFields.down_payment.as('number')}
 								/>
 								<Field.FieldError errors={lendingFields.down_payment.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
+					<Field.Field data-invalid={isInvalid(lendingFields.installment.issues())}>
+						<Field.FieldLabel>Installment</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...lendingContract?.data.installment !== undefined
+									? lendingFields.installment.as('number', lendingContract?.data.installment)
+									: lendingFields.installment.as('number')}
+							/>
+							<Field.FieldError errors={lendingFields.installment.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(lendingFields.yearly_raise.issues())}>
+							<Field.FieldLabel>Yearly Raise</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.yearly_raise !== undefined
+										? lendingFields.yearly_raise.as('number', lendingContract?.data.yearly_raise)
+										: lendingFields.yearly_raise.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.yearly_raise.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+						<Field.Field data-invalid={isInvalid(lendingFields.interest.issues())}>
+							<Field.FieldLabel>Interest</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...lendingContract?.data.interest !== undefined
+										? lendingFields.interest.as('number', lendingContract?.data.interest)
+										: lendingFields.interest.as('number')}
+								/>
+								<Field.FieldError errors={lendingFields.interest.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
 					</div>
