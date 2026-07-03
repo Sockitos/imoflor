@@ -5,7 +5,7 @@
 	import PageTitle from '@/shared/components/page-title.svelte';
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
-	import { PlusCircle } from 'lucide-svelte';
+	import { CirclePlus } from 'lucide-svelte';
 	import { getTenants } from '@/tenant/tenant.remote';
 	import Spinner from '@/shared/components/ui/spinner/spinner.svelte';
 
@@ -24,7 +24,7 @@
 			<PageSubtitle>Manage your tenants and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={() => (openForm = true)}>
-			<PlusCircle class="mr-2 h-4 w-4" />
+			<CirclePlus class="mr-2 h-4 w-4" />
 			Add Tenant
 		</Button>
 	</div>
