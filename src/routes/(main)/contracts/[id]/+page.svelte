@@ -200,7 +200,7 @@
 							{#if contract.balance >= 0}
 								<CheckCheck class="h-4 w-4 text-muted-foreground" />
 							{:else}
-								<AlertTriangle class="h-4 w-4 text-muted-foreground" />
+								<TriangleAlert class="h-4 w-4 text-muted-foreground" />
 							{/if}
 						</Card.Header>
 						<Card.Content>
@@ -246,11 +246,11 @@
 						{#if getContractAccount(contractId).ready}
 							<div class="flex flex-row gap-x-4">
 								<Button onclick={() => (openDueNoteForm = true)} variant="outline">
-									<PlusCircle class="mr-2 h-4 w-4" />
+									<CirclePlus class="mr-2 h-4 w-4" />
 									Due Note
 								</Button>
 								<Button onclick={() => (openPaymentForm = true)}>
-									<PlusCircle class="mr-2 h-4 w-4" />
+									<CirclePlus class="mr-2 h-4 w-4" />
 									Payment
 								</Button>
 							</div>
