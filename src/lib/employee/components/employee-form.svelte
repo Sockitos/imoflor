@@ -11,7 +11,7 @@
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute, today } from '@internationalized/date';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
+	import { CalendarIcon } from 'lucide-svelte';
 	import { employeeSchema } from '../schemas';
 	import { upsertEmployee } from '../employee.remote';
 	import type { Employee, SalaryType } from '../types';
