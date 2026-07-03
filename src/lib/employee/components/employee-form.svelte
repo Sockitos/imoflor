@@ -16,6 +16,7 @@
 	import { upsertEmployee } from '../employee.remote';
 	import type { Employee, SalaryType } from '../types';
 	import { salaryTypeOptions } from '../types';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -517,7 +518,7 @@
 				</Button>
 				<Button type="submit" disabled={!!form.pending}>
 					{#if form.pending}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+						<Spinner />
 					{/if}
 					Submit
 				</Button>

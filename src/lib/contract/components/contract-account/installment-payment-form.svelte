@@ -2,53 +2,46 @@
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Dialog from '@/shared/components/ui/dialog';
-	import * as Form from '@/shared/components/ui/form';
+	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import { CalendarIcon, Loader2 } from 'lucide-svelte';
-	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { zod4Client } from 'sveltekit-superforms/adapters';
-	import {
-		createInstallmentPaymentSchema,
-		type CreateInstallmentPaymentSchema,
-	} from '../../schemas';
-	import type { LendingContract } from '../../types';
+	import { CalendarIcon } from 'lucide-svelte';
+	import { createInstallmentPaymentSchema } from '../../schemas';
+	import { createInstallmentPayment } from '../../contract.remote';
 	import { calculateInterest } from '../../utils';
+	import type { LendingContract } from '../../types';
+	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
+		contractId: number;
 		contract: LendingContract;
-		data: SuperValidated<Infer<CreateInstallmentPaymentSchema>>;
 	}
 
-	let { open = $bindable(false), contract, data }: Props = $props();
+	let { open = $bindable(false), contractId, contract }: Props = $props();
 
-	const form = superForm(data, {
-		validators: zod4Client(createInstallmentPaymentSchema),
-		onUpdated: ({ form: f }) => {
-			if (f.valid) {
-				open = false;
-			}
-		},
-		invalidateAll: 'force',
-	});
+	const form = $derived(createInstallmentPayment.for(contractId));
 
-	const { form: formData, enhance, submitting } = form;
+	let paymentDateStr = $state<string | undefined>(new Date().toISOString());
+	let paymentValue = $derived(contract.data.installment);
+	let interest = $derived(calculateInterest(contract, paymentDateStr));
+	let amortization = $derived(paymentValue - calculateInterest(contract, paymentDateStr));
 
-	const df = new DateFormatter('en-US', {
-		dateStyle: 'long',
-	});
-
-	let paymentDate = $derived(
-		$formData.date ? parseAbsolute($formData.date, getLocalTimeZone()) : undefined
+	const df = new DateFormatter('en-US', { dateStyle: 'long' });
+	const paymentDate = $derived(
+		paymentDateStr ? parseAbsolute(paymentDateStr, getLocalTimeZone()) : undefined
 	);
 
-	function handleValueDateChange() {
-		$formData.interest = calculateInterest(contract, $formData.date);
-		$formData.amortization = $formData.value - $formData.interest;
+	function recalculate() {
+		interest = calculateInterest(contract, paymentDateStr);
+		amortization = paymentValue - interest;
+	}
+
+	function isInvalid(issues?: { message?: string }[]) {
+		return (issues?.length ?? 0) > 0;
 	}
 </script>
 
@@ -56,88 +49,95 @@
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
 			<Dialog.Title>Add Installment Payment</Dialog.Title>
-			<Dialog.Description>Add a Installment payment to the contract.</Dialog.Description>
+			<Dialog.Description>Add an installment payment to the contract.</Dialog.Description>
 		</Dialog.Header>
-		<form method="POST" use:enhance action="?/createInstallmentPayment">
+		<form
+			{...form.preflight(createInstallmentPaymentSchema).enhance(async (f) => {
+				try {
+					if (await f.submit()) {
+						open = false;
+						f.form.reset();
+					}
+				} catch (err) {
+					console.error(err);
+				}
+			})}
+		>
+			<input hidden {...form.fields.contract_id.as('number', contractId)} />
 			<div class="grid gap-4 py-4">
-				<Form.Field {form} name="value">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Value</Form.Label>
-							<Input
-								type="number"
-								step="any"
-								{...props}
-								bind:value={$formData.value}
-								oninput={handleValueDateChange}
-							/>
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="interest">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Interest</Form.Label>
-							<Input type="number" step="any" {...props} bind:value={$formData.interest} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="amortization">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label>Amortization</Form.Label>
-							<Input type="number" step="any" {...props} bind:value={$formData.amortization} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="date">
-					<Form.Control id="installment_payment_date">
-						{#snippet children({ props })}
-							<Form.Label for="installment_payment_date">Date</Form.Label>
-							<Popover.Root>
-								<Popover.Trigger
-									{...props}
-									class={cn(
-										buttonVariants({ variant: 'outline' }),
-										'w-full justify-start pl-4 text-left font-normal',
-										!paymentDate && 'text-muted-foreground'
-									)}
-								>
-									{paymentDate ? df.format(paymentDate.toDate()) : 'Pick a date'}
-									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-								</Popover.Trigger>
-								<Popover.Content class="w-auto p-0" side="top">
-									<Calendar
-										type="single"
-										value={paymentDate}
-										onValueChange={(v) => {
-											if (v) {
-												$formData.date = v.toDate(getLocalTimeZone()).toISOString();
-												handleValueDateChange();
-											} else {
-												$formData.date = '';
-											}
-										}}
-									/>
-								</Popover.Content>
-							</Popover.Root>
-							<Form.FieldErrors />
-							<input hidden value={$formData.date} name={props.name} />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
-				<Form.Field {form} name="description">
-					<Form.Control>
-						{#snippet children({ props })}
-							<Form.Label for="description">Description</Form.Label>
-							<Textarea {...props} bind:value={$formData.description} />
-							<Form.FieldErrors />
-						{/snippet}
-					</Form.Control>
-				</Form.Field>
+				<Field.Field data-invalid={isInvalid(form.fields.value.issues())}>
+					<Field.FieldLabel>Value</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input
+							{...form.fields.value.as('number')}
+							bind:value={paymentValue}
+							oninput={recalculate}
+						/>
+						<Field.FieldError errors={form.fields.value.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(form.fields.interest.issues())}>
+					<Field.FieldLabel>Interest</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input
+							{...form.fields.interest.as('number')}
+							bind:value={interest}
+							oninput={() => (amortization = paymentValue - interest)}
+						/>
+						<Field.FieldError errors={form.fields.interest.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(form.fields.amortization.issues())}>
+					<Field.FieldLabel>Amortization</Field.FieldLabel>
+					<Field.FieldContent>
+						<Input {...form.fields.amortization.as('number')} bind:value={amortization} />
+						<Field.FieldError errors={form.fields.amortization.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field data-invalid={isInvalid(form.fields.date.issues())}>
+					<Field.FieldLabel>Date</Field.FieldLabel>
+					<Field.FieldContent>
+						<Popover.Root>
+							<Popover.Trigger
+								class={cn(
+									buttonVariants({ variant: 'outline' }),
+									'w-full justify-start pl-4 text-left font-normal',
+									!paymentDate && 'text-muted-foreground'
+								)}
+							>
+								{paymentDate ? df.format(paymentDate.toDate()) : 'Pick a date'}
+								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+							</Popover.Trigger>
+							<Popover.Content class="w-auto p-0" side="top">
+								<Calendar
+									type="single"
+									value={paymentDate}
+									onValueChange={(v) => {
+										paymentDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										recalculate();
+									}}
+								/>
+							</Popover.Content>
+						</Popover.Root>
+						<input
+							hidden
+							{...paymentDateStr
+								? form.fields.date.as('text', paymentDateStr)
+								: form.fields.date.as('text')}
+						/>
+						<Field.FieldError errors={form.fields.date.issues()} />
+					</Field.FieldContent>
+				</Field.Field>
+
+				<Field.Field>
+					<Field.FieldLabel>Description</Field.FieldLabel>
+					<Field.FieldContent>
+						<Textarea {...form.fields.description.as('text')} />
+					</Field.FieldContent>
+				</Field.Field>
 			</div>
 			<div class="flex flex-row items-center justify-end gap-4">
 				<Button
@@ -149,12 +149,12 @@
 				>
 					Cancel
 				</Button>
-				<Form.Button disabled={$submitting}>
-					{#if $submitting}
-						<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				<Button type="submit" disabled={!!form.pending}>
+					{#if form.pending}
+						<Spinner />
 					{/if}
 					Submit
-				</Form.Button>
+				</Button>
 			</div>
 		</form>
 	</Dialog.Content>

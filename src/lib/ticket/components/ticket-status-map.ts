@@ -1,5 +1,5 @@
 import type { TicketStatus } from '../types';
-import { CheckCircle2, CircleDashed, CircleDot, XCircle, type Icon } from 'lucide-svelte';
+import { CircleCheck, CircleDashed, CircleDot, CircleX, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 
 export const statusMap: Record<TicketStatus, { label: string; icon: ComponentType<Icon> }> = {
@@ -13,10 +13,10 @@ export const statusMap: Record<TicketStatus, { label: string; icon: ComponentTyp
 	},
 	resolved: {
 		label: 'Resolved',
-		icon: CheckCircle2,
+		icon: CircleCheck,
 	},
 	cancelled: {
 		label: 'Cancelled',
-		icon: XCircle,
+		icon: CircleX,
 	},
 };
