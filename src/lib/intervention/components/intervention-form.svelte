@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Field from '@/shared/components/ui/field';
@@ -25,6 +24,7 @@
 	import { getTicketOptions } from '@/ticket/ticket.remote';
 	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
 	import TicketOptionItem from '@/ticket/components/ticket-option-item.svelte';
+	import EntitySelector from '@/shared/components/entity-selector.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -318,6 +318,7 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getTicketOptions()}
+
 								<EntitySelector bind:entityId={ticketId} {options}>
 									{#snippet displayOption(option)}
 										<TicketOptionItem {option} />

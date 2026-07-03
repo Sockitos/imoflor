@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
+	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
 	import * as Field from '@/shared/components/ui/field';
