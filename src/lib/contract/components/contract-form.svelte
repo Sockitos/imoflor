@@ -311,41 +311,6 @@
 							</Field.FieldContent>
 						</Field.Field>
 					</div>
-					<Field.Field data-invalid={isInvalid(lendingFields.installment.issues())}>
-						<Field.FieldLabel>Installment</Field.FieldLabel>
-						<Field.FieldContent>
-							<Input
-								{...lendingContract?.data.installment !== undefined
-									? lendingFields.installment.as('number', lendingContract?.data.installment)
-									: lendingFields.installment.as('number')}
-							/>
-							<Field.FieldError errors={lendingFields.installment.issues()} />
-						</Field.FieldContent>
-					</Field.Field>
-					<div class="grid grid-cols-2 items-start gap-x-4">
-						<Field.Field data-invalid={isInvalid(lendingFields.yearly_raise.issues())}>
-							<Field.FieldLabel>Yearly Raise</Field.FieldLabel>
-							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.yearly_raise !== undefined
-										? lendingFields.yearly_raise.as('number', lendingContract?.data.yearly_raise)
-										: lendingFields.yearly_raise.as('number')}
-								/>
-								<Field.FieldError errors={lendingFields.yearly_raise.issues()} />
-							</Field.FieldContent>
-						</Field.Field>
-						<Field.Field data-invalid={isInvalid(lendingFields.interest.issues())}>
-							<Field.FieldLabel>Interest</Field.FieldLabel>
-							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.interest !== undefined
-										? lendingFields.interest.as('number', lendingContract?.data.interest)
-										: lendingFields.interest.as('number')}
-								/>
-								<Field.FieldError errors={lendingFields.interest.issues()} />
-							</Field.FieldContent>
-						</Field.Field>
-					</div>
 				{/if}
 			</Field.FieldGroup>
 
