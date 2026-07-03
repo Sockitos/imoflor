@@ -4,8 +4,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { deleteTicketSchema, ticketSchema } from './schemas';
-import { ticketStatusValues, type Ticket } from './types';
-import type { IdAndLabel } from '@/shared/types';
+import { ticketStatusValues, type Ticket, type TicketOption } from './types';
 
 export const getTickets = query<Ticket[]>(async () => {
 	const {
@@ -124,14 +123,12 @@ export const deleteTicket = form(deleteTicketSchema, async ({ id }) => {
 	return redirect(302, '/tickets');
 });
 
-export const getTicketOptions = query<IdAndLabel[]>(async () => {
+export const getTicketOptions = query<TicketOption[]>(async () => {
 	const {
 		locals: { supabase },
 	} = getRequestEvent();
 
-	const { data: tickets, error: ticketsError } = await supabase
-		.from('tickets')
-		.select('id, label:title');
+	const { data: tickets, error: ticketsError } = await supabase.from('tickets').select('id, title');
 
 	if (ticketsError) {
 		error(500, 'Error fetching tickets, please try again later.');
