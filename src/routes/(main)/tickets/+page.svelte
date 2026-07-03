@@ -5,7 +5,7 @@
 	import PageTitle from '@/shared/components/page-title.svelte';
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
-	import { PlusCircle } from 'lucide-svelte';
+	import { CirclePlus } from 'lucide-svelte';
 	import KanbanBoard from '@/shared/components/kanban-board';
 	import { ticketKanbanColumns } from '@/ticket/components/ticket-kanban-columns';
 	import type { TicketStatus } from '@/ticket/types';
@@ -67,7 +67,7 @@
 			<PageSubtitle>Manage your tickets and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={onAddTicket}>
-			<PlusCircle class="mr-2 h-4 w-4" />
+			<CirclePlus class="mr-2 h-4 w-4" />
 			Add Ticket
 		</Button>
 	</div>

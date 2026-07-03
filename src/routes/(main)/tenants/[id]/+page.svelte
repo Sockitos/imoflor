@@ -10,7 +10,7 @@
 	import { Separator } from '@/shared/components/ui/separator';
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
-	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { Pencil, CirclePlus, Trash } from 'lucide-svelte';
 	import { getTenant } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { getMovements } from '@/movement/movement.remote';
@@ -160,7 +160,7 @@
 						</p>
 					</div>
 					<Button>
-						<PlusCircle class="mr-2 h-4 w-4" />
+						<CirclePlus class="mr-2 h-4 w-4" />
 						Movement
 					</Button>
 				</div>

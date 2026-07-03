@@ -19,7 +19,7 @@
 	import TicketIcon from '@tabler/icons-svelte/icons/ticket';
 	import ToolIcon from '@tabler/icons-svelte/icons/tool';
 	import UsersIcon from '@tabler/icons-svelte/icons/users';
-	import { UserCircleIcon } from 'lucide-svelte';
+	import { CircleUser } from 'lucide-svelte';
 	import type { ComponentProps, ComponentType } from 'svelte';
 
 	type Props = ComponentProps<typeof Sidebar.Root>;
@@ -256,7 +256,7 @@
 						<DropdownMenu.Separator />
 						<DropdownMenu.Group>
 							<DropdownMenu.Item>
-								<UserCircleIcon />
+								<CircleUser />
 								Account
 							</DropdownMenu.Item>
 							<DropdownMenu.Item>

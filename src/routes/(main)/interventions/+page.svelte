@@ -5,7 +5,7 @@
 	import PageTitle from '@/shared/components/page-title.svelte';
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
-	import { PlusCircle } from 'lucide-svelte';
+	import { CirclePlus } from 'lucide-svelte';
 	import KanbanBoard from '@/shared/components/kanban-board';
 	import { interventionKanbanColumns } from '@/intervention/components/intervention-kanban-columns';
 	import type { InterventionStatus } from '@/intervention/types';
@@ -69,7 +69,7 @@
 			<PageSubtitle>Manage your interventions and Lorem Ipsum</PageSubtitle>
 		</div>
 		<Button onclick={onAddIntervention}>
-			<PlusCircle class="mr-2 h-4 w-4" />
+			<CirclePlus class="mr-2 h-4 w-4" />
 			Add Intervention
 		</Button>
 	</div>

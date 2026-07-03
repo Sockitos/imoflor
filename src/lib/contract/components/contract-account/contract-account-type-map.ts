@@ -1,5 +1,5 @@
 import type { ContractAccountType } from '../../types';
-import { FileClock, FileKey2, type Icon } from 'lucide-svelte';
+import { FileClock, FileKey, type Icon } from 'lucide-svelte';
 import type { ComponentType } from 'svelte';
 
 export const typeMap: Record<ContractAccountType, { label: string; icon: ComponentType<Icon> }> = {
@@ -9,6 +9,6 @@ export const typeMap: Record<ContractAccountType, { label: string; icon: Compone
 	},
 	payment: {
 		label: 'Payment',
-		icon: FileKey2,
+		icon: FileKey,
 	},
 };

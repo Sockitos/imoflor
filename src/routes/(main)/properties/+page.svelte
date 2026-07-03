@@ -4,7 +4,7 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Separator } from '@/shared/components/ui/separator';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { PlusCircle } from 'lucide-svelte';
+	import { CirclePlus } from 'lucide-svelte';
 	import PropertyForm from '@/property/components/property-form.svelte';
 	import PropertyTable from '@/property/components/property-table.svelte';
 	import { getProperties } from '@/property/property.remote';
@@ -25,7 +25,7 @@
 		</div>
 		{#if getProperties().ready}
 			<Button onclick={() => (openForm = true)}>
-				<PlusCircle class="mr-2 h-4 w-4" />
+				<CirclePlus class="mr-2 h-4 w-4" />
 				Add Property
 			</Button>
 		{/if}

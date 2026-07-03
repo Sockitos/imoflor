@@ -12,7 +12,7 @@
 	import { dateFormatter } from '@/shared/formatters';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { salaryTypeOptions } from '@/employee/types';
-	import { Pencil, PlusCircle, Trash } from 'lucide-svelte';
+	import { Pencil, CirclePlus, Trash } from 'lucide-svelte';
 	import { getMovements } from '@/movement/movement.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
 
@@ -181,7 +181,7 @@
 					</div>
 					{#if getMovements(employee.tax_id_number).ready}
 						<Button>
-							<PlusCircle class="mr-2 h-4 w-4" />
+							<CirclePlus class="mr-2 h-4 w-4" />
 							Movement
 						</Button>
 					{/if}
