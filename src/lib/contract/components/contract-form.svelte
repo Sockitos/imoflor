@@ -17,6 +17,8 @@
 	import { getPropertyOptions } from '@/property/property.remote';
 	import { getTenantOptions } from '@/tenant/tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import EntitySelectorNew from '@/shared/components/entity-selector-new.svelte';
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -118,8 +120,19 @@
 					<Field.FieldContent>
 						<svelte:boundary>
 							{@const propertyOptions = await getPropertyOptions()}
+							{@const spreadOptions = propertyOptions.flatMap((option) => [
+								option,
+								...(option.children ?? []),
+							])}
 
-							<EntitySelector bind:value={propertyId} options={propertyOptions} />
+							<EntitySelectorNew bind:entityId={propertyId} options={spreadOptions}>
+								{#snippet displayOption(option)}
+									<PropertyOptionItem {option} />
+								{/snippet}
+								{#snippet children(option)}
+									<PropertyOptionItem {option} indent={!option.children} />
+								{/snippet}
+							</EntitySelectorNew>
 
 							{#snippet pending()}
 								<div class="flex items-center justify-center">
