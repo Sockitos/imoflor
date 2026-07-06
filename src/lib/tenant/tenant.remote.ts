@@ -122,8 +122,6 @@ export const deleteTenant = form(deleteByIdSchema, async ({ id }) => {
 	return redirect(302, '/tenants');
 });
 
-
-
 export const getTenantOptions = query<TenantOption[]>(async () => {
 	const {
 		locals: { supabase },
@@ -138,25 +136,21 @@ export const getTenantOptions = query<TenantOption[]>(async () => {
 	return tenants;
 });
 
-export const deleteTenants = form(
-	deleteByIdsSchema,
-	async ({ ids }) => {
+export const deleteTenants = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
 
-		const {
-			locals: { supabase },
-			cookies,
-		} = getRequestEvent();
+	const cleanIds = ids.split(',').map(Number);
 
-		const cleanIds = ids.split(',').map(Number);
+	const { error: deleteError } = await supabase.from('tenants').delete().in('id', cleanIds);
 
-		const { error: deleteError } = await supabase.from('tenants').delete().in('id', cleanIds);
-
-		if (deleteError) {
-			setFlash({ type: 'error', message: deleteError.message }, cookies);
-			error(500, deleteError.message);
-		}
-
-		setFlash({ type: 'success', message: 'Tenants deleted successfully' }, cookies);
-		getTenants().refresh();
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
 	}
-);
+
+	setFlash({ type: 'success', message: 'Tenants deleted successfully' }, cookies);
+	getTenants().refresh();
+});
