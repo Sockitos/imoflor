@@ -424,7 +424,7 @@
 				</Field.FieldGroup>
 			</Field.FieldSet>
 
-			<div class="flex flex-row items-center justify-end gap-4 pt-2">
+			<Sheet.Footer class="flex flex-row items-center justify-end gap-4 px-0 pt-0">
 				<Button
 					variant="ghost"
 					onclick={(e) => {
@@ -440,7 +440,7 @@
 					{/if}
 					Submit
 				</Button>
-			</div>
+			</Sheet.Footer>
 		</form>
 	</Sheet.Content>
 </Sheet.Root>
