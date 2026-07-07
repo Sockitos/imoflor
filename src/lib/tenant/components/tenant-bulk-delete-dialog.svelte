@@ -26,7 +26,7 @@
 			}
 		})}
 	>
-		{#each tenantIds as id, i}
+		{#each tenantIds as id, i (id)}
 			<input hidden {...deleteForm.fields.ids[i].as('number', id)} />
 		{/each}
 	</form>
