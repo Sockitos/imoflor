@@ -142,9 +142,7 @@ export const deleteTenants = form(deleteByIdsSchema, async ({ ids }) => {
 		cookies,
 	} = getRequestEvent();
 
-	const cleanIds = ids.split(',').map(Number);
-
-	const { error: deleteError } = await supabase.from('tenants').delete().in('id', cleanIds);
+	const { error: deleteError } = await supabase.from('tenants').delete().in('id', ids);
 
 	if (deleteError) {
 		setFlash({ type: 'error', message: deleteError.message }, cookies);

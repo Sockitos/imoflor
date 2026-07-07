@@ -11,7 +11,7 @@
 
 	let { open = $bindable(false), tenantIds, onSuccess }: Props = $props();
 
-	const deleteForm = $derived(deleteTenants.for(tenantIds.join(',')));
+	const deleteForm = $derived(deleteTenants.for(tenantIds.toString()));
 
 	let formElement: HTMLFormElement | undefined = $state();
 </script>
@@ -26,7 +26,9 @@
 			}
 		})}
 	>
-		<input hidden {...deleteForm.fields.ids.as('text', tenantIds.join(','))} />
+		{#each tenantIds as id, i}
+			<input hidden {...deleteForm.fields.ids[i].as('number', id)} />
+		{/each}
 	</form>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
