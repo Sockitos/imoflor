@@ -4,11 +4,11 @@
 	import { Input } from '@/shared/components/ui/input';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
-	import { Textarea } from '@/shared/components/ui/textarea';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { Textarea } from '@/shared/components/ui/textarea';
 	import { vendorSchema } from '../schemas';
-	import { upsertVendor } from '../vendor.remote';
 	import type { Vendor } from '../types';
+	import { upsertVendor } from '../vendor.remote';
 
 	interface Props {
 		open?: boolean;
@@ -39,7 +39,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);

@@ -5,12 +5,12 @@
 	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { createDueNoteSchema } from '../../schemas';
 	import { createDueNote } from '../../contract.remote';
-	import { Spinner } from '@/shared/components/ui/spinner';
+	import { createDueNoteSchema } from '../../schemas';
 
 	interface Props {
 		open?: boolean;
@@ -41,7 +41,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						f.form.reset();
+						f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);

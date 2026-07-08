@@ -6,13 +6,13 @@
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { createInstallmentUpdateSchema } from '../../schemas';
 	import { createInstallmentUpdate, getInstallmentUpdates } from '../../contract.remote';
-	import { Spinner } from '@/shared/components/ui/spinner';
+	import { createInstallmentUpdateSchema } from '../../schemas';
 
 	interface Props {
 		open?: boolean;
@@ -46,7 +46,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						f.form.reset();
+						f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
