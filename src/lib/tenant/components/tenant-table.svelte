@@ -96,5 +96,5 @@
 <TenantBulkDeleteDialog
 	bind:open={openBulkDelete}
 	tenantIds={selectedTenantIds}
-	onSuccess={() => (rowSelection = {})}
+	onSuccess={() => table.toggleAllPageRowsSelected(false)}
 />
