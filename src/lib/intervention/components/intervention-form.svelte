@@ -80,7 +80,7 @@
 					console.error(err);
 				}
 			})}
-			onfocusout={form.validate}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
 			{#if intervention?.id != null}
