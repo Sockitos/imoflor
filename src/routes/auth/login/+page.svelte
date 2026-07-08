@@ -27,6 +27,7 @@
 						console.error(err);
 					}
 				})}
+				onfocusout={signIn.validate}
 				class="flex flex-col gap-4"
 			>
 				<Field.Field data-invalid={isInvalid(signIn.fields.email.issues())}>

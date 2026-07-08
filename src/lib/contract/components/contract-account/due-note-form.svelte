@@ -47,6 +47,7 @@
 					console.error(err);
 				}
 			})}
+			onfocusout={form.validate}
 		>
 			<input hidden {...form.fields.contract_id.as('number', contractId)} />
 			<div class="grid gap-4 py-4">

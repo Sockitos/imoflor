@@ -56,6 +56,7 @@
 					console.error(err);
 				}
 			})}
+			onfocusout={form.validate}
 			class="flex flex-col gap-8 px-4"
 		>
 			{#if tenant?.id != null}
