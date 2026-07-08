@@ -52,6 +52,7 @@
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-6 px-4 py-4"
 		>
 			<input hidden {...form.fields.contract_id.as('number', contractId)} />
