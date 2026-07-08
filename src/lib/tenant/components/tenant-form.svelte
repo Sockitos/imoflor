@@ -7,6 +7,7 @@
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
@@ -15,7 +16,6 @@
 	import { tenantSchema } from '../schemas';
 	import { upsertTenant } from '../tenant.remote';
 	import type { Tenant } from '../types';
-	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -56,6 +56,7 @@
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
 			{#if tenant?.id != null}

@@ -107,6 +107,7 @@
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-6 px-4 pb-4"
 		>
 			{#if contract?.id != null}
