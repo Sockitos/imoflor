@@ -49,7 +49,7 @@
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center justify-between">
 		<Input placeholder="Search..." bind:value={globalFilter} class="w-[150px] lg:w-[250px]" />
-		{#if selectedTenantIds.length > 1}
+		{#if selectedTenantIds.length}
 			<Button variant="destructive" size="sm" onclick={() => (openBulkDelete = true)}>
 				<Trash2 class="mr-2 h-4 w-4" />
 				Delete ({selectedTenantIds.length})
