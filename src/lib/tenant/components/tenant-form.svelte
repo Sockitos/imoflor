@@ -50,7 +50,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);

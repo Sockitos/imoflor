@@ -5,17 +5,17 @@
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { propertySchema } from '../schemas';
 	import { upsertProperty } from '../property.remote';
+	import { propertySchema } from '../schemas';
+	import type { Property } from '../types';
 	import {
 		propertyClassOptions,
 		propertyTypeOptions,
 		type PropertyClass,
 		type PropertyType,
 	} from '../types';
-	import type { Property } from '../types';
-	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -48,7 +48,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
