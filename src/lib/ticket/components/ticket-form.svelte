@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
+	import { getPropertyOptions } from '@/property/property.remote';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
@@ -9,21 +10,20 @@
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
+	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { ticketSchema } from '../schemas';
 	import { upsertTicket } from '../ticket.remote';
+	import type { Ticket } from '../types';
 	import {
 		ticketPriorityOptions,
 		ticketStatusOptions,
 		type TicketPriority,
 		type TicketStatus,
 	} from '../types';
-	import type { Ticket } from '../types';
-	import { Spinner } from '@/shared/components/ui/spinner';
-	import { getPropertyOptions } from '@/property/property.remote';
-	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -65,7 +65,7 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
