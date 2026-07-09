@@ -2,7 +2,7 @@ import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { deleteByIdsSchema, idSchema } from '@/shared/schemas';
+import { deleteByIdsSchema } from '@/shared/schemas';
 import {
 	contractSchema,
 	createDueNoteSchema,
