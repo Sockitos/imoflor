@@ -4,10 +4,12 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import {
 	deleteFractionSchema,
+	deleteFractionsSchema,
 	deletePropertySchema,
 	fractionSchema,
 	propertySchema,
 } from './schemas';
+import { deleteByIdsSchema } from '@/shared/schemas';
 import type { Fraction, Property, PropertyOption } from './types';
 
 export const getProperties = query<Property[]>(async () => {
@@ -130,6 +132,23 @@ export const deleteProperty = form(deletePropertySchema, async ({ id }) => {
 	return redirect(302, '/properties');
 });
 
+export const deleteProperties = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('properties').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Properties deleted successfully' }, cookies);
+	getProperties().refresh();
+});
+
 export const getFractions = query(z.number(), async (parentId): Promise<Fraction[]> => {
 	const {
 		locals: { supabase },
@@ -238,6 +257,23 @@ export const deleteFraction = form(deleteFractionSchema, async ({ id, parent_id 
 	getFractions(parent_id).refresh();
 
 	return redirect(302, `/properties/${parent_id}`);
+});
+
+export const deleteFractions = form(deleteFractionsSchema, async ({ ids, parent_id }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('properties').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Fractions deleted successfully' }, cookies);
+	getFractions(parent_id).refresh();
 });
 
 export const getPropertyOptions = query<PropertyOption[]>(async () => {

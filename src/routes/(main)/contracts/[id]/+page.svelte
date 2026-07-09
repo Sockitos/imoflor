@@ -260,7 +260,7 @@
 					<svelte:boundary>
 						{@const contractAccount = await getContractAccount(contractId)}
 
-						<ContractAccountTable {contractAccount} />
+						<ContractAccountTable {contractAccount} {contractId} />
 
 						{#snippet pending()}
 							<div class="flex items-center justify-center px-4 py-6 lg:px-8">

@@ -167,7 +167,7 @@
 				<svelte:boundary>
 					{@const movements = await getMovements(tenant.tax_id_number)}
 
-					<MovementTable {movements} />
+					<MovementTable {movements} taxIdNumber={tenant.tax_id_number} />
 
 					{#snippet pending()}
 						<div class="flex items-center justify-center px-4 py-6 lg:px-8">

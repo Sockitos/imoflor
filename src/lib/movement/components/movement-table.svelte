@@ -1,18 +1,24 @@
 <script lang="ts">
 	import { createSvelteTable, FlexRender } from '@/shared/components/ui/data-table';
+	import { Button } from '@/shared/components/ui/button';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import { Trash2 } from 'lucide-svelte';
 	import type { Movement } from '../types';
 	import { columns } from './movement-columns';
+	import MovementBulkDeleteDialog from './movement-bulk-delete-dialog.svelte';
 
 	interface Props {
 		movements: Movement[];
+		taxIdNumber: string;
 	}
 
-	let { movements }: Props = $props();
+	let { movements, taxIdNumber }: Props = $props();
 
 	let globalFilter = $state('');
+	let rowSelection = $state<Record<string, boolean>>({});
+	let openBulkDelete = $state(false);
 
 	const table = createSvelteTable({
 		get data() {
@@ -23,17 +29,33 @@
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		onGlobalFilterChange: (value) => (globalFilter = value),
+		onRowSelectionChange: (updater) => {
+			rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+		},
 		state: {
 			get globalFilter() {
 				return globalFilter;
 			},
+			get rowSelection() {
+				return rowSelection;
+			},
 		},
 	});
+
+	const selectedMovementIds = $derived(
+		table.getSelectedRowModel().rows.map((row) => row.original.id)
+	);
 </script>
 
 <div class="flex flex-col gap-y-4">
-	<div class="flex flex-row items-center">
+	<div class="flex flex-row items-center justify-between">
 		<Input placeholder="Search..." bind:value={globalFilter} class="w-[150px] lg:w-[250px]" />
+		{#if selectedMovementIds.length}
+			<Button variant="destructive" size="sm" onclick={() => (openBulkDelete = true)}>
+				<Trash2 class="mr-2 h-4 w-4" />
+				Delete ({selectedMovementIds.length})
+			</Button>
+		{/if}
 	</div>
 	<div class="rounded-md border">
 		<Table.Root>
@@ -71,3 +93,10 @@
 		</Table.Root>
 	</div>
 </div>
+
+<MovementBulkDeleteDialog
+	bind:open={openBulkDelete}
+	movementIds={selectedMovementIds}
+	{taxIdNumber}
+	onSuccess={() => table.toggleAllPageRowsSelected(false)}
+/>

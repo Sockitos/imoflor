@@ -2,6 +2,7 @@ import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { deleteByIdsSchema, idSchema } from '@/shared/schemas';
 import {
 	contractSchema,
 	createDueNoteSchema,
@@ -9,6 +10,7 @@ import {
 	createInstallmentUpdateSchema,
 	createRentPaymentSchema,
 	createRentUpdateSchema,
+	deleteContractAccountItemsSchema,
 	deleteContractSchema,
 } from './schemas';
 import type { Contract, ContractAccountItem, InstallmentUpdate, RentUpdate } from './types';
@@ -201,6 +203,46 @@ export const deleteContract = form(deleteContractSchema, async ({ id }) => {
 
 	return redirect(302, '/contracts');
 });
+
+export const deleteContracts = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('contracts').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Contracts deleted successfully' }, cookies);
+	getContracts().refresh();
+});
+
+export const deleteContractAccountItems = form(
+	deleteContractAccountItemsSchema,
+	async ({ ids, contract_id }) => {
+		const {
+			locals: { supabase },
+			cookies,
+		} = getRequestEvent();
+
+		const { error: deleteError } = await supabase
+			.from('contracts_accounts_view')
+			.delete()
+			.in('id', ids);
+
+		if (deleteError) {
+			setFlash({ type: 'error', message: deleteError.message }, cookies);
+			error(500, deleteError.message);
+		}
+
+		setFlash({ type: 'success', message: 'Items deleted successfully' }, cookies);
+		getContractAccount(contract_id).refresh();
+	}
+);
 
 export const createRentUpdate = form(
 	createRentUpdateSchema,

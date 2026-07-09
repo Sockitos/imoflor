@@ -1,4 +1,4 @@
-import { addressSchema, deleteByIdSchema, idSchema } from '@/shared/schemas';
+import { addressSchema, deleteByIdSchema, deleteByIdsSchema, idSchema } from '@/shared/schemas';
 import { z } from 'zod';
 import { fractionTypeValues, propertyClassValues, propertyTypeValues } from './types';
 
@@ -47,5 +47,10 @@ export const deleteFractionSchema = z.object({
 	parent_id: idSchema,
 });
 
+export const deleteFractionsSchema = deleteByIdsSchema.extend({
+	parent_id: idSchema,
+});
+
 export type FractionSchema = typeof fractionSchema;
 export type DeleteFractionSchema = typeof deleteFractionSchema;
+export type DeleteFractionsSchema = typeof deleteFractionsSchema;

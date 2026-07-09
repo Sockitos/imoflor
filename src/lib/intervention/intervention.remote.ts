@@ -1,5 +1,6 @@
 import { command, form, getRequestEvent, query, requested } from '$app/server';
 import { generateRankBetween } from '@/shared/utils';
+import { deleteByIdsSchema } from '@/shared/schemas';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
@@ -125,4 +126,20 @@ export const deleteIntervention = form(deleteInterventionSchema, async ({ id }) 
 	getInterventions().refresh();
 
 	return redirect(302, '/interventions');
+});
+
+export const deleteExpenses = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('movements').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Expenses deleted successfully' }, cookies);
 });
