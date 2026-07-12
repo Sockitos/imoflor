@@ -5,17 +5,17 @@
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { fractionSchema } from '../schemas';
 	import { upsertFraction } from '../property.remote';
+	import { fractionSchema } from '../schemas';
+	import type { Fraction, Property } from '../types';
 	import {
 		fractionTypeOptions,
 		propertyClassOptions,
 		type FractionType,
 		type PropertyClass,
 	} from '../types';
-	import type { Fraction, Property } from '../types';
-	import { Spinner } from '@/shared/components/ui/spinner';
 
 	type Props =
 		| {
@@ -59,12 +59,13 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
 			{#if propertyOrFraction.fraction?.id != null}

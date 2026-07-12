@@ -19,3 +19,7 @@ export const addressSchema = z.object({
 export const genderSchema = z.enum(genderValues);
 
 export const maritalStatusSchema = z.enum(maritalStatusValues);
+
+export const deleteByIdsSchema = z.object({
+	ids: z.array(idSchema),
+});

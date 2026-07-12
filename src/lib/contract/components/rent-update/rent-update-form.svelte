@@ -6,13 +6,13 @@
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { createRentUpdateSchema } from '../../schemas';
 	import { createRentUpdate, getRentUpdates } from '../../contract.remote';
-	import { Spinner } from '@/shared/components/ui/spinner';
+	import { createRentUpdateSchema } from '../../schemas';
 
 	interface Props {
 		open?: boolean;
@@ -46,12 +46,13 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						f.form.reset();
+						f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-6 px-4 py-4"
 		>
 			<input hidden {...form.fields.contract_id.as('number', contractId)} />

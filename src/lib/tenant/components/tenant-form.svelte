@@ -7,6 +7,7 @@
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
 	import { cn } from '@/shared/utils';
@@ -15,7 +16,6 @@
 	import { tenantSchema } from '../schemas';
 	import { upsertTenant } from '../tenant.remote';
 	import type { Tenant } from '../types';
-	import { Spinner } from '@/shared/components/ui/spinner';
 
 	interface Props {
 		open?: boolean;
@@ -50,12 +50,13 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
 			{#if tenant?.id != null}
@@ -424,7 +425,7 @@
 				</Field.FieldGroup>
 			</Field.FieldSet>
 
-			<div class="flex flex-row items-center justify-end gap-4 pt-2">
+			<Sheet.Footer class="flex flex-row items-center justify-end gap-4 px-0 pt-0">
 				<Button
 					variant="ghost"
 					onclick={(e) => {
@@ -440,7 +441,7 @@
 					{/if}
 					Submit
 				</Button>
-			</div>
+			</Sheet.Footer>
 		</form>
 	</Sheet.Content>
 </Sheet.Root>

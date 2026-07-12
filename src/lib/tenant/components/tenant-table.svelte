@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { createSvelteTable, FlexRender } from '@/shared/components/ui/data-table';
+	import { Button } from '@/shared/components/ui/button';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
 	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
-	import { writable } from 'svelte/store';
+	import { Trash2 } from 'lucide-svelte';
 	import type { Tenant } from '../types';
 	import { columns } from './tenant-columns';
+	import TenantBulkDeleteDialog from './tenant-bulk-delete-dialog.svelte';
 
 	interface Props {
 		tenants: Tenant[];
@@ -13,7 +15,9 @@
 
 	let { tenants }: Props = $props();
 
-	const globalFilter = writable('');
+	let globalFilter = $state<string>('');
+	let rowSelection = $state<Record<string, boolean>>({});
+	let openBulkDelete = $state(false);
 
 	const table = createSvelteTable({
 		get data() {
@@ -23,18 +27,34 @@
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
-		onGlobalFilterChange: globalFilter.set,
+		onGlobalFilterChange: (value) => (globalFilter = value),
+		onRowSelectionChange: (updater) => {
+			rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+		},
 		state: {
 			get globalFilter() {
-				return $globalFilter;
+				return globalFilter;
+			},
+			get rowSelection() {
+				return rowSelection;
 			},
 		},
 	});
+
+	const selectedTenantIds = $derived(
+		table.getSelectedRowModel().rows.map((row) => row.original.id)
+	);
 </script>
 
 <div class="flex flex-col gap-y-4">
-	<div class="flex flex-row items-center">
-		<Input placeholder="Search..." bind:value={$globalFilter} class="w-[150px] lg:w-[250px]" />
+	<div class="flex flex-row items-center justify-between">
+		<Input placeholder="Search..." bind:value={globalFilter} class="w-[150px] lg:w-[250px]" />
+		{#if selectedTenantIds.length}
+			<Button variant="destructive" size="sm" onclick={() => (openBulkDelete = true)}>
+				<Trash2 class="mr-2 h-4 w-4" />
+				Delete ({selectedTenantIds.length})
+			</Button>
+		{/if}
 	</div>
 	<div class="rounded-md border">
 		<Table.Root>
@@ -72,3 +92,9 @@
 		</Table.Root>
 	</div>
 </div>
+
+<TenantBulkDeleteDialog
+	bind:open={openBulkDelete}
+	tenantIds={selectedTenantIds}
+	onSuccess={() => table.toggleAllPageRowsSelected(false)}
+/>
