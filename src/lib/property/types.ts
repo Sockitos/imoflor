@@ -73,5 +73,6 @@ export type PropertyOption = {
 	matrix: string;
 	type: PropertyType;
 	address: string;
+	fraction: string | null;
 	children?: PropertyOption[];
 };
