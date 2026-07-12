@@ -42,16 +42,20 @@
 		},
 	});
 
-	const selectedItemIds = $derived(table.getSelectedRowModel().rows.map((row) => row.original.id));
+	const selectedItems = $derived(
+		table
+			.getSelectedRowModel()
+			.rows.map((row) => ({ id: row.original.id, type: row.original.type }))
+	);
 </script>
 
 <div class="flex flex-col gap-y-4">
 	<div class="flex flex-row items-center justify-between">
 		<Input placeholder="Search..." bind:value={globalFilter} class="w-[150px] lg:w-[250px]" />
-		{#if selectedItemIds.length}
+		{#if selectedItems.length}
 			<Button variant="destructive" size="sm" onclick={() => (openBulkDelete = true)}>
 				<Trash2 class="mr-2 h-4 w-4" />
-				Delete ({selectedItemIds.length})
+				Delete ({selectedItems.length})
 			</Button>
 		{/if}
 	</div>
@@ -94,7 +98,7 @@
 
 <ContractAccountBulkDeleteDialog
 	bind:open={openBulkDelete}
-	itemIds={selectedItemIds}
+	items={selectedItems}
 	{contractId}
 	onSuccess={() => table.toggleAllPageRowsSelected(false)}
 />

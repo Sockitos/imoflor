@@ -5,16 +5,16 @@
 
 	interface Props {
 		open?: boolean;
-		itemIds: number[];
+		items: { id: number; type: string }[];
 		contractId: number;
 		onSuccess: () => void;
 	}
 
-	let { open = $bindable(false), itemIds, contractId, onSuccess }: Props = $props();
+	let { open = $bindable(false), items, contractId, onSuccess }: Props = $props();
 
-	const deleteForm = $derived(
-		deleteContractAccountItems.for(`${contractId}-${itemIds.toString()}`)
-	);
+	const ids = $derived(items.map((i) => i.id));
+
+	const deleteForm = $derived(deleteContractAccountItems.for(`${contractId}-${ids.toString()}`));
 
 	let formElement: HTMLFormElement | undefined = $state();
 </script>
@@ -29,8 +29,9 @@
 			}
 		})}
 	>
-		{#each itemIds as id, i (id)}
-			<input hidden {...deleteForm.fields.ids[i].as('number', id)} />
+		{#each items as item, i ((item.id, item.type))}
+			<input hidden {...deleteForm.fields.ids[i].as('number', item.id)} />
+			<input hidden {...deleteForm.fields.types[i].as('text', item.type)} />
 		{/each}
 		<input hidden {...deleteForm.fields.contract_id.as('number', contractId)} />
 	</form>
@@ -38,8 +39,8 @@
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
 			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete {itemIds.length} account items and
-				remove their data from our servers.
+				This action cannot be undone. This will permanently delete {items.length} account items and remove
+				their data from our servers.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

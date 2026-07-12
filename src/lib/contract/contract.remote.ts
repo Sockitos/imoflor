@@ -223,16 +223,17 @@ export const deleteContracts = form(deleteByIdsSchema, async ({ ids }) => {
 
 export const deleteContractAccountItems = form(
 	deleteContractAccountItemsSchema,
-	async ({ ids, contract_id }) => {
+	async ({ ids, types, contract_id }) => {
 		const {
 			locals: { supabase },
 			cookies,
 		} = getRequestEvent();
 
-		const { error: deleteError } = await supabase
-			.from('contracts_accounts_view')
-			.delete()
-			.in('id', ids);
+		const { error: deleteError } = await supabase.rpc('delete_contract_account_items', {
+			p_contract_id: contract_id,
+			p_ids: ids,
+			p_types: types,
+		});
 
 		if (deleteError) {
 			setFlash({ type: 'error', message: deleteError.message }, cookies);

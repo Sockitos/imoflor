@@ -414,11 +414,19 @@ LANGUAGE plpgsql;
 CREATE FUNCTION public.remove_rent_payment()
   RETURNS TRIGGER
   AS $$
+DECLARE
+  v_movement_id bigint;
 BEGIN
+  SELECT movement_id INTO v_movement_id
+  FROM public.rent_payments
+  WHERE id = OLD.id;
+
   DELETE FROM public.rent_payments
   WHERE id = OLD.id;
+
   DELETE FROM public.movements
-  WHERE id = OLD.movement_id;
+  WHERE id = v_movement_id;
+
   RETURN old;
 END;
 $$
@@ -451,14 +459,58 @@ LANGUAGE plpgsql;
 CREATE FUNCTION public.remove_installment_payment()
   RETURNS TRIGGER
   AS $$
+DECLARE
+  v_interest_movement_id bigint;
+  v_amortization_movement_id bigint;
 BEGIN
+  SELECT interest_movement_id, amortization_movement_id
+    INTO v_interest_movement_id, v_amortization_movement_id
+  FROM public.installment_payments
+  WHERE id = OLD.id;
+
   DELETE FROM public.installment_payments
   WHERE id = OLD.id;
+
   DELETE FROM public.movements
-  WHERE id = OLD.interest_movement_id;
+  WHERE id = v_interest_movement_id;
+
   DELETE FROM public.movements
-  WHERE id = OLD.amortization_movement_id;
+  WHERE id = v_amortization_movement_id;
+
   RETURN old;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE FUNCTION public.delete_contract_account_items(
+  p_contract_id bigint,
+  p_ids bigint[],
+  p_types text[]
+)
+  RETURNS void
+  AS $$
+BEGIN
+  DELETE FROM public.due_notes
+  WHERE contract_id = p_contract_id
+    AND id IN (
+      SELECT unnest_id
+      FROM unnest(p_ids, p_types) AS t(unnest_id, unnest_type)
+      WHERE unnest_type = 'due_note'
+    );
+  DELETE FROM public.rent_payments_view
+  WHERE contract_id = p_contract_id
+    AND id IN (
+      SELECT unnest_id
+      FROM unnest(p_ids, p_types) AS t(unnest_id, unnest_type)
+      WHERE unnest_type = 'payment'
+    );
+  DELETE FROM public.installment_payments_view
+  WHERE contract_id = p_contract_id
+    AND id IN (
+      SELECT unnest_id
+      FROM unnest(p_ids, p_types) AS t(unnest_id, unnest_type)
+      WHERE unnest_type = 'payment'
+    );
 END;
 $$
 LANGUAGE plpgsql;

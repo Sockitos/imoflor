@@ -82,6 +82,7 @@ export const contractAccountItemSchema = z.object({
 
 export const deleteContractAccountItemsSchema = deleteByIdsSchema.extend({
 	contract_id: idSchema,
+	types: z.array(contractAccountTypeSchema),
 });
 
 export type ContractSchema = typeof contractSchema;
