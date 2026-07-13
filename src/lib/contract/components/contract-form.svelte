@@ -1,4 +1,6 @@
 <script lang="ts">
+	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
+	import { getPropertyOptions } from '@/property/property.remote';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
 	import { Button, buttonVariants } from '@/shared/components/ui/button';
 	import { Calendar } from '@/shared/components/ui/calendar';
@@ -7,18 +9,16 @@
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
+	import { Spinner } from '@/shared/components/ui/spinner';
 	import * as Tabs from '@/shared/components/ui/tabs';
 	import { cn } from '@/shared/utils';
+	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
+	import { getTenantOptions } from '@/tenant/tenant.remote';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { contractSchema } from '../schemas';
 	import { upsertContract } from '../contract.remote';
+	import { contractSchema } from '../schemas';
 	import { contractTypeValues, type Contract, type ContractType } from '../types';
-	import { getPropertyOptions } from '@/property/property.remote';
-	import { getTenantOptions } from '@/tenant/tenant.remote';
-	import { Spinner } from '@/shared/components/ui/spinner';
-	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
-	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 
 	interface Props {
 		open?: boolean;
@@ -101,12 +101,13 @@
 				try {
 					if (await f.submit()) {
 						open = false;
-						if (!isEdit) f.form.reset();
+						if (!isEdit) f.element.reset();
 					}
 				} catch (err) {
 					console.error(err);
 				}
 			})}
+			onfocusout={() => form.validate()}
 			class="flex flex-col gap-6 px-4 pb-4"
 		>
 			{#if contract?.id != null}

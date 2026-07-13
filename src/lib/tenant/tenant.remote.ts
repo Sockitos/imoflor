@@ -1,5 +1,5 @@
 import { form, getRequestEvent, query } from '$app/server';
-import { deleteByIdSchema } from '@/shared/schemas';
+import { deleteByIdSchema, deleteByIdsSchema } from '@/shared/schemas';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
@@ -134,4 +134,21 @@ export const getTenantOptions = query<TenantOption[]>(async () => {
 	}
 
 	return tenants;
+});
+
+export const deleteTenants = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('tenants').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Tenants deleted successfully' }, cookies);
+	getTenants().refresh();
 });
