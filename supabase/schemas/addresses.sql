@@ -1,6 +1,6 @@
 -- =============================================
 -- SCHEMA: Addresses
--- DESCRIPTION: ...
+-- DESCRIPTION: ... teste
 -- =============================================
 -- Tables
 CREATE TABLE public.addresses(
