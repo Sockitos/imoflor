@@ -102,10 +102,10 @@
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 					<Table.Row>
 					{#each headerGroup.headers as header (header.id)}
-						<Table.Head
-							style={getColumnStyle(header.column)}
-							class={header.column.getIsPinned() ? 'bg-background' : undefined}
-						>
+					<Table.Head
+						style={getColumnStyle(header.column)}
+						class="border-r last:border-r-0 {header.column.getIsPinned() ? 'bg-background' : ''}"
+					>
 							{#if !header.isPlaceholder}
 								<FlexRender
 									content={header.column.columnDef.header}
