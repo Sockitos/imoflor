@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'supabase/**'
+      - "supabase/**"
   pull_request:
     types: [opened, reopened, synchronize]
 
@@ -19,7 +19,7 @@ jobs:
     outputs:
       supabase: ${{ steps.filter.outputs.supabase }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check for supabase changes
@@ -38,8 +38,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: supabase/setup-cli@v2
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
@@ -56,8 +56,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: supabase/setup-cli@v2
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
@@ -80,8 +80,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
-      - uses: supabase/setup-cli@v2
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
         with:
           version: latest
 
