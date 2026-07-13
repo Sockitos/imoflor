@@ -214,7 +214,7 @@
 	}
 </script>
 
-<div class="flex gap-4 overflow-x-auto">
+<div class="flex min-h-0 gap-4 overflow-x-auto">
 	{#each columns as col (col.id)}
 		{@const colCards = columnCards(col.id)}
 
