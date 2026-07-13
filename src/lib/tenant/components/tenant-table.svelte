@@ -3,7 +3,13 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { Input } from '@/shared/components/ui/input';
 	import * as Table from '@/shared/components/ui/table';
-	import { getCoreRowModel, getFilteredRowModel, getSortedRowModel } from '@tanstack/table-core';
+	import {
+		getCoreRowModel,
+		getFilteredRowModel,
+		getSortedRowModel,
+		type ColumnPinningState,
+		type SortingState,
+	} from '@tanstack/table-core';
 	import { Trash2 } from 'lucide-svelte';
 	import type { Tenant } from '../types';
 	import { columns } from './tenant-columns';
@@ -17,6 +23,8 @@
 
 	let globalFilter = $state<string>('');
 	let rowSelection = $state<Record<string, boolean>>({});
+	let columnPinning = $state<ColumnPinningState>({});
+	let sorting = $state<SortingState>([]);
 	let openBulkDelete = $state(false);
 
 	const table = createSvelteTable({
@@ -31,6 +39,12 @@
 		onRowSelectionChange: (updater) => {
 			rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
 		},
+		onColumnPinningChange: (updater) => {
+			columnPinning = typeof updater === 'function' ? updater(columnPinning) : updater;
+		},
+		onSortingChange: (updater) => {
+			sorting = typeof updater === 'function' ? updater(sorting) : updater;
+		},
 		state: {
 			get globalFilter() {
 				return globalFilter;
@@ -38,8 +52,34 @@
 			get rowSelection() {
 				return rowSelection;
 			},
+			get columnPinning() {
+				return columnPinning;
+			},
+			get sorting() {
+				return sorting;
+			},
 		},
 	});
+
+	function getColumnStyle(column: {
+		getIsPinned: () => false | 'left' | 'right';
+		getStart: (pos: 'left') => number;
+		getAfter: (pos: 'right') => number;
+		columnDef: { size?: number };
+		getSize: () => number;
+	}) {
+		const parts: string[] = [];
+		if (column.columnDef.size !== undefined) {
+			parts.push(`width: ${column.getSize()}px`);
+		}
+		const pinned = column.getIsPinned();
+		if (pinned === 'left') {
+			parts.push(`position: sticky; left: ${column.getStart('left')}px; z-index: 1`);
+		} else if (pinned === 'right') {
+			parts.push(`position: sticky; right: ${column.getAfter('right')}px; z-index: 1`);
+		}
+		return parts.length ? parts.join('; ') : undefined;
+	}
 
 	const selectedTenantIds = $derived(
 		table.getSelectedRowModel().rows.map((row) => row.original.id)
@@ -56,32 +96,38 @@
 			</Button>
 		{/if}
 	</div>
-	<div class="rounded-md border">
-		<Table.Root>
+	<div class="overflow-x-auto rounded-md border">
+		<Table.Root class="w-full">
 			<Table.Header>
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
 					<Table.Row>
-						{#each headerGroup.headers as header (header.id)}
-							<Table.Head>
-								{#if !header.isPlaceholder}
-									<FlexRender
-										content={header.column.columnDef.header}
-										context={header.getContext()}
-									/>
-								{/if}
-							</Table.Head>
-						{/each}
+					{#each headerGroup.headers as header (header.id)}
+						<Table.Head
+							style={getColumnStyle(header.column)}
+							class={header.column.getIsPinned() ? 'bg-background' : undefined}
+						>
+							{#if !header.isPlaceholder}
+								<FlexRender
+									content={header.column.columnDef.header}
+									context={header.getContext()}
+								/>
+							{/if}
+						</Table.Head>
+					{/each}
 					</Table.Row>
 				{/each}
 			</Table.Header>
 			<Table.Body>
 				{#each table.getRowModel().rows as row (row.id)}
 					<Table.Row data-state={row.getIsSelected() && 'selected'}>
-						{#each row.getVisibleCells() as cell (cell.id)}
-							<Table.Cell>
-								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-							</Table.Cell>
-						{/each}
+					{#each row.getVisibleCells() as cell (cell.id)}
+						<Table.Cell
+							style={getColumnStyle(cell.column)}
+							class={cell.column.getIsPinned() ? 'bg-background' : undefined}
+						>
+							<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+						</Table.Cell>
+					{/each}
 					</Table.Row>
 				{:else}
 					<Table.Row>
