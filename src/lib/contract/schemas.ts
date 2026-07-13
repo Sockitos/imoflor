@@ -1,4 +1,4 @@
-import { deleteByIdSchema, idSchema } from '@/shared/schemas';
+import { deleteByIdSchema, deleteByIdsSchema, idSchema } from '@/shared/schemas';
 import { z } from 'zod';
 import { contractAccountTypeValues } from './types';
 
@@ -78,6 +78,11 @@ export const contractAccountItemSchema = z.object({
 	date: z.string().min(1, 'Date is required'),
 	value: z.number(),
 	type: contractAccountTypeSchema,
+});
+
+export const deleteContractAccountItemsSchema = deleteByIdsSchema.extend({
+	contract_id: idSchema,
+	types: z.array(contractAccountTypeSchema),
 });
 
 export type ContractSchema = typeof contractSchema;

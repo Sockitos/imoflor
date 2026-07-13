@@ -2,6 +2,7 @@ import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { deleteByIdsSchema } from '@/shared/schemas';
 import { deleteEmployeeSchema, employeeSchema } from './schemas';
 import type { Employee } from './types';
 
@@ -122,4 +123,21 @@ export const deleteEmployee = form(deleteEmployeeSchema, async ({ id }) => {
 	getEmployees().refresh();
 
 	return redirect(302, '/employees');
+});
+
+export const deleteEmployees = form(deleteByIdsSchema, async ({ ids }) => {
+	const {
+		locals: { supabase },
+		cookies,
+	} = getRequestEvent();
+
+	const { error: deleteError } = await supabase.from('employees').delete().in('id', ids);
+
+	if (deleteError) {
+		setFlash({ type: 'error', message: deleteError.message }, cookies);
+		error(500, deleteError.message);
+	}
+
+	setFlash({ type: 'success', message: 'Employees deleted successfully' }, cookies);
+	getEmployees().refresh();
 });

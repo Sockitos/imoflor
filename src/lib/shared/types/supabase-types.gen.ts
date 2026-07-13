@@ -1094,6 +1094,10 @@ export type Database = {
       }
     }
     Functions: {
+      delete_contract_account_items: {
+        Args: { p_contract_id: number; p_ids: number[]; p_types: string[] }
+        Returns: undefined
+      }
       update_contract_tenants: {
         Args: { p_contract_id: number; p_tenants: number[] }
         Returns: undefined

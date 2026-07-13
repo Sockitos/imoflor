@@ -156,7 +156,7 @@
 				<svelte:boundary>
 					{@const fractions = await getFractions(propertyId)}
 
-					<FractionTable {fractions} />
+					<FractionTable {fractions} parentId={propertyId} />
 
 					{#snippet pending()}
 						<div class="flex items-center justify-center px-4 py-6 lg:px-8">

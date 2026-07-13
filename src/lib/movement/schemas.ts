@@ -1,4 +1,4 @@
-import { deleteByIdSchema, idSchema } from '@/shared/schemas';
+import { deleteByIdSchema, deleteByIdsSchema, idSchema } from '@/shared/schemas';
 import { z } from 'zod';
 import { movementTypeValues } from './types';
 
@@ -19,6 +19,10 @@ export const updateMovementSchema = movementSchema.partial().extend({
 });
 
 export const deleteMovementSchema = deleteByIdSchema;
+
+export const deleteMovementsSchema = deleteByIdsSchema.extend({
+	tax_id_number: z.string(),
+});
 
 export type CreateMovementSchema = typeof createMovementSchema;
 export type UpdateMovementSchema = typeof updateMovementSchema;
