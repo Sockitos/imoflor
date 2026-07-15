@@ -314,7 +314,7 @@
 								{@const options = await getTicketOptions()}
 
 								<EntitySelector bind:entityId={ticketId} entities={options}>
-									{#snippet entityBuilder({ entity, isSelected })}
+									{#snippet entityBuilder({ entity, isSelected: _ })}
 										<TicketOptionItem option={entity} />
 									{/snippet}
 								</EntitySelector>

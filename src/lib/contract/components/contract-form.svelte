@@ -158,7 +158,7 @@
 							{@const tenantOptions = await getTenantOptions()}
 
 							<EntitySelector bind:entityId={tenantId} entities={tenantOptions}>
-								{#snippet entityBuilder({ entity, isSelected })}
+								{#snippet entityBuilder({ entity, isSelected: _ })}
 									<TenantOptionItem option={entity} />
 								{/snippet}
 							</EntitySelector>

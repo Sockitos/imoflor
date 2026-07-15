@@ -18,7 +18,7 @@
 
 	let open = $state(false);
 
-	let selectedValue = $derived(entities.find((p) => p.id === entityId));
+	let selectedEntity = $derived(entities.find((p) => p.id === entityId));
 
 	let triggerId = useId();
 
@@ -44,8 +44,8 @@
 				aria-expanded={open}
 				class="w-full justify-between px-3 font-normal"
 			>
-				{#if selectedValue != null}
-					{@render entityBuilder({ entity: selectedValue, isSelected: true })}
+				{#if selectedEntity != null}
+					{@render entityBuilder({ entity: selectedEntity, isSelected: true })}
 				{:else}
 					Select...
 				{/if}
