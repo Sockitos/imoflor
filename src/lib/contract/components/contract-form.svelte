@@ -122,21 +122,9 @@
 						<svelte:boundary>
 							{@const options = await getPropertyOptions()}
 
-							<EntitySelector bind:entityId={propertyId} {options}>
-								{#snippet displayOption(option)}
-									<PropertyOptionItem
-										type={option.type}
-										address={option.address + (option.fraction ? `, ${option.fraction}` : '')}
-										matrix={option.matrix}
-									/>
-								{/snippet}
-								{#snippet children(option)}
-									<PropertyOptionItem
-										type={option.type}
-										address={option.fraction ? option.fraction : option.address}
-										matrix={option.matrix}
-										indent={!option.children}
-									/>
+							<EntitySelector bind:entityId={propertyId} entities={options}>
+								{#snippet entityBuilder({ entity, isSelected })}
+									<PropertyOptionItem option={entity} {isSelected} />
 								{/snippet}
 							</EntitySelector>
 
@@ -169,12 +157,9 @@
 						<svelte:boundary>
 							{@const tenantOptions = await getTenantOptions()}
 
-							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
-								{#snippet displayOption(option)}
-									<TenantOptionItem {option} />
-								{/snippet}
-								{#snippet children(option)}
-									<TenantOptionItem {option} />
+							<EntitySelector bind:entityId={tenantId} entities={tenantOptions}>
+								{#snippet entityBuilder({ entity, isSelected })}
+									<TenantOptionItem option={entity} />
 								{/snippet}
 							</EntitySelector>
 

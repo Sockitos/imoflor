@@ -10,16 +10,15 @@
 
 	interface Props {
 		entityId?: Id;
-		options: TEntity[];
-		displayOption: Snippet<[TEntity]>;
-		children: Snippet<[TEntity]>;
+		entities: TEntity[];
+		entityBuilder: Snippet<[{ entity: TEntity; isSelected: boolean }]>;
 	}
 
-	let { entityId = $bindable(), options, displayOption, children }: Props = $props();
+	let { entityId = $bindable(), entities, entityBuilder }: Props = $props();
 
 	let open = $state(false);
 
-	let selectedValue = $derived(options.find((p) => p.id === entityId));
+	let selectedValue = $derived(entities.find((p) => p.id === entityId));
 
 	let triggerId = useId();
 
@@ -46,7 +45,7 @@
 				class="w-full justify-between px-3 font-normal"
 			>
 				{#if selectedValue != null}
-					{@render displayOption(selectedValue)}
+					{@render entityBuilder({ entity: selectedValue, isSelected: true })}
 				{:else}
 					Select...
 				{/if}
@@ -59,16 +58,16 @@
 			<Command.Input placeholder="Search options..." />
 			<Command.List>
 				<Command.Empty>No options found.</Command.Empty>
-				{#each options as option (option.id)}
+				{#each entities as entity (entity.id)}
 					<Command.Item
 						class="aria-selected:bg-primary aria-selected:text-primary-foreground"
-						data-checked={entityId === option.id}
+						data-checked={entityId === entity.id}
 						onSelect={() => {
-							entityId = option.id;
+							entityId = entity.id;
 							closeAndFocusTrigger(triggerId);
 						}}
 					>
-						{@render children(option)}
+						{@render entityBuilder({ entity, isSelected: false })}
 					</Command.Item>
 				{/each}
 			</Command.List>
