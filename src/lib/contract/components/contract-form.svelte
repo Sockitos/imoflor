@@ -121,17 +121,10 @@
 					<Field.FieldContent>
 						<svelte:boundary>
 							{@const options = await getPropertyOptions()}
-							{@const spreadOptions = options.flatMap((option) => [
-								option,
-								...(option.children ?? []),
-							])}
 
-							<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
-								{#snippet displayOption(option)}
-									<PropertyOptionItem {option} />
-								{/snippet}
-								{#snippet children(option)}
-									<PropertyOptionItem {option} indent={!option.children} />
+							<EntitySelector bind:entityId={propertyId} entities={options}>
+								{#snippet entityBuilder({ entity, isSelected })}
+									<PropertyOptionItem option={entity} {isSelected} />
 								{/snippet}
 							</EntitySelector>
 
@@ -164,12 +157,9 @@
 						<svelte:boundary>
 							{@const tenantOptions = await getTenantOptions()}
 
-							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
-								{#snippet displayOption(option)}
-									<TenantOptionItem {option} />
-								{/snippet}
-								{#snippet children(option)}
-									<TenantOptionItem {option} />
+							<EntitySelector bind:entityId={tenantId} entities={tenantOptions}>
+								{#snippet entityBuilder({ entity, isSelected: _ })}
+									<TenantOptionItem option={entity} />
 								{/snippet}
 							</EntitySelector>
 
