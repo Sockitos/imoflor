@@ -99,13 +99,13 @@
 	<div class="overflow-x-auto rounded-md border">
 		<Table.Root class="w-full">
 			<Table.Header>
-				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-					<Table.Row>
-					{#each headerGroup.headers as header (header.id)}
-					<Table.Head
-						style={getColumnStyle(header.column)}
-						class="border-r last:border-r-0 {header.column.getIsPinned() ? 'bg-background' : ''}"
-					>
+			{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+				<Table.Row class="hover:bg-transparent">
+				{#each headerGroup.headers as header (header.id)}
+			<Table.Head
+				style={getColumnStyle(header.column)}
+				class="border-r last:border-r-0 {['select', 'actions'].includes(header.column.id) ? '' : 'cursor-pointer transition-colors hover:bg-muted/50'} {header.column.getIsPinned() ? 'bg-background' : ''}"
+			>
 							{#if !header.isPlaceholder}
 								<FlexRender
 									content={header.column.columnDef.header}

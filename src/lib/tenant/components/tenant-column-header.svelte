@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Button } from '@/shared/components/ui/button';
 	import * as DropdownMenu from '@/shared/components/ui/dropdown-menu';
 	import type { Column } from '@tanstack/table-core';
 	import {
@@ -7,7 +6,6 @@
 		ArrowLeftToLine,
 		ArrowRightToLine,
 		ArrowUpNarrowWide,
-		EllipsisVertical,
 		PinOff,
 		X,
 	} from 'lucide-svelte';
@@ -23,17 +21,24 @@
 	const sorted = $derived(column.getIsSorted());
 </script>
 
-<div class="flex items-center justify-between gap-1">
-	<span>{label}</span>
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger>
-			{#snippet child({ props })}
-				<Button variant="ghost" size="icon" class="h-6 w-6 shrink-0" {...props}>
-					<EllipsisVertical class="h-3.5 w-3.5" />
-					<span class="sr-only">Column options</span>
-				</Button>
-			{/snippet}
-		</DropdownMenu.Trigger>
+<DropdownMenu.Root>
+	<DropdownMenu.Trigger>
+		{#snippet child({ props })}
+		<div
+			role="button"
+			tabindex="0"
+			class="flex w-full cursor-pointer items-center gap-1.5 select-none"
+			{...props}
+		>
+			{label}
+			{#if sorted === 'asc'}
+				<ArrowUpNarrowWide class="h-3.5 w-3.5 shrink-0" />
+			{:else if sorted === 'desc'}
+				<ArrowDownWideNarrow class="h-3.5 w-3.5 shrink-0" />
+			{/if}
+		</div>
+		{/snippet}
+	</DropdownMenu.Trigger>
 		<DropdownMenu.Content align="end">
 			{#if sorted === 'asc'}
 				<DropdownMenu.Item onclick={() => column.clearSorting()}>
@@ -81,5 +86,4 @@
 				</DropdownMenu.Item>
 			{/if}
 		</DropdownMenu.Content>
-	</DropdownMenu.Root>
-</div>
+</DropdownMenu.Root>
