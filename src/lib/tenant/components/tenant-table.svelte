@@ -11,6 +11,7 @@
 		type SortingState,
 	} from '@tanstack/table-core';
 	import { Trash2 } from 'lucide-svelte';
+	import { persistedState, PersistedStateKey } from '@/shared/persisted-state.svelte';
 	import type { Tenant } from '../types';
 	import { columns } from './tenant-columns';
 	import TenantBulkDeleteDialog from './tenant-bulk-delete-dialog.svelte';
@@ -23,9 +24,10 @@
 
 	let globalFilter = $state<string>('');
 	let rowSelection = $state<Record<string, boolean>>({});
-	let columnPinning = $state<ColumnPinningState>({});
-	let sorting = $state<SortingState>([]);
 	let openBulkDelete = $state(false);
+
+	const columnPinning = persistedState<ColumnPinningState>(PersistedStateKey.TenantTableColumnPinning, {});
+	const sorting = persistedState<SortingState>(PersistedStateKey.TenantTableSorting, []);
 
 	const table = createSvelteTable({
 		get data() {
@@ -40,10 +42,10 @@
 			rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
 		},
 		onColumnPinningChange: (updater) => {
-			columnPinning = typeof updater === 'function' ? updater(columnPinning) : updater;
+			columnPinning.current = typeof updater === 'function' ? updater(columnPinning.current) : updater;
 		},
 		onSortingChange: (updater) => {
-			sorting = typeof updater === 'function' ? updater(sorting) : updater;
+			sorting.current = typeof updater === 'function' ? updater(sorting.current) : updater;
 		},
 		state: {
 			get globalFilter() {
@@ -53,10 +55,10 @@
 				return rowSelection;
 			},
 			get columnPinning() {
-				return columnPinning;
+				return columnPinning.current;
 			},
 			get sorting() {
-				return sorting;
+				return sorting.current;
 			},
 		},
 	});
