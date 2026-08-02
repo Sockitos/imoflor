@@ -1,17 +1,5 @@
 -- =============================================================================
 -- Core
--- Shared enums, extensions, and audit helpers.
---
--- Feature files follow this layout:
---   Enums → Tables → Triggers → Indexes → Functions → Views → Grants → Row Level Security
---
--- Audit columns (every table):
---   created_at, created_by, updated_at, updated_by
---   created_by / updated_by → public.users(id)
--- Access model: shared — authenticated users have full CRUD on all rows.
---
--- Formatting: SQL keywords and built-in functions are UPPERCASE; identifiers
--- and types remain lowercase (e.g. timestamp with time zone, public.users).
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -48,18 +36,38 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cron TO postgres;
 -- Audit helpers
 -- -----------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION public.handle_audit_columns()
+CREATE OR REPLACE FUNCTION public.system_user_id()
+  RETURNS uuid
+  LANGUAGE sql
+  IMMUTABLE
+  PARALLEL SAFE
+  SET search_path = ''
+  AS $$
+  SELECT
+    '00000000-0000-0000-0000-000000000001'::uuid;
+$$;
+
+CREATE OR REPLACE FUNCTION public.handle_created_by()
   RETURNS TRIGGER
   LANGUAGE plpgsql
   SECURITY INVOKER
   SET search_path = ''
   AS $$
 BEGIN
-  IF TG_OP = 'INSERT' THEN
-    NEW.created_by := COALESCE(NEW.created_by,(SELECT auth.uid()));
-  ELSIF TG_OP = 'UPDATE' THEN
-    NEW.updated_by :=(SELECT auth.uid());
-  END IF;
+  NEW.created_by := COALESCE(NEW.created_by, auth.uid(), public.system_user_id());
+  NEW.updated_by := COALESCE(NEW.updated_by, NEW.created_by);
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.handle_updated_by()
+  RETURNS TRIGGER
+  LANGUAGE plpgsql
+  SECURITY INVOKER
+  SET search_path = ''
+  AS $$
+BEGIN
+  NEW.updated_by := COALESCE(auth.uid(), public.system_user_id());
   RETURN NEW;
 END;
 $$;

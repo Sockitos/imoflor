@@ -19,6 +19,25 @@ insert into auth.users (
 	)
 values (
 		'00000000-0000-0000-0000-000000000000',
+		'00000000-0000-0000-0000-000000000001'::uuid,
+		'authenticated',
+		'authenticated',
+		'system@imoflor.pt',
+		crypt ('Password123', gen_salt ('bf')),
+		current_timestamp,
+		current_timestamp,
+		current_timestamp,
+		'{"provider":"email","providers":["email"]}',
+		'{"display_name": "System"}',
+		current_timestamp,
+		current_timestamp,
+		'',
+		'',
+		'',
+		''
+	),
+	(
+		'00000000-0000-0000-0000-000000000000',
 		uuid_generate_v4 (),
 		'authenticated',
 		'authenticated',
@@ -122,7 +141,8 @@ insert into public.addresses (
 		postal_code,
 		city
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Portugal',
 		'Lisboa',
@@ -254,7 +274,8 @@ insert into public.employees (
 		salary_type,
 		salary
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Mariana Costa',
 		'female',
@@ -324,7 +345,8 @@ insert into public.vendors (
 		phone,
 		website
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Canalizações Tejo, Lda.',
 		'510234987',
@@ -377,7 +399,8 @@ insert into public.properties (
 		sold,
 		parent_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'urban',
 		'building',
@@ -538,7 +561,8 @@ insert into public.tenants (
 		mobile,
 		phone
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Ana Ribeiro',
 		'female',
@@ -611,7 +635,8 @@ insert into public.contracts (
 		property_id,
 		is_active
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'renting',
 		'2025-01-01',
@@ -645,7 +670,8 @@ values (
 	);
 
 insert into public.renting_contracts (id)
-values (1),
+	overriding system value
+	values (1),
 	(2),
 	(4);
 
@@ -655,7 +681,8 @@ insert into public.lending_contracts (
 		down_payment,
 		yearly_raise
 	)
-values (
+	overriding system value
+	values (
 		3,
 		365000,
 		50000,
@@ -668,7 +695,8 @@ insert into public.rent_updates (
 		rent,
 		contract_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'2025-01-01',
 		950,
@@ -700,7 +728,8 @@ insert into public.installment_updates (
 		interest,
 		contract_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'2024-09-01',
 		1400,
@@ -728,7 +757,8 @@ insert into public.due_notes (
 		due_date,
 		value
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
 		'2026-04-01',
@@ -755,7 +785,8 @@ insert into public.movements (
 		tax_id_number,
 		description
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'rent',
 		'2026-04-03 00:00:00+00',
@@ -817,7 +848,8 @@ insert into public.rent_payments (
 		contract_id,
 		movement_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
 		1
@@ -835,7 +867,8 @@ insert into public.installment_payments (
 		amortization_movement_id,
 		extra_debt
 	)
-values (
+	overriding system value
+	values (
 		1,
 		3,
 		3,
@@ -852,7 +885,8 @@ insert into public.tickets (
 		property_id,
 		rank
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'high',
 		'resolved',
@@ -891,7 +925,8 @@ insert into public.interventions (
 		ticket_id,
 		rank
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'maintenance',
 		'completed',
@@ -925,12 +960,13 @@ values (
 		'a0'
 	);
 
-insert into public.intervention_payments (
+insert into public.intervention_expenses (
 		id,
 		intervention_id,
 		movement_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
 		5
@@ -973,4 +1009,4 @@ select setval(pg_get_serial_sequence('public.tickets', 'id'), (select max(id) fr
 
 select setval(pg_get_serial_sequence('public.interventions', 'id'), (select max(id) from public.interventions));
 
-select setval(pg_get_serial_sequence('public.intervention_payments', 'id'), (select max(id) from public.intervention_payments));
+select setval(pg_get_serial_sequence('public.intervention_expenses', 'id'), (select max(id) from public.intervention_expenses));

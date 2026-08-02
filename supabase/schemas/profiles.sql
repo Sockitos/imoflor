@@ -1,6 +1,5 @@
 -- =============================================================================
 -- Profiles
--- User-facing profile data and profile image storage.
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -10,9 +9,9 @@
 CREATE TABLE public.profiles(
   id uuid NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
-  created_by uuid,
+  created_by uuid NOT NULL,
   updated_at timestamp with time zone NOT NULL DEFAULT TIMEZONE('utc'::text, NOW()),
-  updated_by uuid,
+  updated_by uuid NOT NULL,
   email text NOT NULL,
   display_name text NOT NULL,
   image text,
@@ -27,16 +26,31 @@ CREATE TRIGGER handle_updated_at
   FOR EACH ROW
   EXECUTE PROCEDURE moddatetime(updated_at);
 
-CREATE TRIGGER handle_audit_columns
-  BEFORE INSERT OR UPDATE ON public.profiles
+CREATE TRIGGER handle_created_by
+  BEFORE INSERT ON public.profiles
   FOR EACH ROW
-  EXECUTE PROCEDURE handle_audit_columns();
+  EXECUTE PROCEDURE handle_created_by();
+
+CREATE TRIGGER handle_updated_by
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW
+  EXECUTE PROCEDURE handle_updated_by();
+
+-- -----------------------------------------------------------------------------
+-- Indexes
+-- -----------------------------------------------------------------------------
+
+CREATE INDEX idx_profiles_created_by ON public.profiles(created_by);
+
+CREATE INDEX idx_profiles_updated_by ON public.profiles(updated_by);
 
 -- -----------------------------------------------------------------------------
 -- Grants
 -- -----------------------------------------------------------------------------
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated, service_role;
+GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO service_role;
 
 -- -----------------------------------------------------------------------------
 -- Row Level Security
