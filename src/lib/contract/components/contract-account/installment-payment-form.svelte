@@ -98,7 +98,7 @@
 					</Field.FieldContent>
 				</Field.Field>
 
-				<Field.Field data-invalid={isInvalid(form.fields.date.issues())}>
+				<Field.Field data-invalid={isInvalid(form.fields.occurred_at.issues())}>
 					<Field.FieldLabel>Date</Field.FieldLabel>
 					<Field.FieldContent>
 						<Popover.Root>
@@ -126,10 +126,10 @@
 						<input
 							hidden
 							{...paymentDateStr
-								? form.fields.date.as('text', paymentDateStr)
-								: form.fields.date.as('text')}
+								? form.fields.occurred_at.as('text', paymentDateStr)
+								: form.fields.occurred_at.as('text')}
 						/>
-						<Field.FieldError errors={form.fields.date.issues()} />
+						<Field.FieldError errors={form.fields.occurred_at.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
 

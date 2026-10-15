@@ -27,9 +27,9 @@ export const columns: ColumnDef<ContractAccountItem>[] = [
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'date',
+		accessorKey: 'occurred_at',
 		header: 'Date',
-		cell: ({ row }) => dayjs(row.original.date).format('DD/MM/YYYY'),
+		cell: ({ row }) => dayjs(row.original.occurred_at).format('DD/MM/YYYY'),
 	},
 	{
 		accessorKey: 'type',

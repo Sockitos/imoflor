@@ -10,8 +10,8 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { tenantSchema } from '../schemas';
 	import { upsertTenant } from '../tenant.remote';
@@ -175,13 +175,12 @@
 									>
 										{form.fields.birth_date.value()
 											? df.format(
-													parseAbsolute(
-														form.fields.birth_date.value()!,
+													parsePlainDate(form.fields.birth_date.value()!)!.toDate(
 														getLocalTimeZone()
-													).toDate()
+													)
 												)
 											: tenant?.birth_date
-												? df.format(parseAbsolute(tenant.birth_date, getLocalTimeZone()).toDate())
+												? df.format(parsePlainDate(tenant.birth_date)!.toDate(getLocalTimeZone()))
 												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
@@ -189,12 +188,12 @@
 										<Calendar
 											type="single"
 											value={form.fields.birth_date.value()
-												? parseAbsolute(form.fields.birth_date.value()!, getLocalTimeZone())
+												? parsePlainDate(form.fields.birth_date.value()!)
 												: tenant?.birth_date
-													? parseAbsolute(tenant.birth_date, getLocalTimeZone())
+													? parsePlainDate(tenant.birth_date)
 													: undefined}
 											onValueChange={(v) => {
-												form.fields.birth_date.set(v?.toDate(getLocalTimeZone()).toISOString());
+												form.fields.birth_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
@@ -239,14 +238,13 @@
 									>
 										{tenant?.id_expiration_date
 											? df.format(
-													parseAbsolute(tenant.id_expiration_date, getLocalTimeZone()).toDate()
+													parsePlainDate(tenant.id_expiration_date)!.toDate(getLocalTimeZone())
 												)
 											: form.fields.id_expiration_date.value()
 												? df.format(
-														parseAbsolute(
-															form.fields.id_expiration_date.value()!,
+														parsePlainDate(form.fields.id_expiration_date.value()!)!.toDate(
 															getLocalTimeZone()
-														).toDate()
+														)
 													)
 												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
@@ -255,17 +253,12 @@
 										<Calendar
 											type="single"
 											value={tenant?.id_expiration_date
-												? parseAbsolute(tenant.id_expiration_date, getLocalTimeZone())
+												? parsePlainDate(tenant.id_expiration_date)
 												: form.fields.id_expiration_date.value()
-													? parseAbsolute(
-															form.fields.id_expiration_date.value()!,
-															getLocalTimeZone()
-														)
+													? parsePlainDate(form.fields.id_expiration_date.value()!)
 													: undefined}
 											onValueChange={(v) => {
-												form.fields.id_expiration_date.set(
-													v?.toDate(getLocalTimeZone()).toISOString()
-												);
+												form.fields.id_expiration_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>

@@ -17,9 +17,21 @@ export const ticketStatusOptions = {
 };
 export type TicketStatus = (typeof ticketStatusValues)[number];
 
+/** Mirrors public.ticket_status_transitions */
+export const ticketStatusTransitions: Record<TicketStatus, readonly TicketStatus[]> = {
+	open: ['in_progress', 'cancelled'],
+	in_progress: ['open', 'resolved', 'cancelled'],
+	resolved: ['open', 'cancelled'],
+	cancelled: ['open'],
+};
+
+export function canTransitionTicketStatus(from: TicketStatus, to: TicketStatus): boolean {
+	return from === to || ticketStatusTransitions[from].includes(to);
+}
+
 export type Ticket = {
 	id: Id;
-	date: Timestamp;
+	created_at: Timestamp;
 	priority: TicketPriority;
 	status: TicketStatus;
 	title: string;

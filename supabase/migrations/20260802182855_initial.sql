@@ -897,6 +897,15 @@ ALTER TABLE public.intervention_status_transitions
 ALTER TABLE public.intervention_status_transitions
   ADD CONSTRAINT pk_intervention_status_transitions PRIMARY KEY (from_status, to_status);
 
+INSERT INTO public.intervention_status_transitions (from_status, to_status)
+VALUES
+  ('not_started', 'in_progress'),
+  ('not_started', 'cancelled'),
+  ('in_progress', 'not_started'),
+  ('in_progress', 'completed'),
+  ('in_progress', 'cancelled'),
+  ('cancelled', 'not_started');
+
 GRANT MAINTAIN, REFERENCES, TRIGGER, TRUNCATE ON public.intervention_status_transitions TO anon;
 
 GRANT MAINTAIN, REFERENCES, SELECT, TRIGGER, TRUNCATE ON public.intervention_status_transitions TO authenticated;
@@ -1540,6 +1549,17 @@ ALTER TABLE public.ticket_status_transitions
 
 ALTER TABLE public.ticket_status_transitions
   ADD CONSTRAINT pk_ticket_status_transitions PRIMARY KEY (from_status, to_status);
+
+INSERT INTO public.ticket_status_transitions (from_status, to_status)
+VALUES
+  ('open', 'in_progress'),
+  ('open', 'cancelled'),
+  ('in_progress', 'open'),
+  ('in_progress', 'resolved'),
+  ('in_progress', 'cancelled'),
+  ('resolved', 'open'),
+  ('resolved', 'cancelled'),
+  ('cancelled', 'open');
 
 GRANT MAINTAIN, REFERENCES, TRIGGER, TRUNCATE ON public.ticket_status_transitions TO anon;
 

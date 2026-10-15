@@ -39,63 +39,107 @@ export type Database = {
           address: string
           city: string
           country: string
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
           postal_code: string
           region: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           address: string
           city: string
           country: string
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
           postal_code: string
           region: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           address?: string
           city?: string
           country?: string
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
           postal_code?: string
           region?: string
+          updated_at?: string
+          updated_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "addresses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addresses_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contracts: {
         Row: {
+          created_at: string
+          created_by: string
           end_date: string | null
           id: number
-          inserted_at: string
           is_active: boolean
           property_id: number
           start_date: string
           type: Database["public"]["Enums"]["contract_type"]
           updated_at: string
+          updated_by: string
         }
         Insert: {
+          created_at?: string
+          created_by: string
           end_date?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           is_active?: boolean
           property_id: number
           start_date: string
           type: Database["public"]["Enums"]["contract_type"]
           updated_at?: string
+          updated_by: string
         }
         Update: {
+          created_at?: string
+          created_by?: string
           end_date?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           is_active?: boolean
           property_id?: number
           start_date?: string
           type?: Database["public"]["Enums"]["contract_type"]
           updated_at?: string
+          updated_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_contracts_property_id"
             columns: ["property_id"]
@@ -108,17 +152,43 @@ export type Database = {
       contracts_tenants: {
         Row: {
           contract_id: number
+          created_at: string
+          created_by: string
           tenant_id: number
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           contract_id: number
+          created_at?: string
+          created_by: string
           tenant_id: number
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           contract_id?: number
+          created_at?: string
+          created_by?: string
           tenant_id?: number
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_tenants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_tenants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_contracts_tenants_contract_id"
             columns: ["contract_id"]
@@ -152,26 +222,52 @@ export type Database = {
       due_notes: {
         Row: {
           contract_id: number
+          created_at: string
+          created_by: string
           due_date: string
           id: number
-          inserted_at: string
+          is_scheduled: boolean
+          updated_at: string
+          updated_by: string
           value: number
         }
         Insert: {
           contract_id: number
+          created_at?: string
+          created_by: string
           due_date: string
-          id?: number
-          inserted_at?: string
+          id?: never
+          is_scheduled?: boolean
+          updated_at?: string
+          updated_by: string
           value: number
         }
         Update: {
           contract_id?: number
+          created_at?: string
+          created_by?: string
           due_date?: string
-          id?: number
-          inserted_at?: string
+          id?: never
+          is_scheduled?: boolean
+          updated_at?: string
+          updated_by?: string
           value?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "due_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "due_notes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_due_notes_contract_id"
             columns: ["contract_id"]
@@ -199,13 +295,14 @@ export type Database = {
         Row: {
           address_id: number
           birth_date: string | null
+          created_at: string
+          created_by: string
           email: string | null
           gender: Database["public"]["Enums"]["gender"]
           id: number
           id_expiration_date: string | null
           id_number: string
           id_type: string
-          inserted_at: string
           marital_status: Database["public"]["Enums"]["marital_status"]
           mobile: string | null
           name: string
@@ -216,17 +313,20 @@ export type Database = {
           salary_type: Database["public"]["Enums"]["salary_type"]
           ss_number: string
           tax_id_number: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           address_id: number
           birth_date?: string | null
+          created_at?: string
+          created_by: string
           email?: string | null
           gender: Database["public"]["Enums"]["gender"]
-          id?: number
+          id?: never
           id_expiration_date?: string | null
           id_number: string
           id_type: string
-          inserted_at?: string
           marital_status: Database["public"]["Enums"]["marital_status"]
           mobile?: string | null
           name: string
@@ -237,17 +337,20 @@ export type Database = {
           salary_type: Database["public"]["Enums"]["salary_type"]
           ss_number: string
           tax_id_number: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           address_id?: number
           birth_date?: string | null
+          created_at?: string
+          created_by?: string
           email?: string | null
           gender?: Database["public"]["Enums"]["gender"]
-          id?: number
+          id?: never
           id_expiration_date?: string | null
           id_number?: string
           id_type?: string
-          inserted_at?: string
           marital_status?: Database["public"]["Enums"]["marital_status"]
           mobile?: string | null
           name?: string
@@ -258,8 +361,24 @@ export type Database = {
           salary_type?: Database["public"]["Enums"]["salary_type"]
           ss_number?: string
           tax_id_number?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employees_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_employees_address_id"
             columns: ["address_id"]
@@ -273,26 +392,35 @@ export type Database = {
         Row: {
           amortization_movement_id: number | null
           contract_id: number
+          created_at: string
+          created_by: string
           extra_debt: number | null
           id: number
-          inserted_at: string
           interest_movement_id: number
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           amortization_movement_id?: number | null
           contract_id: number
+          created_at?: string
+          created_by: string
           extra_debt?: number | null
-          id?: number
-          inserted_at?: string
+          id?: never
           interest_movement_id: number
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           amortization_movement_id?: number | null
           contract_id?: number
+          created_at?: string
+          created_by?: string
           extra_debt?: number | null
-          id?: number
-          inserted_at?: string
+          id?: never
           interest_movement_id?: number
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -330,32 +458,55 @@ export type Database = {
             referencedRelation: "movements"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "installment_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installment_payments_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       installment_updates: {
         Row: {
           contract_id: number
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
           installment: number
           interest: number
           update_date: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           contract_id: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
           installment: number
           interest: number
           update_date: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           contract_id?: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
           installment?: number
           interest?: number
           update_date?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -379,80 +530,187 @@ export type Database = {
             referencedRelation: "lending_contracts_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "installment_updates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installment_updates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      intervention_payments: {
+      intervention_expenses: {
         Row: {
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
           intervention_id: number
           movement_id: number
+          updated_at: string
+          updated_by: string
         }
         Insert: {
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
           intervention_id: number
           movement_id: number
+          updated_at?: string
+          updated_by: string
         }
         Update: {
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
           intervention_id?: number
           movement_id?: number
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_intervention_payments_intervention_id"
+            foreignKeyName: "fk_intervention_expenses_intervention_id"
             columns: ["intervention_id"]
             isOneToOne: false
             referencedRelation: "interventions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_intervention_payments_movement_id"
+            foreignKeyName: "fk_intervention_expenses_movement_id"
             columns: ["movement_id"]
             isOneToOne: false
             referencedRelation: "movements"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "intervention_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intervention_expenses_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      intervention_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          from_status: Database["public"]["Enums"]["intervention_status"] | null
+          id: number
+          intervention_id: number
+          to_status: Database["public"]["Enums"]["intervention_status"]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          from_status?:
+            | Database["public"]["Enums"]["intervention_status"]
+            | null
+          id?: never
+          intervention_id: number
+          to_status: Database["public"]["Enums"]["intervention_status"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          from_status?:
+            | Database["public"]["Enums"]["intervention_status"]
+            | null
+          id?: never
+          intervention_id?: number
+          to_status?: Database["public"]["Enums"]["intervention_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_intervention_status_history_intervention_id"
+            columns: ["intervention_id"]
+            isOneToOne: false
+            referencedRelation: "interventions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intervention_status_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intervention_status_transitions: {
+        Row: {
+          from_status: Database["public"]["Enums"]["intervention_status"]
+          to_status: Database["public"]["Enums"]["intervention_status"]
+        }
+        Insert: {
+          from_status: Database["public"]["Enums"]["intervention_status"]
+          to_status: Database["public"]["Enums"]["intervention_status"]
+        }
+        Update: {
+          from_status?: Database["public"]["Enums"]["intervention_status"]
+          to_status?: Database["public"]["Enums"]["intervention_status"]
+        }
+        Relationships: []
       }
       interventions: {
         Row: {
+          created_at: string
+          created_by: string
           description: string
           end_date: string | null
           id: number
-          inserted_at: string
           property_id: number
           rank: string
           start_date: string | null
           status: Database["public"]["Enums"]["intervention_status"]
           ticket_id: number | null
           type: Database["public"]["Enums"]["intervention_type"]
+          updated_at: string
+          updated_by: string
         }
         Insert: {
+          created_at?: string
+          created_by: string
           description: string
           end_date?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           property_id: number
           rank: string
           start_date?: string | null
           status: Database["public"]["Enums"]["intervention_status"]
           ticket_id?: number | null
           type: Database["public"]["Enums"]["intervention_type"]
+          updated_at?: string
+          updated_by: string
         }
         Update: {
+          created_at?: string
+          created_by?: string
           description?: string
           end_date?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           property_id?: number
           rank?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["intervention_status"]
           ticket_id?: number | null
           type?: Database["public"]["Enums"]["intervention_type"]
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -469,31 +727,54 @@ export type Database = {
             referencedRelation: "tickets"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "interventions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interventions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       lending_contracts: {
         Row: {
           contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          created_by: string
           down_payment: number
           id: number
-          inserted_at: string
           sale_value: number
+          updated_at: string
+          updated_by: string
           yearly_raise: number
         }
         Insert: {
           contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by: string
           down_payment: number
-          id?: number
-          inserted_at?: string
+          id?: never
           sale_value: number
+          updated_at?: string
+          updated_by: string
           yearly_raise: number
         }
         Update: {
           contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by?: string
           down_payment?: number
-          id?: number
-          inserted_at?: string
+          id?: never
           sale_value?: number
+          updated_at?: string
+          updated_by?: string
           yearly_raise?: number
         }
         Relationships: [
@@ -511,61 +792,130 @@ export type Database = {
             referencedRelation: "contracts_view"
             referencedColumns: ["id", "type"]
           },
+          {
+            foreignKeyName: "lending_contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lending_contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       movements: {
         Row: {
-          date: string
+          created_at: string
+          created_by: string
           description: string | null
           id: number
-          inserted_at: string
+          occurred_at: string
           tax_id_number: string | null
           type: Database["public"]["Enums"]["movement_type"]
+          updated_at: string
+          updated_by: string
           value: number
         }
         Insert: {
-          date: string
+          created_at?: string
+          created_by: string
           description?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
+          occurred_at: string
           tax_id_number?: string | null
           type: Database["public"]["Enums"]["movement_type"]
+          updated_at?: string
+          updated_by: string
           value: number
         }
         Update: {
-          date?: string
+          created_at?: string
+          created_by?: string
           description?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
+          occurred_at?: string
           tax_id_number?: string | null
           type?: Database["public"]["Enums"]["movement_type"]
+          updated_at?: string
+          updated_by?: string
           value?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "movements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movements_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
+          created_at: string
+          created_by: string
           display_name: string
           email: string
           id: string
           image: string | null
-          inserted_at: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
+          created_at?: string
+          created_by: string
           display_name: string
           email: string
           id: string
           image?: string | null
-          inserted_at?: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
+          created_at?: string
+          created_by?: string
           display_name?: string
           email?: string
           id?: string
           image?: string | null
-          inserted_at?: string
+          updated_at?: string
+          updated_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_profiles_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_profiles_id"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_profiles_updated_by"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {
@@ -573,10 +923,11 @@ export type Database = {
           area: number | null
           class: Database["public"]["Enums"]["property_class"]
           conservatory: string
+          created_at: string
+          created_by: string
           description: string | null
           fraction: string | null
           id: number
-          inserted_at: string
           market_value: number | null
           matrix: string
           parent_id: number | null
@@ -584,16 +935,19 @@ export type Database = {
           sold: boolean
           tipology: string | null
           type: Database["public"]["Enums"]["property_type"]
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           address_id: number
           area?: number | null
           class: Database["public"]["Enums"]["property_class"]
           conservatory: string
+          created_at?: string
+          created_by: string
           description?: string | null
           fraction?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           market_value?: number | null
           matrix: string
           parent_id?: number | null
@@ -601,16 +955,19 @@ export type Database = {
           sold?: boolean
           tipology?: string | null
           type: Database["public"]["Enums"]["property_type"]
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           address_id?: number
           area?: number | null
           class?: Database["public"]["Enums"]["property_class"]
           conservatory?: string
+          created_at?: string
+          created_by?: string
           description?: string | null
           fraction?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           market_value?: number | null
           matrix?: string
           parent_id?: number | null
@@ -618,6 +975,8 @@ export type Database = {
           sold?: boolean
           tipology?: string | null
           type?: Database["public"]["Enums"]["property_type"]
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -634,26 +993,49 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "properties_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rent_payments: {
         Row: {
           contract_id: number
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
           movement_id: number
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           contract_id: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
           movement_id: number
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           contract_id?: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
           movement_id?: number
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -677,29 +1059,52 @@ export type Database = {
             referencedRelation: "movements"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rent_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_payments_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rent_updates: {
         Row: {
           contract_id: number
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
           rent: number
           update_date: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           contract_id: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
           rent: number
           update_date: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           contract_id?: number
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
           rent?: number
           update_date?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -716,23 +1121,46 @@ export type Database = {
             referencedRelation: "renting_contracts_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rent_updates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_updates_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       renting_contracts: {
         Row: {
           contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          created_by: string
           id: number
-          inserted_at: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           contract_type?: Database["public"]["Enums"]["contract_type"]
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by: string
+          id?: never
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           contract_type?: Database["public"]["Enums"]["contract_type"]
-          id?: number
-          inserted_at?: string
+          created_at?: string
+          created_by?: string
+          id?: never
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -749,59 +1177,82 @@ export type Database = {
             referencedRelation: "contracts_view"
             referencedColumns: ["id", "type"]
           },
+          {
+            foreignKeyName: "renting_contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renting_contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tenants: {
         Row: {
           address_id: number
           birth_date: string | null
+          created_at: string
+          created_by: string
           email: string | null
           gender: Database["public"]["Enums"]["gender"]
           id: number
           id_expiration_date: string | null
           id_number: string
           id_type: string
-          inserted_at: string
           marital_status: Database["public"]["Enums"]["marital_status"]
           mobile: string | null
           name: string
           nationality: string
           phone: string | null
           tax_id_number: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
           address_id: number
           birth_date?: string | null
+          created_at?: string
+          created_by: string
           email?: string | null
           gender: Database["public"]["Enums"]["gender"]
-          id?: number
+          id?: never
           id_expiration_date?: string | null
           id_number: string
           id_type: string
-          inserted_at?: string
           marital_status: Database["public"]["Enums"]["marital_status"]
           mobile?: string | null
           name: string
           nationality: string
           phone?: string | null
           tax_id_number: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
           address_id?: number
           birth_date?: string | null
+          created_at?: string
+          created_by?: string
           email?: string | null
           gender?: Database["public"]["Enums"]["gender"]
-          id?: number
+          id?: never
           id_expiration_date?: string | null
           id_number?: string
           id_type?: string
-          inserted_at?: string
           marital_status?: Database["public"]["Enums"]["marital_status"]
           mobile?: string | null
           name?: string
           nationality?: string
           phone?: string | null
           tax_id_number?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -811,41 +1262,118 @@ export type Database = {
             referencedRelation: "addresses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tenants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      ticket_status_history: {
+        Row: {
+          created_at: string
+          created_by: string
+          from_status: Database["public"]["Enums"]["ticket_status"] | null
+          id: number
+          ticket_id: number
+          to_status: Database["public"]["Enums"]["ticket_status"]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          from_status?: Database["public"]["Enums"]["ticket_status"] | null
+          id?: never
+          ticket_id: number
+          to_status: Database["public"]["Enums"]["ticket_status"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          from_status?: Database["public"]["Enums"]["ticket_status"] | null
+          id?: never
+          ticket_id?: number
+          to_status?: Database["public"]["Enums"]["ticket_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_ticket_status_history_ticket_id"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_status_history_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_status_transitions: {
+        Row: {
+          from_status: Database["public"]["Enums"]["ticket_status"]
+          to_status: Database["public"]["Enums"]["ticket_status"]
+        }
+        Insert: {
+          from_status: Database["public"]["Enums"]["ticket_status"]
+          to_status: Database["public"]["Enums"]["ticket_status"]
+        }
+        Update: {
+          from_status?: Database["public"]["Enums"]["ticket_status"]
+          to_status?: Database["public"]["Enums"]["ticket_status"]
+        }
+        Relationships: []
       }
       tickets: {
         Row: {
-          date: string
+          created_at: string
+          created_by: string
           description: string
           id: number
-          inserted_at: string
           priority: Database["public"]["Enums"]["ticket_priority"]
           property_id: number
           rank: string
           status: Database["public"]["Enums"]["ticket_status"]
           title: string
+          updated_at: string
+          updated_by: string
         }
         Insert: {
-          date: string
+          created_at?: string
+          created_by: string
           description: string
-          id?: number
-          inserted_at?: string
+          id?: never
           priority: Database["public"]["Enums"]["ticket_priority"]
           property_id: number
           rank: string
           status: Database["public"]["Enums"]["ticket_status"]
           title: string
+          updated_at?: string
+          updated_by: string
         }
         Update: {
-          date?: string
+          created_at?: string
+          created_by?: string
           description?: string
-          id?: number
-          inserted_at?: string
+          id?: never
           priority?: Database["public"]["Enums"]["ticket_priority"]
           property_id?: number
           rank?: string
           status?: Database["public"]["Enums"]["ticket_status"]
           title?: string
+          updated_at?: string
+          updated_by?: string
         }
         Relationships: [
           {
@@ -855,46 +1383,84 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      users: {
+        Row: {
+          email: string
+          id: string
+        }
+        Insert: {
+          email: string
+          id: string
+        }
+        Update: {
+          email?: string
+          id?: string
+        }
+        Relationships: []
       }
       vendors: {
         Row: {
           address_id: number
+          created_at: string
+          created_by: string
           description: string | null
           email: string | null
           id: number
-          inserted_at: string
           mobile: string | null
           name: string
           phone: string | null
           tags: string[]
           tax_id_number: string
+          updated_at: string
+          updated_by: string
           website: string | null
         }
         Insert: {
           address_id: number
+          created_at?: string
+          created_by: string
           description?: string | null
           email?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           mobile?: string | null
           name: string
           phone?: string | null
           tags?: string[]
           tax_id_number: string
+          updated_at?: string
+          updated_by: string
           website?: string | null
         }
         Update: {
           address_id?: number
+          created_at?: string
+          created_by?: string
           description?: string | null
           email?: string | null
-          id?: number
-          inserted_at?: string
+          id?: never
           mobile?: string | null
           name?: string
           phone?: string | null
           tags?: string[]
           tax_id_number?: string
+          updated_at?: string
+          updated_by?: string
           website?: string | null
         }
         Relationships: [
@@ -905,15 +1471,44 @@ export type Database = {
             referencedRelation: "addresses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendors_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      contracts_accounts_view: {
+      contracts_account_entries_view: {
         Row: {
           contract_id: number | null
-          date: string | null
+          description: string | null
           id: number | null
+          is_scheduled: boolean | null
+          occurred_at: string | null
+          type: string | null
+          value: number | null
+        }
+        Relationships: []
+      }
+      contracts_accounts_view: {
+        Row: {
+          balance: number | null
+          contract_id: number | null
+          description: string | null
+          id: number | null
+          is_scheduled: boolean | null
+          occurred_at: string | null
           type: string | null
           value: number | null
         }
@@ -929,17 +1524,33 @@ export type Database = {
       contracts_view: {
         Row: {
           balance: number | null
+          created_at: string | null
+          created_by: string | null
           data: Json | null
           end_date: string | null
           id: number | null
-          inserted_at: string | null
           is_active: boolean | null
           property_id: number | null
           start_date: string | null
           type: Database["public"]["Enums"]["contract_type"] | null
           updated_at: string | null
+          updated_by: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_contracts_property_id"
             columns: ["property_id"]
@@ -953,11 +1564,11 @@ export type Database = {
         Row: {
           amortization: number | null
           contract_id: number | null
-          date: string | null
           description: string | null
           extra_debt: number | null
           id: number | null
           interest: number | null
+          occurred_at: string | null
         }
         Relationships: [
           {
@@ -983,20 +1594,38 @@ export type Database = {
           },
         ]
       }
-      intervention_payments_view: {
+      intervention_expenses_view: {
         Row: {
-          date: string | null
+          created_at: string | null
+          created_by: string | null
           description: string | null
           id: number | null
           intervention_id: number | null
+          occurred_at: string | null
+          updated_at: string | null
+          updated_by: string | null
           value: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "fk_intervention_payments_intervention_id"
+            foreignKeyName: "fk_intervention_expenses_intervention_id"
             columns: ["intervention_id"]
             isOneToOne: false
             referencedRelation: "interventions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intervention_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intervention_expenses_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1006,23 +1635,26 @@ export type Database = {
           debt: number | null
           extra_debt: number | null
           id: number | null
-          last_payment_date: string | null
+          last_paid_at: string | null
         }
         Relationships: []
       }
       lending_contracts_view: {
         Row: {
           contract_type: Database["public"]["Enums"]["contract_type"] | null
+          created_at: string | null
+          created_by: string | null
           debt: number | null
           down_payment: number | null
           extra_debt: number | null
           id: number | null
-          inserted_at: string | null
           installment: number | null
           interest: number | null
-          last_payment_date: string | null
+          last_paid_at: string | null
           next_update: Json | null
           sale_value: number | null
+          updated_at: string | null
+          updated_by: string | null
           yearly_raise: number | null
         }
         Relationships: [
@@ -1040,14 +1672,28 @@ export type Database = {
             referencedRelation: "contracts_view"
             referencedColumns: ["id", "type"]
           },
+          {
+            foreignKeyName: "lending_contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lending_contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rent_payments_view: {
         Row: {
           contract_id: number | null
-          date: string | null
           description: string | null
           id: number | null
+          occurred_at: string | null
           value: number | null
         }
         Relationships: [
@@ -1070,10 +1716,13 @@ export type Database = {
       renting_contracts_view: {
         Row: {
           contract_type: Database["public"]["Enums"]["contract_type"] | null
+          created_at: string | null
+          created_by: string | null
           id: number | null
-          inserted_at: string | null
           next_update: Json | null
           rent: number | null
+          updated_at: string | null
+          updated_by: string | null
         }
         Relationships: [
           {
@@ -1090,10 +1739,79 @@ export type Database = {
             referencedRelation: "contracts_view"
             referencedColumns: ["id", "type"]
           },
+          {
+            foreignKeyName: "renting_contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renting_contracts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Functions: {
+      system_user_id: { Args: never; Returns: string }
+      transition_intervention: {
+        Args: {
+          p_intervention_id: number
+          p_rank: string
+          p_to_status: Database["public"]["Enums"]["intervention_status"]
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          end_date: string | null
+          id: number
+          property_id: number
+          rank: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["intervention_status"]
+          ticket_id: number | null
+          type: Database["public"]["Enums"]["intervention_type"]
+          updated_at: string
+          updated_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "interventions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      transition_ticket: {
+        Args: {
+          p_rank: string
+          p_ticket_id: number
+          p_to_status: Database["public"]["Enums"]["ticket_status"]
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          description: string
+          id: number
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          property_id: number
+          rank: string
+          status: Database["public"]["Enums"]["ticket_status"]
+          title: string
+          updated_at: string
+          updated_by: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_contract_tenants: {
         Args: { p_contract_id: number; p_tenants: number[] }
         Returns: undefined

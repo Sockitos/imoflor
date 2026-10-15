@@ -2,25 +2,22 @@
 	import PropertyOptionItem from '@/property/components/property-option-item.svelte';
 	import { getPropertyOptions } from '@/property/property.remote';
 	import EntitySelector from '@/shared/components/entity-selector.svelte';
-	import { Button, buttonVariants } from '@/shared/components/ui/button';
-	import { Calendar } from '@/shared/components/ui/calendar';
+	import { Button } from '@/shared/components/ui/button';
 	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
-	import * as Popover from '@/shared/components/ui/popover';
 	import * as Select from '@/shared/components/ui/select';
 	import { Separator } from '@/shared/components/ui/separator';
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
-	import { CalendarIcon } from 'lucide-svelte';
 	import { ticketSchema } from '../schemas';
 	import { upsertTicket } from '../ticket.remote';
 	import type { Ticket } from '../types';
 	import {
+		canTransitionTicketStatus,
 		ticketPriorityOptions,
 		ticketStatusOptions,
+		ticketStatusValues,
 		type TicketPriority,
 		type TicketStatus,
 	} from '../types';
@@ -38,13 +35,17 @@
 
 	let propertyId = $state<number | undefined>();
 
+	const availableStatuses = $derived(
+		ticketStatusValues.filter(
+			(status) => ticket == null || canTransitionTicketStatus(ticket.status, status)
+		)
+	);
+
 	$effect(() => {
 		if (open) {
 			propertyId = ticket?.property.id;
 		}
 	});
-
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -81,64 +82,17 @@
 			<Field.FieldSet>
 				<Field.FieldLegend>Information</Field.FieldLegend>
 				<Field.FieldGroup>
-					<div class="grid grid-cols-2 items-start gap-x-4">
-						<Field.Field data-invalid={isInvalid(form.fields.date.issues())}>
-							<Field.FieldLabel for="date">Date</Field.FieldLabel>
-							<Field.FieldContent>
-								<Popover.Root>
-									<Popover.Trigger
-										id="date"
-										class={cn(
-											buttonVariants({ variant: 'outline' }),
-											'w-full justify-start pl-4 text-left font-normal',
-											!form.fields.date.value() && !ticket?.date && 'text-muted-foreground'
-										)}
-									>
-										{form.fields.date.value()
-											? df.format(
-													parseAbsolute(form.fields.date.value()!, getLocalTimeZone()).toDate()
-												)
-											: ticket?.date
-												? df.format(parseAbsolute(ticket.date, getLocalTimeZone()).toDate())
-												: 'Pick a date'}
-										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
-									</Popover.Trigger>
-									<Popover.Content class="w-auto p-0" side="top">
-										<Calendar
-											type="single"
-											value={form.fields.date.value()
-												? parseAbsolute(form.fields.date.value()!, getLocalTimeZone())
-												: ticket?.date
-													? parseAbsolute(ticket.date, getLocalTimeZone())
-													: undefined}
-											onValueChange={(v) => {
-												form.fields.date.set(v?.toDate(getLocalTimeZone()).toISOString());
-											}}
-										/>
-									</Popover.Content>
-								</Popover.Root>
-								<input
-									hidden
-									{...ticket?.date != null
-										? form.fields.date.as('text', ticket.date)
-										: form.fields.date.as('text')}
-								/>
-								<Field.FieldError errors={form.fields.date.issues()} />
-							</Field.FieldContent>
-						</Field.Field>
-
-						<Field.Field data-invalid={isInvalid(form.fields.title.issues())}>
-							<Field.FieldLabel>Title</Field.FieldLabel>
-							<Field.FieldContent>
-								<Input
-									{...ticket?.title != null
-										? form.fields.title.as('text', ticket.title)
-										: form.fields.title.as('text')}
-								/>
-								<Field.FieldError errors={form.fields.title.issues()} />
-							</Field.FieldContent>
-						</Field.Field>
-					</div>
+					<Field.Field data-invalid={isInvalid(form.fields.title.issues())}>
+						<Field.FieldLabel>Title</Field.FieldLabel>
+						<Field.FieldContent>
+							<Input
+								{...ticket?.title != null
+									? form.fields.title.as('text', ticket.title)
+									: form.fields.title.as('text')}
+							/>
+							<Field.FieldError errors={form.fields.title.issues()} />
+						</Field.FieldContent>
+					</Field.Field>
 
 					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
 						<Field.FieldLabel>Description</Field.FieldLabel>
@@ -204,8 +158,8 @@
 												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(ticketStatusOptions) as [value, label] (value)}
-											<Select.Item {value} {label} />
+										{#each availableStatuses as value (value)}
+											<Select.Item {value} label={ticketStatusOptions[value]} />
 										{/each}
 									</Select.Content>
 								</Select.Root>

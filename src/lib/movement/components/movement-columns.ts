@@ -27,10 +27,10 @@ export const columns: ColumnDef<Movement>[] = [
 		enableHiding: false,
 	},
 	{
-		accessorKey: 'date',
+		accessorKey: 'occurred_at',
 		header: 'Date',
 		cell: ({ row }) => {
-			return dayjs(row.original.date).format('DD/MM/YYYY');
+			return dayjs(row.original.occurred_at).format('DD/MM/YYYY');
 		},
 	},
 	{

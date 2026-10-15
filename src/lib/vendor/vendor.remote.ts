@@ -46,12 +46,13 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 	} = getRequestEvent();
 
 	const { address: addressData, ...vendorData } = data;
+	const { id: existingAddressId, ...addressFields } = addressData;
 
-	let addressId = addressData.id;
+	let addressId = existingAddressId;
 	if (addressId) {
 		const { error: addressError } = await supabase
 			.from('addresses')
-			.update(addressData)
+			.update(addressFields)
 			.eq('id', addressId);
 
 		if (addressError) {
@@ -61,7 +62,7 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 	} else {
 		const { data: insertedAddress, error: addressError } = await supabase
 			.from('addresses')
-			.insert(addressData)
+			.insert(addressFields)
 			.select('id')
 			.single();
 
@@ -90,8 +91,9 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 		getVendors().refresh();
 		getVendor(id).refresh();
 	} else {
+		const { id: _id, ...insertFields } = vendorData;
 		const { error: insertError } = await supabase.from('vendors').insert({
-			...vendorData,
+			...insertFields,
 			address_id: addressId,
 		});
 

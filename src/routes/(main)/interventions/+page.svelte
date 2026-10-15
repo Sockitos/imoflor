@@ -8,7 +8,7 @@
 	import { CirclePlus } from 'lucide-svelte';
 	import KanbanBoard from '@/shared/components/kanban-board';
 	import { interventionKanbanColumns } from '@/intervention/components/intervention-kanban-columns';
-	import type { InterventionStatus } from '@/intervention/types';
+	import { canTransitionInterventionStatus, type InterventionStatus } from '@/intervention/types';
 	import { getInterventions, updateStatus } from '@/intervention/intervention.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { generateRankBetween } from '@/shared/utils';
@@ -34,6 +34,13 @@
 		openInterventionForm(status as InterventionStatus);
 	}
 
+	function canMoveToColumn(fromColumnId: string, toColumnId: string) {
+		return canTransitionInterventionStatus(
+			fromColumnId as InterventionStatus,
+			toColumnId as InterventionStatus
+		);
+	}
+
 	async function onMoveCard(
 		id: number,
 		columnId: string,
@@ -51,8 +58,10 @@
 					)
 				)
 			);
-		} catch {
-			toast.error('Failed to move intervention. Please try again.');
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to move intervention. Please try again.'
+			);
 		}
 	}
 </script>
@@ -84,7 +93,13 @@
 			<Spinner class="size-6" />
 		</div>
 	{:else}
-		<KanbanBoard columns={interventionKanbanColumns} {cards} {onAddCard} {onMoveCard}>
+		<KanbanBoard
+			columns={interventionKanbanColumns}
+			{cards}
+			{onAddCard}
+			{onMoveCard}
+			{canMoveToColumn}
+		>
 			{#snippet card(intervention)}
 				<InterventionKanbanCard {intervention} />
 			{/snippet}

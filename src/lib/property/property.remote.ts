@@ -52,12 +52,13 @@ export const upsertProperty = form(propertySchema, async (data) => {
 	} = getRequestEvent();
 
 	const { address: addressData, ...propertyData } = data;
+	const { id: existingAddressId, ...addressFields } = addressData;
 
-	let addressId = addressData.id;
+	let addressId = existingAddressId;
 	if (addressId) {
 		const { error: addressError } = await supabase
 			.from('addresses')
-			.update(addressData)
+			.update(addressFields)
 			.eq('id', addressId);
 
 		if (addressError) {
@@ -67,7 +68,7 @@ export const upsertProperty = form(propertySchema, async (data) => {
 	} else {
 		const { data: address, error: addressError } = await supabase
 			.from('addresses')
-			.insert(addressData)
+			.insert(addressFields)
 			.select('id')
 			.single();
 
@@ -96,8 +97,9 @@ export const upsertProperty = form(propertySchema, async (data) => {
 		getProperties().refresh();
 		getProperty(id).refresh();
 	} else {
+		const { id: _id, ...insertFields } = propertyData;
 		const { error: insertError } = await supabase.from('properties').insert({
-			...propertyData,
+			...insertFields,
 			address_id: addressId,
 		});
 
@@ -206,8 +208,9 @@ export const upsertFraction = form(fractionSchema, async (data) => {
 		getFractions(fractionData.parent_id).refresh();
 		getFraction(id).refresh();
 	} else {
+		const { id: _id, ...insertFields } = fractionData;
 		const { error: insertError } = await supabase.from('properties').insert({
-			...fractionData,
+			...insertFields,
 			address_id: addressId,
 		});
 

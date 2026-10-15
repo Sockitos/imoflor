@@ -6,8 +6,8 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { createDueNote } from '../../contract.remote';
 	import { createDueNoteSchema } from '../../schemas';
@@ -21,9 +21,9 @@
 
 	const form = $derived(createDueNote.for(contractId));
 
-	let dueDateStr = $state<string | undefined>(new Date().toISOString());
+	let dueDateStr = $state<string | undefined>(today(getLocalTimeZone()).toString());
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const dueDate = $derived(dueDateStr ? parseAbsolute(dueDateStr, getLocalTimeZone()) : undefined);
+	const dueDate = $derived(parsePlainDate(dueDateStr));
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -70,7 +70,7 @@
 									!dueDate && 'text-muted-foreground'
 								)}
 							>
-								{dueDate ? df.format(dueDate.toDate()) : 'Pick a date'}
+								{dueDate ? df.format(dueDate.toDate(getLocalTimeZone())) : 'Pick a date'}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
@@ -78,7 +78,7 @@
 									type="single"
 									value={dueDate}
 									onValueChange={(v) => {
-										dueDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										dueDateStr = toPlainDateString(v);
 									}}
 								/>
 							</Popover.Content>

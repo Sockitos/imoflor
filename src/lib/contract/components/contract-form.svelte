@@ -11,10 +11,10 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import * as Tabs from '@/shared/components/ui/tabs';
-	import { cn } from '@/shared/utils';
+	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 	import { getTenantOptions } from '@/tenant/tenant.remote';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { upsertContract } from '../contract.remote';
 	import { contractSchema } from '../schemas';
@@ -45,10 +45,8 @@
 	let startDateStr = $state<string | undefined>();
 	let endDateStr = $state<string | undefined>();
 
-	const startDate = $derived(
-		startDateStr ? parseAbsolute(startDateStr, getLocalTimeZone()) : undefined
-	);
-	const endDate = $derived(endDateStr ? parseAbsolute(endDateStr, getLocalTimeZone()) : undefined);
+	const startDate = $derived(parsePlainDate(startDateStr));
+	const endDate = $derived(parsePlainDate(endDateStr));
 
 	$effect(() => {
 		if (contract?.type) {
@@ -208,7 +206,7 @@
 										!startDate && 'text-muted-foreground'
 									)}
 								>
-									{startDate ? df.format(startDate.toDate()) : 'Pick a date'}
+									{startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -216,7 +214,7 @@
 										type="single"
 										value={startDate}
 										onValueChange={(v) => {
-											startDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+											startDateStr = toPlainDateString(v);
 										}}
 									/>
 								</Popover.Content>
@@ -242,7 +240,7 @@
 										!endDate && 'text-muted-foreground'
 									)}
 								>
-									{endDate ? df.format(endDate.toDate()) : 'Pick a date'}
+									{endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'Pick a date'}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -250,7 +248,7 @@
 										type="single"
 										value={endDate}
 										onValueChange={(v) => {
-											endDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+											endDateStr = toPlainDateString(v);
 										}}
 									/>
 								</Popover.Content>

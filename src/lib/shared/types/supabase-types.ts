@@ -1,17 +1,39 @@
 import type { MergeDeep } from 'type-fest';
 import type { Database as DatabaseGenerated, Json } from './supabase-types.gen.ts';
 
+/** Audit columns are filled by DB triggers from auth.uid(). */
+type OptionalAuditInsert = {
+	created_by?: string;
+	updated_by?: string;
+};
+
 export type Database = MergeDeep<
 	DatabaseGenerated,
 	{
 		public: {
+			Tables: {
+				addresses: { Insert: OptionalAuditInsert };
+				properties: { Insert: OptionalAuditInsert };
+				tenants: { Insert: OptionalAuditInsert };
+				employees: { Insert: OptionalAuditInsert };
+				vendors: { Insert: OptionalAuditInsert };
+				tickets: { Insert: OptionalAuditInsert };
+				interventions: { Insert: OptionalAuditInsert };
+				due_notes: { Insert: OptionalAuditInsert };
+				rent_updates: { Insert: OptionalAuditInsert };
+				installment_updates: { Insert: OptionalAuditInsert };
+				contracts: { Insert: OptionalAuditInsert };
+			};
 			Views: {
 				contracts_accounts_view: {
 					Row: {
+						balance: number;
 						contract_id: number;
-						date: string;
+						description: string | null;
 						id: number;
-						type: 'due_note' | 'payment';
+						is_scheduled: boolean;
+						occurred_at: string;
+						type: 'due_note' | 'rent_payment' | 'installment_payment';
 						value: number;
 					};
 				};
@@ -24,11 +46,11 @@ export type Database = MergeDeep<
 				contracts_view: {
 					Row: {
 						balance: number;
+						created_at: string;
 						data: Json;
 						end_date: string | null;
 						property_id: number;
 						id: number;
-						inserted_at: string;
 						is_active: boolean;
 						start_date: string;
 						type: DatabaseGenerated['public']['Enums']['contract_type'];
@@ -38,7 +60,6 @@ export type Database = MergeDeep<
 						end_date?: string | null;
 						property_id: number;
 						id?: number;
-						inserted_at?: string;
 						is_active?: boolean;
 						start_date: string;
 						type: DatabaseGenerated['public']['Enums']['contract_type'];
@@ -48,7 +69,6 @@ export type Database = MergeDeep<
 						end_date?: string | null;
 						property_id?: number;
 						id?: number;
-						inserted_at?: string;
 						is_active?: boolean;
 						start_date?: string;
 						type?: DatabaseGenerated['public']['Enums']['contract_type'];
@@ -58,7 +78,7 @@ export type Database = MergeDeep<
 					Row: {
 						amortization: number;
 						contract_id: number;
-						date: string;
+						occurred_at: string;
 						description: string | null;
 						extra_debt: number;
 						id: number;
@@ -67,7 +87,7 @@ export type Database = MergeDeep<
 					Insert: {
 						amortization: number;
 						contract_id: number;
-						date: string;
+						occurred_at: string;
 						description?: string | null;
 						extra_debt: number;
 						id?: number;
@@ -76,16 +96,16 @@ export type Database = MergeDeep<
 					Update: {
 						amortization?: number;
 						contract_id?: number;
-						date?: string;
+						occurred_at?: string;
 						description?: string | null;
 						extra_debt?: number;
 						id?: number;
 						interest?: number;
 					};
 				};
-				intervention_payments_view: {
+				intervention_expenses_view: {
 					Row: {
-						date: string;
+						occurred_at: string;
 						description: string;
 						id: number;
 						intervention_id: number;
@@ -97,7 +117,7 @@ export type Database = MergeDeep<
 						debt: number;
 						extra_debt: number;
 						id: number;
-						last_payment_date: string;
+						last_paid_at: string;
 					};
 				};
 				lending_contracts_view: {
@@ -107,10 +127,10 @@ export type Database = MergeDeep<
 						down_payment: number;
 						extra_debt: number;
 						id: number;
-						inserted_at: string;
+						created_at: string;
 						installment: number;
 						interest: number;
-						last_payment_date: string | null;
+						last_paid_at: string | null;
 						next_update: Json | null;
 						sale_value: number;
 						yearly_raise: number;
@@ -119,21 +139,21 @@ export type Database = MergeDeep<
 				rent_payments_view: {
 					Row: {
 						contract_id: number;
-						date: string;
+						occurred_at: string;
 						description: string | null;
 						id: number;
 						value: number;
 					};
 					Insert: {
 						contract_id: number;
-						date: string;
+						occurred_at: string;
 						description?: string | null;
 						id?: number;
 						value: number;
 					};
 					Update: {
 						contract_id?: number;
-						date?: string;
+						occurred_at?: string;
 						description?: string | null;
 						id?: number;
 						value?: number;
@@ -143,7 +163,7 @@ export type Database = MergeDeep<
 					Row: {
 						contract_type: DatabaseGenerated['public']['Enums']['contract_type'];
 						id: number;
-						inserted_at: string;
+						created_at: string;
 						next_update: Json | null;
 						rent: number;
 					};

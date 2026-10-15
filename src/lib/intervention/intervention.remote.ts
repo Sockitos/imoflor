@@ -55,13 +55,14 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 		locals: { supabase },
 	} = getRequestEvent();
 
-	const { error: updateError } = await supabase
-		.from('interventions')
-		.update({ status: data.status, rank: data.rank })
-		.eq('id', data.id);
+	const { error: transitionError } = await supabase.rpc('transition_intervention', {
+		p_intervention_id: data.id,
+		p_to_status: data.status,
+		p_rank: data.rank,
+	});
 
-	if (updateError) {
-		error(500, 'Error updating status, please try again later.');
+	if (transitionError) {
+		error(500, transitionError.message || 'Error updating status, please try again later.');
 	}
 
 	await requested(getInterventions, 1).refreshAll();
@@ -74,13 +75,40 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 	} = getRequestEvent();
 
 	if (data.id) {
-		const { id, ...fields } = data;
+		const { id, status, ...fields } = data;
+
+		const { data: current, error: currentError } = await supabase
+			.from('interventions')
+			.select('status, rank')
+			.eq('id', id)
+			.single();
+
+		if (currentError || !current) {
+			setFlash(
+				{ type: 'error', message: currentError?.message ?? 'Intervention not found' },
+				cookies
+			);
+			error(500, currentError?.message ?? 'Intervention not found');
+		}
 
 		const { error: updateError } = await supabase.from('interventions').update(fields).eq('id', id);
 
 		if (updateError) {
 			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
+		}
+
+		if (status !== current.status) {
+			const { error: transitionError } = await supabase.rpc('transition_intervention', {
+				p_intervention_id: id,
+				p_to_status: status,
+				p_rank: current.rank,
+			});
+
+			if (transitionError) {
+				setFlash({ type: 'error', message: transitionError.message }, cookies);
+				error(500, transitionError.message);
+			}
 		}
 
 		setFlash({ type: 'success', message: 'Intervention updated successfully' }, cookies);
@@ -96,7 +124,10 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 		const bottomRank = existing?.[0]?.rank;
 		const rank = generateRankBetween(undefined, bottomRank);
 
-		const { error: insertError } = await supabase.from('interventions').insert({ ...data, rank });
+		const { id: _id, ...insertFields } = data;
+		const { error: insertError } = await supabase
+			.from('interventions')
+			.insert({ ...insertFields, rank });
 
 		if (insertError) {
 			setFlash({ type: 'error', message: insertError.message }, cookies);
