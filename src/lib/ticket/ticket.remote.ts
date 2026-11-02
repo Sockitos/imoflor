@@ -118,9 +118,7 @@ export const upsertTicket = form(ticketSchema, async (data) => {
 		const rank = generateRankBetween(undefined, bottomRank);
 
 		const { id: _id, ...insertFields } = data;
-		const { error: insertError } = await supabase
-			.from('tickets')
-			.insert({ ...insertFields, rank });
+		const { error: insertError } = await supabase.from('tickets').insert({ ...insertFields, rank });
 
 		if (insertError) {
 			setFlash({ type: 'error', message: insertError.message }, cookies);

@@ -35,10 +35,7 @@
 	}
 
 	function canMoveToColumn(fromColumnId: string, toColumnId: string) {
-		return canTransitionTicketStatus(
-			fromColumnId as TicketStatus,
-			toColumnId as TicketStatus
-		);
+		return canTransitionTicketStatus(fromColumnId as TicketStatus, toColumnId as TicketStatus);
 	}
 
 	async function onMoveCard(
@@ -57,7 +54,9 @@
 				)
 			);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : 'Failed to move ticket. Please try again.');
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to move ticket. Please try again.'
+			);
 		}
 	}
 </script>

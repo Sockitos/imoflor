@@ -247,9 +247,7 @@
 													)
 												)
 											: employee?.birth_date
-												? df.format(
-														parsePlainDate(employee.birth_date)!.toDate(getLocalTimeZone())
-													)
+												? df.format(parsePlainDate(employee.birth_date)!.toDate(getLocalTimeZone()))
 												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>

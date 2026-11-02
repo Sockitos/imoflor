@@ -47,8 +47,7 @@
 	const status = $derived(intervention?.status ?? defaultStatus);
 	const availableStatuses = $derived(
 		interventionStatusValues.filter(
-			(value) =>
-				intervention == null || canTransitionInterventionStatus(intervention.status, value)
+			(value) => intervention == null || canTransitionInterventionStatus(intervention.status, value)
 		)
 	);
 
@@ -236,9 +235,7 @@
 									>
 										{form.fields.end_date.value()
 											? df.format(
-													parsePlainDate(form.fields.end_date.value()!)!.toDate(
-														getLocalTimeZone()
-													)
+													parsePlainDate(form.fields.end_date.value()!)!.toDate(getLocalTimeZone())
 												)
 											: intervention?.end_date
 												? df.format(
