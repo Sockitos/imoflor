@@ -7,13 +7,14 @@
 </script>
 
 <Sidebar.Provider
+	class="h-svh"
 	style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
 >
 	<AppSidebar variant="inset" />
 	<Sidebar.Inset>
 		<TopBar />
-		<div class="flex flex-1 flex-col">
-			<div class="@container/main flex flex-1 flex-col gap-2">
+		<div class="flex min-h-0 flex-1 flex-col">
+			<div class="@container/main flex min-h-0 flex-1 flex-col gap-2">
 				{@render children?.()}
 			</div>
 		</div>
