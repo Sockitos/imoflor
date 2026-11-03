@@ -7,6 +7,7 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { upsertFraction } from '../property.remote';
 	import { fractionSchema } from '../schemas';
 	import type { Fraction, Property } from '../types';
@@ -58,11 +59,14 @@
 			{...form.preflight(fractionSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
+						toastSuccess(
+							isEdit ? 'Fraction updated successfully' : 'Fraction created successfully'
+						);
 						open = false;
 						if (!isEdit) f.element.reset();
 					}
-				} catch (err) {
-					console.error(err);
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

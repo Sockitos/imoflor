@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { signIn } from '@/auth/auth.remote';
+	import { toastError } from '@/shared/toast';
 	import * as Card from '@/shared/components/ui/card';
 	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
@@ -23,8 +24,8 @@
 				{...signIn.preflight(signInSchema).enhance(async (f) => {
 					try {
 						await f.submit();
-					} catch (err) {
-						console.error(err);
+					} catch (error) {
+						toastError(error);
 					}
 				})}
 				onfocusout={() => signIn.validate()}

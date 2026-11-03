@@ -8,6 +8,7 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -43,11 +44,12 @@
 			{...form.preflight(createInstallmentUpdateSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
+						toastSuccess('Installment update created successfully');
 						open = false;
 						f.element.reset();
 					}
-				} catch (err) {
-					console.error(err);
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

@@ -16,6 +16,7 @@
 	import { getTenantOptions } from '@/tenant/tenant.remote';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { upsertContract } from '../contract.remote';
 	import { contractSchema } from '../schemas';
 	import { contractTypeValues, type Contract, type ContractType } from '../types';
@@ -98,11 +99,14 @@
 			{...form.preflight(contractSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
+						toastSuccess(
+							isEdit ? 'Contract updated successfully' : 'Contract created successfully'
+						);
 						open = false;
 						if (!isEdit) f.element.reset();
 					}
-				} catch (err) {
-					console.error(err);
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

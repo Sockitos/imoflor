@@ -12,7 +12,6 @@ declare global {
 		interface PageData {
 			supabase: SupabaseClient<Database>;
 			claims: Claims;
-			flash?: { type: 'success' | 'error'; message: string };
 		}
 		// interface Error {}
 		// interface Platform {}

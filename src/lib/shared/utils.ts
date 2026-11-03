@@ -3,7 +3,6 @@ import type { RouteId as AppRouteId } from '$app/types';
 import type { ActionFailure, RequestEvent } from '@sveltejs/kit';
 import { CalendarDate, parseDate } from '@internationalized/date';
 import { type ClassValue, clsx } from 'clsx';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
@@ -85,7 +84,6 @@ export async function handleFormAction<
 
 	if (!form.valid) {
 		const errorMessage = 'Invalid form.';
-		setFlash({ type: 'error', message: errorMessage }, event.cookies);
 		return fail(400, { message: errorMessage, form });
 	}
 
@@ -93,7 +91,6 @@ export async function handleFormAction<
 		const { data: claimsData, error: claimsError } = await event.locals.supabase.auth.getClaims();
 		const claims = claimsError ? null : claimsData?.claims;
 		if (!claims) {
-			setFlash({ type: 'error', message: 'Unauthorized' }, event.cookies);
 			return fail(401, { message: 'Unauthorized', form });
 		}
 

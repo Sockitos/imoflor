@@ -6,6 +6,7 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
@@ -55,11 +56,12 @@
 			{...form.preflight(createInstallmentPaymentSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
+						toastSuccess('Installment payment created successfully');
 						open = false;
 						f.element.reset();
 					}
-				} catch (err) {
-					console.error(err);
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

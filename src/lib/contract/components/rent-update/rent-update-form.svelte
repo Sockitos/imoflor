@@ -11,6 +11,7 @@
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { createRentUpdate, getRentUpdates } from '../../contract.remote';
 	import { createRentUpdateSchema } from '../../schemas';
 
@@ -43,11 +44,12 @@
 			{...form.preflight(createRentUpdateSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
+						toastSuccess('Rent update created successfully');
 						open = false;
 						f.element.reset();
 					}
-				} catch (err) {
-					console.error(err);
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

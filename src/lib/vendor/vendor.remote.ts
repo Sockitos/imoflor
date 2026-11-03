@@ -1,7 +1,6 @@
 import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { deleteVendorSchema, vendorSchema } from './schemas';
 import type { Vendor } from './types';
 
@@ -42,7 +41,6 @@ export const getVendor = query(z.number(), async (id): Promise<Vendor> => {
 export const upsertVendor = form(vendorSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { address: addressData, ...vendorData } = data;
@@ -56,7 +54,6 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 			.eq('id', addressId);
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 	} else {
@@ -67,7 +64,6 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 			.single();
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 
@@ -83,11 +79,9 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 			.eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Vendor updated successfully' }, cookies);
 		getVendors().refresh();
 		getVendor(id).refresh();
 	} else {
@@ -98,11 +92,9 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Vendor created successfully' }, cookies);
 		getVendors().refresh();
 	}
 });
@@ -110,17 +102,14 @@ export const upsertVendor = form(vendorSchema, async (data) => {
 export const deleteVendor = form(deleteVendorSchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('vendors').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Vendor deleted successfully' }, cookies);
 	getVendors().refresh();
 
 	return redirect(302, '/vendors');
