@@ -16,6 +16,7 @@
 	import { getTicketOptions } from '@/ticket/ticket.remote';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { submitWithToast } from '@/shared/toast';
 	import { upsertIntervention } from '../intervention.remote';
 	import { interventionSchema } from '../schemas';
 	import type { Intervention } from '../types';
@@ -78,13 +79,14 @@
 		<Separator />
 		<form
 			{...form.preflight(interventionSchema).enhance(async (f) => {
-				try {
-					if (await f.submit()) {
-						open = false;
-						if (!isEdit) f.element.reset();
-					}
-				} catch (err) {
-					console.error(err);
+				if (
+					await submitWithToast(
+						() => f.submit(),
+						isEdit ? 'Intervention updated successfully' : 'Intervention created successfully'
+					)
+				) {
+					open = false;
+					if (!isEdit) f.element.reset();
 				}
 			})}
 			onfocusout={() => form.validate()}

@@ -2,6 +2,7 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteTenant } from '../tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { submitWithToast } from '@/shared/toast';
 
 	interface Props {
 		open?: boolean;
@@ -19,7 +20,7 @@
 	<form
 		bind:this={formElement}
 		{...deleteForm.enhance(async (f) => {
-			if (await f.submit()) {
+			if (await submitWithToast(() => f.submit(), 'Tenant deleted successfully')) {
 				open = false;
 			}
 		})}

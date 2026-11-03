@@ -8,6 +8,7 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
+	import { submitWithToast } from '@/shared/toast';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -41,13 +42,9 @@
 		<Separator />
 		<form
 			{...form.preflight(createInstallmentUpdateSchema).enhance(async (f) => {
-				try {
-					if (await f.submit()) {
-						open = false;
-						f.element.reset();
-					}
-				} catch (err) {
-					console.error(err);
+				if (await submitWithToast(() => f.submit(), 'Installment update created successfully')) {
+					open = false;
+					f.element.reset();
 				}
 			})}
 			onfocusout={() => form.validate()}

@@ -2,6 +2,7 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteFraction } from '../property.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { submitWithToast } from '@/shared/toast';
 
 	interface Props {
 		open?: boolean;
@@ -20,7 +21,7 @@
 	<form
 		bind:this={formElement}
 		{...deleteForm.enhance(async (f) => {
-			if (await f.submit()) {
+			if (await submitWithToast(() => f.submit(), 'Fraction deleted successfully')) {
 				open = false;
 			}
 		})}

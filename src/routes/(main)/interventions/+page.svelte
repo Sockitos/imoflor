@@ -12,7 +12,7 @@
 	import { getInterventions, updateStatus } from '@/intervention/intervention.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { generateRankBetween } from '@/shared/utils';
-	import { toast } from 'svelte-sonner';
+	import { toastError } from '@/shared/toast';
 
 	let openForm = $state(false);
 	let defaultStatus = $state<InterventionStatus | undefined>(undefined);
@@ -59,9 +59,7 @@
 				)
 			);
 		} catch (error) {
-			toast.error(
-				error instanceof Error ? error.message : 'Failed to move intervention. Please try again.'
-			);
+			toastError(error, 'Failed to move intervention. Please try again.');
 		}
 	}
 </script>

@@ -1,7 +1,6 @@
 import { command, form, getRequestEvent, query, requested } from '$app/server';
 import { generateRankBetween } from '@/shared/utils';
 import { error, redirect } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { deleteTicketSchema, ticketSchema } from './schemas';
 import { ticketStatusValues, type Ticket, type TicketOption } from './types';
@@ -67,7 +66,6 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 export const upsertTicket = form(ticketSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	if (data.id) {
@@ -80,14 +78,12 @@ export const upsertTicket = form(ticketSchema, async (data) => {
 			.single();
 
 		if (currentError || !current) {
-			setFlash({ type: 'error', message: currentError?.message ?? 'Ticket not found' }, cookies);
 			error(500, currentError?.message ?? 'Ticket not found');
 		}
 
 		const { error: updateError } = await supabase.from('tickets').update(fields).eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
@@ -99,12 +95,10 @@ export const upsertTicket = form(ticketSchema, async (data) => {
 			});
 
 			if (transitionError) {
-				setFlash({ type: 'error', message: transitionError.message }, cookies);
 				error(500, transitionError.message);
 			}
 		}
 
-		setFlash({ type: 'success', message: 'Ticket updated successfully' }, cookies);
 		getTickets().refresh();
 		getTicket(id).refresh();
 	} else {
@@ -121,11 +115,9 @@ export const upsertTicket = form(ticketSchema, async (data) => {
 		const { error: insertError } = await supabase.from('tickets').insert({ ...insertFields, rank });
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Ticket created successfully' }, cookies);
 		getTickets().refresh();
 	}
 });
@@ -133,17 +125,14 @@ export const upsertTicket = form(ticketSchema, async (data) => {
 export const deleteTicket = form(deleteTicketSchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('tickets').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Ticket deleted successfully' }, cookies);
 	getTickets().refresh();
 
 	return redirect(302, '/tickets');

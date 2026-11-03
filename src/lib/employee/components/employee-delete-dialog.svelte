@@ -2,6 +2,7 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteEmployee } from '../employee.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
+	import { submitWithToast } from '@/shared/toast';
 
 	interface Props {
 		open?: boolean;
@@ -18,7 +19,7 @@
 	<form
 		bind:this={formElement}
 		{...deleteForm.enhance(async (f) => {
-			if (await f.submit()) {
+			if (await submitWithToast(() => f.submit(), 'Employee deleted successfully')) {
 				open = false;
 			}
 		})}

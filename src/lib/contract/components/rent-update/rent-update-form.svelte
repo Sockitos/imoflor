@@ -11,6 +11,7 @@
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { submitWithToast } from '@/shared/toast';
 	import { createRentUpdate, getRentUpdates } from '../../contract.remote';
 	import { createRentUpdateSchema } from '../../schemas';
 
@@ -41,13 +42,9 @@
 		<Separator />
 		<form
 			{...form.preflight(createRentUpdateSchema).enhance(async (f) => {
-				try {
-					if (await f.submit()) {
-						open = false;
-						f.element.reset();
-					}
-				} catch (err) {
-					console.error(err);
+				if (await submitWithToast(() => f.submit(), 'Rent update created successfully')) {
+					open = false;
+					f.element.reset();
 				}
 			})}
 			onfocusout={() => form.validate()}

@@ -1,6 +1,5 @@
 import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import {
 	deleteFractionSchema,
@@ -48,7 +47,6 @@ export const getProperty = query(z.number(), async (id): Promise<Property> => {
 export const upsertProperty = form(propertySchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { address: addressData, ...propertyData } = data;
@@ -62,7 +60,6 @@ export const upsertProperty = form(propertySchema, async (data) => {
 			.eq('id', addressId);
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 	} else {
@@ -73,7 +70,6 @@ export const upsertProperty = form(propertySchema, async (data) => {
 			.single();
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 
@@ -89,11 +85,9 @@ export const upsertProperty = form(propertySchema, async (data) => {
 			.eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Property updated successfully' }, cookies);
 		getProperties().refresh();
 		getProperty(id).refresh();
 	} else {
@@ -104,11 +98,9 @@ export const upsertProperty = form(propertySchema, async (data) => {
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Property created successfully' }, cookies);
 		getProperties().refresh();
 	}
 });
@@ -116,17 +108,14 @@ export const upsertProperty = form(propertySchema, async (data) => {
 export const deleteProperty = form(deletePropertySchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('properties').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Property deleted successfully' }, cookies);
 	getProperties().refresh();
 
 	return redirect(302, '/properties');
@@ -170,7 +159,6 @@ export const getFraction = query(z.number(), async (fid): Promise<Fraction> => {
 export const upsertFraction = form(fractionSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { address: addressData, ...fractionData } = data;
@@ -184,7 +172,6 @@ export const upsertFraction = form(fractionSchema, async (data) => {
 			.single();
 
 		if (parentError) {
-			setFlash({ type: 'error', message: parentError.message }, cookies);
 			error(500, parentError.message);
 		}
 
@@ -200,11 +187,9 @@ export const upsertFraction = form(fractionSchema, async (data) => {
 			.eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Fraction updated successfully' }, cookies);
 		getFractions(fractionData.parent_id).refresh();
 		getFraction(id).refresh();
 	} else {
@@ -215,11 +200,9 @@ export const upsertFraction = form(fractionSchema, async (data) => {
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Fraction created successfully' }, cookies);
 		getFractions(fractionData.parent_id).refresh();
 	}
 });
@@ -227,17 +210,14 @@ export const upsertFraction = form(fractionSchema, async (data) => {
 export const deleteFraction = form(deleteFractionSchema, async ({ id, parent_id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('properties').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Fraction deleted successfully' }, cookies);
 	getFractions(parent_id).refresh();
 
 	return redirect(302, `/properties/${parent_id}`);

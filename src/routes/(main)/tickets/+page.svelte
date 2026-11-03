@@ -12,7 +12,7 @@
 	import { getTickets, updateStatus } from '@/ticket/ticket.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { generateRankBetween } from '@/shared/utils';
-	import { toast } from 'svelte-sonner';
+	import { toastError } from '@/shared/toast';
 
 	let openForm = $state(false);
 	let defaultStatus = $state<TicketStatus | undefined>(undefined);
@@ -54,9 +54,7 @@
 				)
 			);
 		} catch (error) {
-			toast.error(
-				error instanceof Error ? error.message : 'Failed to move ticket. Please try again.'
-			);
+			toastError(error, 'Failed to move ticket. Please try again.');
 		}
 	}
 </script>

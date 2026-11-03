@@ -1,7 +1,6 @@
 import { form, getRequestEvent, query } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
-import { setFlash } from 'sveltekit-flash-message/server';
 import {
 	contractSchema,
 	createDueNoteSchema,
@@ -115,7 +114,6 @@ export const getInstallmentUpdates = query<z.ZodNumber, InstallmentUpdate[]>(
 export const upsertContract = form(contractSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { id, type, property_id, start_date, end_date, tenant_id, ...typeData } = data;
@@ -133,7 +131,6 @@ export const upsertContract = form(contractSchema, async (data) => {
 			.eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
@@ -143,11 +140,9 @@ export const upsertContract = form(contractSchema, async (data) => {
 		});
 
 		if (tenantError) {
-			setFlash({ type: 'error', message: tenantError.message }, cookies);
 			error(500, tenantError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Contract updated successfully' }, cookies);
 		getContracts().refresh();
 		getContract(id).refresh();
 	} else {
@@ -164,7 +159,6 @@ export const upsertContract = form(contractSchema, async (data) => {
 			.single();
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
@@ -174,11 +168,9 @@ export const upsertContract = form(contractSchema, async (data) => {
 		});
 
 		if (tenantError) {
-			setFlash({ type: 'error', message: tenantError.message }, cookies);
 			error(500, tenantError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Contract created successfully' }, cookies);
 		getContracts().refresh();
 	}
 });
@@ -186,17 +178,14 @@ export const upsertContract = form(contractSchema, async (data) => {
 export const deleteContract = form(deleteContractSchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('contracts').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Contract deleted successfully' }, cookies);
 	getContracts().refresh();
 
 	return redirect(302, '/contracts');
@@ -207,7 +196,6 @@ export const createRentUpdate = form(
 	async ({ contract_id, rent, update_date }) => {
 		const {
 			locals: { supabase },
-			cookies,
 		} = getRequestEvent();
 
 		const { error: insertError } = await supabase.from('rent_updates').insert({
@@ -217,11 +205,9 @@ export const createRentUpdate = form(
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Rent update created successfully' }, cookies);
 		getRentUpdates(contract_id).refresh();
 		getContract(contract_id).refresh();
 	}
@@ -232,7 +218,6 @@ export const createInstallmentUpdate = form(
 	async ({ contract_id, installment, interest, update_date }) => {
 		const {
 			locals: { supabase },
-			cookies,
 		} = getRequestEvent();
 
 		const { error: insertError } = await supabase.from('installment_updates').insert({
@@ -243,11 +228,9 @@ export const createInstallmentUpdate = form(
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Installment update created successfully' }, cookies);
 		getInstallmentUpdates(contract_id).refresh();
 		getContract(contract_id).refresh();
 	}
@@ -256,7 +239,6 @@ export const createInstallmentUpdate = form(
 export const createDueNote = form(createDueNoteSchema, async ({ contract_id, due_date, value }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: insertError } = await supabase.from('due_notes').insert({
@@ -266,11 +248,9 @@ export const createDueNote = form(createDueNoteSchema, async ({ contract_id, due
 	});
 
 	if (insertError) {
-		setFlash({ type: 'error', message: insertError.message }, cookies);
 		error(500, insertError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Due note created successfully' }, cookies);
 	getContractAccount(contract_id).refresh();
 });
 
@@ -279,7 +259,6 @@ export const createRentPayment = form(
 	async ({ contract_id, occurred_at, value, description }) => {
 		const {
 			locals: { supabase },
-			cookies,
 		} = getRequestEvent();
 
 		const { error: insertError } = await supabase.from('rent_payments_view').insert({
@@ -290,11 +269,9 @@ export const createRentPayment = form(
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Rent payment created successfully' }, cookies);
 		getContractAccount(contract_id).refresh();
 		getContract(contract_id).refresh();
 	}
@@ -305,7 +282,6 @@ export const createInstallmentPayment = form(
 	async ({ contract_id, occurred_at, amortization, interest, description }) => {
 		const {
 			locals: { supabase },
-			cookies,
 		} = getRequestEvent();
 
 		const { error: insertError } = await supabase.from('installment_payments_view').insert({
@@ -318,11 +294,9 @@ export const createInstallmentPayment = form(
 		});
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Installment payment created successfully' }, cookies);
 		getContractAccount(contract_id).refresh();
 		getContract(contract_id).refresh();
 	}

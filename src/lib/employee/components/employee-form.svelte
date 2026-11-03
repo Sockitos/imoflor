@@ -10,6 +10,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
+	import { submitWithToast } from '@/shared/toast';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -50,13 +51,14 @@
 		<Separator />
 		<form
 			{...form.preflight(employeeSchema).enhance(async (f) => {
-				try {
-					if (await f.submit()) {
-						open = false;
-						if (!isEdit) f.element.reset();
-					}
-				} catch (err) {
-					console.error(err);
+				if (
+					await submitWithToast(
+						() => f.submit(),
+						isEdit ? 'Employee updated successfully' : 'Employee created successfully'
+					)
+				) {
+					open = false;
+					if (!isEdit) f.element.reset();
 				}
 			})}
 			onfocusout={() => form.validate()}

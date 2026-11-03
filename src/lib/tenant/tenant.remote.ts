@@ -1,7 +1,6 @@
 import { form, getRequestEvent, query } from '$app/server';
 import { deleteByIdSchema, deleteByIdsSchema } from '@/shared/schemas';
 import { error, redirect } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { tenantSchema } from './schemas';
 import type { Tenant, TenantOption } from './types';
@@ -43,7 +42,6 @@ export const getTenant = query(z.number(), async (id): Promise<Tenant> => {
 export const upsertTenant = form(tenantSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
@@ -57,7 +55,6 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 			.eq('id', addressId);
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 	} else {
@@ -68,7 +65,6 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 			.single();
 
 		if (addressError) {
-			setFlash({ type: 'error', message: addressError.message }, cookies);
 			error(500, addressError.message);
 		}
 
@@ -83,11 +79,9 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 			.eq('id', id);
 
 		if (tenantError) {
-			setFlash({ type: 'error', message: tenantError.message }, cookies);
 			error(500, tenantError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Tenant updated successfully' }, cookies);
 		getTenants().refresh();
 		getTenant(id).refresh();
 	} else {
@@ -97,11 +91,9 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 			.insert({ ...insertFields, address_id: addressId });
 
 		if (tenantError) {
-			setFlash({ type: 'error', message: tenantError.message }, cookies);
 			error(500, tenantError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Tenant created successfully' }, cookies);
 		getTenants().refresh();
 	}
 });
@@ -109,17 +101,14 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 export const deleteTenant = form(deleteByIdSchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('tenants').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Tenant deleted successfully' }, cookies);
 	getTenants().refresh();
 
 	return redirect(302, '/tenants');
@@ -142,16 +131,13 @@ export const getTenantOptions = query<TenantOption[]>(async () => {
 export const deleteTenants = form(deleteByIdsSchema, async ({ ids }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('tenants').delete().in('id', ids);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Tenants deleted successfully' }, cookies);
 	getTenants().refresh();
 });

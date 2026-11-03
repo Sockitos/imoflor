@@ -1,7 +1,6 @@
 import { command, form, getRequestEvent, query, requested } from '$app/server';
 import { generateRankBetween } from '@/shared/utils';
 import { error, redirect } from '@sveltejs/kit';
-import { setFlash } from 'sveltekit-flash-message/server';
 import { z } from 'zod';
 import { deleteInterventionSchema, interventionSchema } from './schemas';
 import { interventionStatusValues, type Intervention } from './types';
@@ -71,7 +70,6 @@ export const updateStatus = command(updateStatusSchema, async (data) => {
 export const upsertIntervention = form(interventionSchema, async (data) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	if (data.id) {
@@ -84,17 +82,12 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 			.single();
 
 		if (currentError || !current) {
-			setFlash(
-				{ type: 'error', message: currentError?.message ?? 'Intervention not found' },
-				cookies
-			);
 			error(500, currentError?.message ?? 'Intervention not found');
 		}
 
 		const { error: updateError } = await supabase.from('interventions').update(fields).eq('id', id);
 
 		if (updateError) {
-			setFlash({ type: 'error', message: updateError.message }, cookies);
 			error(500, updateError.message);
 		}
 
@@ -106,12 +99,10 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 			});
 
 			if (transitionError) {
-				setFlash({ type: 'error', message: transitionError.message }, cookies);
 				error(500, transitionError.message);
 			}
 		}
 
-		setFlash({ type: 'success', message: 'Intervention updated successfully' }, cookies);
 		getInterventions().refresh();
 		getIntervention(id).refresh();
 	} else {
@@ -130,11 +121,9 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 			.insert({ ...insertFields, rank });
 
 		if (insertError) {
-			setFlash({ type: 'error', message: insertError.message }, cookies);
 			error(500, insertError.message);
 		}
 
-		setFlash({ type: 'success', message: 'Intervention created successfully' }, cookies);
 		getInterventions().refresh();
 	}
 });
@@ -142,17 +131,14 @@ export const upsertIntervention = form(interventionSchema, async (data) => {
 export const deleteIntervention = form(deleteInterventionSchema, async ({ id }) => {
 	const {
 		locals: { supabase },
-		cookies,
 	} = getRequestEvent();
 
 	const { error: deleteError } = await supabase.from('interventions').delete().eq('id', id);
 
 	if (deleteError) {
-		setFlash({ type: 'error', message: deleteError.message }, cookies);
 		error(500, deleteError.message);
 	}
 
-	setFlash({ type: 'success', message: 'Intervention deleted successfully' }, cookies);
 	getInterventions().refresh();
 
 	return redirect(302, '/interventions');
