@@ -40,7 +40,7 @@ export type LendingContractData = {
 		yearly_raise: number;
 		debt: number;
 		extra_debt: number;
-		last_payment_date: Timestamp | null;
+		last_paid_at: Timestamp | null;
 		installment: number;
 		interest: number;
 		next_update: InstallmentUpdate | null;
@@ -51,12 +51,19 @@ export type LendingContract = BaseContract & LendingContractData;
 
 export type Contract = RentingContract | LendingContract;
 
-export const contractAccountTypeValues = ['due_note', 'payment'] as const;
+export const contractAccountTypeValues = [
+	'due_note',
+	'rent_payment',
+	'installment_payment',
+] as const;
 export type ContractAccountType = (typeof contractAccountTypeValues)[number];
 
 export type ContractAccountItem = {
 	id: Id;
-	date: Timestamp;
+	occurred_at: Timestamp;
 	value: number;
 	type: ContractAccountType;
+	description: string | null;
+	is_scheduled: boolean;
+	balance: number;
 };

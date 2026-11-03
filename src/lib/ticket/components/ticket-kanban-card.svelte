@@ -13,7 +13,7 @@
 	<CardHeader class="gap-2 px-0">
 		{@const priority = priorityMap[ticket.priority]}
 		<div class="flex items-center justify-between">
-			<span class="text-xs text-muted-foreground">{dateFormatter(ticket.date)}</span>
+			<span class="text-xs text-muted-foreground">{dateFormatter(ticket.created_at)}</span>
 			<Badge variant={priority.variant} class="flex shrink-0 items-center gap-1 text-xs">
 				<priority.icon class="h-3 w-3" />
 				{priority.label}

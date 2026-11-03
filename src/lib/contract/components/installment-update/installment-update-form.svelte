@@ -8,8 +8,8 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { createInstallmentUpdate, getInstallmentUpdates } from '../../contract.remote';
 	import { createInstallmentUpdateSchema } from '../../schemas';
@@ -23,11 +23,9 @@
 
 	const form = $derived(createInstallmentUpdate.for(contractId));
 
-	let updateDateStr = $state<string | undefined>(new Date().toISOString());
+	let updateDateStr = $state<string | undefined>(today(getLocalTimeZone()).toString());
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const updateDate = $derived(
-		updateDateStr ? parseAbsolute(updateDateStr, getLocalTimeZone()) : undefined
-	);
+	const updateDate = $derived(parsePlainDate(updateDateStr));
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -77,7 +75,7 @@
 									!updateDate && 'text-muted-foreground'
 								)}
 							>
-								{updateDate ? df.format(updateDate.toDate()) : 'Pick a date'}
+								{updateDate ? df.format(updateDate.toDate(getLocalTimeZone())) : 'Pick a date'}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
@@ -85,7 +83,7 @@
 									type="single"
 									value={updateDate}
 									onValueChange={(v) => {
-										updateDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										updateDateStr = toPlainDateString(v);
 									}}
 								/>
 							</Popover.Content>

@@ -18,7 +18,7 @@ export const interventionSchema = z.object({
 
 export const deleteInterventionSchema = deleteByIdSchema;
 
-export const interventionPaymentSchema = z.object({
+export const interventionExpenseSchema = z.object({
 	id: idSchema,
 	intervention_id: idSchema,
 	movement_id: idSchema,
@@ -26,4 +26,4 @@ export const interventionPaymentSchema = z.object({
 
 export type InterventionSchema = typeof interventionSchema;
 export type DeleteInterventionSchema = typeof deleteInterventionSchema;
-export type InterventionPaymentSchema = typeof interventionPaymentSchema;
+export type InterventionExpenseSchema = typeof interventionExpenseSchema;

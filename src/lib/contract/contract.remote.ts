@@ -276,7 +276,7 @@ export const createDueNote = form(createDueNoteSchema, async ({ contract_id, due
 
 export const createRentPayment = form(
 	createRentPaymentSchema,
-	async ({ contract_id, date, value, description }) => {
+	async ({ contract_id, occurred_at, value, description }) => {
 		const {
 			locals: { supabase },
 			cookies,
@@ -284,7 +284,7 @@ export const createRentPayment = form(
 
 		const { error: insertError } = await supabase.from('rent_payments_view').insert({
 			contract_id,
-			date,
+			occurred_at,
 			value,
 			description,
 		});
@@ -302,7 +302,7 @@ export const createRentPayment = form(
 
 export const createInstallmentPayment = form(
 	createInstallmentPaymentSchema,
-	async ({ contract_id, date, amortization, interest, description }) => {
+	async ({ contract_id, occurred_at, amortization, interest, description }) => {
 		const {
 			locals: { supabase },
 			cookies,
@@ -310,7 +310,7 @@ export const createInstallmentPayment = form(
 
 		const { error: insertError } = await supabase.from('installment_payments_view').insert({
 			contract_id,
-			date,
+			occurred_at,
 			amortization: amortization < 0 ? 0 : amortization,
 			interest: amortization < 0 ? interest + amortization : interest,
 			description,

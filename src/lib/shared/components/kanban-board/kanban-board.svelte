@@ -10,6 +10,7 @@
 		card,
 		onAddCard,
 		onMoveCard,
+		canMoveToColumn,
 	}: {
 		columns: KanbanColumnDef[];
 		cards: TCard[];
@@ -21,6 +22,7 @@
 			upperRank: string | undefined,
 			bottomRank: string | undefined
 		) => void;
+		canMoveToColumn?: (fromColumnId: string, toColumnId: string) => boolean;
 	} = $props();
 
 	function sortByRank(items: TCard[]): TCard[] {
@@ -80,8 +82,19 @@
 
 	let columnCardsByColumn = $derived(groupByColumn(cards, columnIds));
 
+	function canDropOnColumn(toColumnId: string): boolean {
+		if (draggingCardId === null) return true;
+		const draggingItem = cards.find((c) => c.id === draggingCardId);
+		if (!draggingItem) return true;
+		return canMoveToColumn?.(draggingItem.columnId, toColumnId) ?? true;
+	}
+
 	let previewColumnCards = $derived.by((): ColumnCards<TCard> => {
 		if (draggingCardId === null || dragOverColumnId === null) {
+			return columnCardsByColumn;
+		}
+
+		if (!canDropOnColumn(dragOverColumnId)) {
 			return columnCardsByColumn;
 		}
 
@@ -126,6 +139,13 @@
 	}
 
 	function onColumnDragOver(e: DragEvent, columnId: string) {
+		if (!canDropOnColumn(columnId)) {
+			if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+			dragOverColumnId = null;
+			dragOverCardId = null;
+			return;
+		}
+
 		e.preventDefault();
 
 		if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
@@ -137,6 +157,7 @@
 
 	function commitCardMove() {
 		if (draggingCardId === null || dragOverColumnId === null) return;
+		if (!canDropOnColumn(dragOverColumnId)) return;
 
 		const originalCard = cards.find((c) => c.id === draggingCardId);
 		if (!originalCard) return;
@@ -185,6 +206,14 @@
 	function onCardDragOver(e: DragEvent, cardId: number, targetColumn: string) {
 		if (cardId === draggingCardId) {
 			e.preventDefault();
+			e.stopPropagation();
+			return;
+		}
+
+		if (!canDropOnColumn(targetColumn)) {
+			if (e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+			dragOverColumnId = null;
+			dragOverCardId = null;
 			e.stopPropagation();
 			return;
 		}

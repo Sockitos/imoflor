@@ -6,7 +6,7 @@ export const movementTypeSchema = z.enum(movementTypeValues);
 
 const movementSchema = z.object({
 	type: movementTypeSchema,
-	date: z.string().min(1, 'Date is required'),
+	occurred_at: z.string().min(1, 'Date is required'),
 	value: z.coerce.number(),
 	description: z.string().nullish(),
 	tax_id_number: z.string().nullish(),

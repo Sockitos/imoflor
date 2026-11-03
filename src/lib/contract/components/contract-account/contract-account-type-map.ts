@@ -7,8 +7,12 @@ export const typeMap: Record<ContractAccountType, { label: string; icon: Compone
 		label: 'Due Note',
 		icon: FileClock,
 	},
-	payment: {
-		label: 'Payment',
+	rent_payment: {
+		label: 'Rent Payment',
+		icon: FileKey,
+	},
+	installment_payment: {
+		label: 'Installment Payment',
 		icon: FileKey,
 	},
 };

@@ -12,7 +12,7 @@ export type MovementType = (typeof movementTypeValues)[number];
 export type Movement = {
 	id: Id;
 	type: MovementType;
-	date: string;
+	occurred_at: string;
 	value: number;
 	description: string | null;
 	tax_id_number: string | null;

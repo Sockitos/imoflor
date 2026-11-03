@@ -11,16 +11,18 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { cn } from '@/shared/utils';
+	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import TicketOptionItem from '@/ticket/components/ticket-option-item.svelte';
 	import { getTicketOptions } from '@/ticket/ticket.remote';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { upsertIntervention } from '../intervention.remote';
 	import { interventionSchema } from '../schemas';
 	import type { Intervention } from '../types';
 	import {
+		canTransitionInterventionStatus,
 		interventionStatusOptions,
+		interventionStatusValues,
 		interventionTypeOptions,
 		type InterventionStatus,
 		type InterventionType,
@@ -43,6 +45,11 @@
 	let ticketId = $state<number | undefined>();
 
 	const status = $derived(intervention?.status ?? defaultStatus);
+	const availableStatuses = $derived(
+		interventionStatusValues.filter(
+			(value) => intervention == null || canTransitionInterventionStatus(intervention.status, value)
+		)
+	);
 
 	$effect(() => {
 		if (open) {
@@ -142,8 +149,8 @@
 												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
-										{#each Object.entries(interventionStatusOptions) as [value, label] (value)}
-											<Select.Item {value} {label} />
+										{#each availableStatuses as value (value)}
+											<Select.Item {value} label={interventionStatusOptions[value]} />
 										{/each}
 									</Select.Content>
 								</Select.Root>
@@ -177,14 +184,13 @@
 									>
 										{form.fields.start_date.value()
 											? df.format(
-													parseAbsolute(
-														form.fields.start_date.value()!,
+													parsePlainDate(form.fields.start_date.value()!)!.toDate(
 														getLocalTimeZone()
-													).toDate()
+													)
 												)
 											: intervention?.start_date
 												? df.format(
-														parseAbsolute(intervention.start_date, getLocalTimeZone()).toDate()
+														parsePlainDate(intervention.start_date)!.toDate(getLocalTimeZone())
 													)
 												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
@@ -193,12 +199,12 @@
 										<Calendar
 											type="single"
 											value={form.fields.start_date.value()
-												? parseAbsolute(form.fields.start_date.value()!, getLocalTimeZone())
+												? parsePlainDate(form.fields.start_date.value()!)
 												: intervention?.start_date
-													? parseAbsolute(intervention.start_date, getLocalTimeZone())
+													? parsePlainDate(intervention.start_date)
 													: undefined}
 											onValueChange={(v) => {
-												form.fields.start_date.set(v?.toDate(getLocalTimeZone()).toISOString());
+												form.fields.start_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
@@ -229,11 +235,11 @@
 									>
 										{form.fields.end_date.value()
 											? df.format(
-													parseAbsolute(form.fields.end_date.value()!, getLocalTimeZone()).toDate()
+													parsePlainDate(form.fields.end_date.value()!)!.toDate(getLocalTimeZone())
 												)
 											: intervention?.end_date
 												? df.format(
-														parseAbsolute(intervention.end_date, getLocalTimeZone()).toDate()
+														parsePlainDate(intervention.end_date)!.toDate(getLocalTimeZone())
 													)
 												: 'Pick a date'}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
@@ -242,12 +248,12 @@
 										<Calendar
 											type="single"
 											value={form.fields.end_date.value()
-												? parseAbsolute(form.fields.end_date.value()!, getLocalTimeZone())
+												? parsePlainDate(form.fields.end_date.value()!)
 												: intervention?.end_date
-													? parseAbsolute(intervention.end_date, getLocalTimeZone())
+													? parsePlainDate(intervention.end_date)
 													: undefined}
 											onValueChange={(v) => {
-												form.fields.end_date.set(v?.toDate(getLocalTimeZone()).toISOString());
+												form.fields.end_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>

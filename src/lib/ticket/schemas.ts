@@ -7,7 +7,6 @@ export const ticketStatusSchema = z.enum(ticketStatusValues).default('open');
 
 export const ticketSchema = z.object({
 	id: idSchema.optional(),
-	date: z.string().min(1, 'Date is required'),
 	description: z.string().min(1, 'Description is required'),
 	priority: ticketPrioritySchema,
 	property_id: idSchema,

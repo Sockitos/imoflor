@@ -19,6 +19,25 @@ insert into auth.users (
 	)
 values (
 		'00000000-0000-0000-0000-000000000000',
+		'00000000-0000-0000-0000-000000000001'::uuid,
+		'authenticated',
+		'authenticated',
+		'system@imoflor.pt',
+		crypt ('Password123', gen_salt ('bf')),
+		current_timestamp,
+		current_timestamp,
+		current_timestamp,
+		'{"provider":"email","providers":["email"]}',
+		'{"display_name": "System"}',
+		current_timestamp,
+		current_timestamp,
+		'',
+		'',
+		'',
+		''
+	),
+	(
+		'00000000-0000-0000-0000-000000000000',
 		uuid_generate_v4 (),
 		'authenticated',
 		'authenticated',
@@ -122,7 +141,8 @@ insert into public.addresses (
 		postal_code,
 		city
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Portugal',
 		'Lisboa',
@@ -254,15 +274,16 @@ insert into public.employees (
 		salary_type,
 		salary
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Mariana Costa',
 		'female',
 		'married',
 		'Portuguesa',
-		'1986-04-12 00:00:00+00',
+		'1986-04-12',
 		'Cartão de Cidadão',
-		'2030-04-12 00:00:00+00',
+		'2030-04-12',
 		'15483927 4ZX6',
 		'214563987',
 		'12004567891',
@@ -279,9 +300,9 @@ values (
 		'male',
 		'single',
 		'Portuguesa',
-		'1991-09-22 00:00:00+00',
+		'1991-09-22',
 		'Cartão de Cidadão',
-		'2029-09-22 00:00:00+00',
+		'2029-09-22',
 		'18374620 8ZY3',
 		'228901456',
 		'12008765432',
@@ -298,9 +319,9 @@ values (
 		'female',
 		'union',
 		'Portuguesa',
-		'1989-01-08 00:00:00+00',
+		'1989-01-08',
 		'Cartão de Cidadão',
-		'2031-01-08 00:00:00+00',
+		'2031-01-08',
 		'19283746 1ZX2',
 		'236789012',
 		'12003456789',
@@ -324,7 +345,8 @@ insert into public.vendors (
 		phone,
 		website
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Canalizações Tejo, Lda.',
 		'510234987',
@@ -377,7 +399,8 @@ insert into public.properties (
 		sold,
 		parent_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'urban',
 		'building',
@@ -538,15 +561,16 @@ insert into public.tenants (
 		mobile,
 		phone
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'Ana Ribeiro',
 		'female',
 		'single',
 		'Portuguesa',
-		'1993-05-17 00:00:00+00',
+		'1993-05-17',
 		'Cartão de Cidadão',
-		'2030-05-17 00:00:00+00',
+		'2030-05-17',
 		'14567890 5ZX1',
 		'245789123',
 		11,
@@ -560,9 +584,9 @@ values (
 		'male',
 		'married',
 		'Portuguesa',
-		'1984-11-03 00:00:00+00',
+		'1984-11-03',
 		'Cartão de Cidadão',
-		'2028-11-03 00:00:00+00',
+		'2028-11-03',
 		'16789432 7ZY9',
 		'213456789',
 		12,
@@ -576,9 +600,9 @@ values (
 		'female',
 		'divorced',
 		'Brasileira',
-		'1978-02-28 00:00:00+00',
+		'1978-02-28',
 		'Título de Residência',
-		'2027-02-28 00:00:00+00',
+		'2027-02-28',
 		'TR845612',
 		'287654321',
 		13,
@@ -592,9 +616,9 @@ values (
 		'male',
 		'union',
 		'Portuguesa',
-		'1981-07-09 00:00:00+00',
+		'1981-07-09',
 		'Cartão de Cidadão',
-		'2029-07-09 00:00:00+00',
+		'2029-07-09',
 		'17654321 9ZX4',
 		'224567890',
 		14,
@@ -611,10 +635,11 @@ insert into public.contracts (
 		property_id,
 		is_active
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'renting',
-		'2025-01-01 00:00:00+00',
+		'2025-01-01',
 		NULL,
 		5,
 		TRUE
@@ -622,7 +647,7 @@ values (
 	(
 		2,
 		'renting',
-		'2025-02-01 00:00:00+00',
+		'2025-02-01',
 		NULL,
 		6,
 		TRUE
@@ -630,7 +655,7 @@ values (
 	(
 		3,
 		'lending',
-		'2024-09-01 00:00:00+00',
+		'2024-09-01',
 		NULL,
 		3,
 		TRUE
@@ -638,14 +663,15 @@ values (
 	(
 		4,
 		'renting',
-		'2024-01-01 00:00:00+00',
-		'2024-12-31 00:00:00+00',
+		'2024-01-01',
+		'2024-12-31',
 		8,
 		FALSE
 	);
 
 insert into public.renting_contracts (id)
-values (1),
+	overriding system value
+	values (1),
 	(2),
 	(4);
 
@@ -655,7 +681,8 @@ insert into public.lending_contracts (
 		down_payment,
 		yearly_raise
 	)
-values (
+	overriding system value
+	values (
 		3,
 		365000,
 		50000,
@@ -668,27 +695,28 @@ insert into public.rent_updates (
 		rent,
 		contract_id
 	)
-values (
+	overriding system value
+	values (
 		1,
-		'2025-01-01 00:00:00+00',
+		'2025-01-01',
 		950,
 		1
 	),
 	(
 		2,
-		'2026-01-01 00:00:00+00',
+		'2026-01-01',
 		985,
 		1
 	),
 	(
 		3,
-		'2025-02-01 00:00:00+00',
+		'2025-02-01',
 		1250,
 		2
 	),
 	(
 		4,
-		'2024-01-01 00:00:00+00',
+		'2024-01-01',
 		1100,
 		4
 	);
@@ -700,16 +728,17 @@ insert into public.installment_updates (
 		interest,
 		contract_id
 	)
-values (
+	overriding system value
+	values (
 		1,
-		'2024-09-01 00:00:00+00',
+		'2024-09-01',
 		1400,
 		320,
 		3
 	),
 	(
 		2,
-		'2025-09-01 00:00:00+00',
+		'2025-09-01',
 		1435,
 		295,
 		3
@@ -728,34 +757,36 @@ insert into public.due_notes (
 		due_date,
 		value
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
-		'2026-04-01 00:00:00+00',
+		'2026-04-01',
 		985
 	),
 	(
 		2,
 		2,
-		'2026-04-01 00:00:00+00',
+		'2026-04-01',
 		1250
 	),
 	(
 		3,
 		3,
-		'2026-04-01 00:00:00+00',
+		'2026-04-01',
 		1435
 	);
 
 insert into public.movements (
 		id,
 		type,
-		date,
+		occurred_at,
 		value,
 		tax_id_number,
 		description
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'rent',
 		'2026-04-03 00:00:00+00',
@@ -817,7 +848,8 @@ insert into public.rent_payments (
 		contract_id,
 		movement_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
 		1
@@ -835,7 +867,8 @@ insert into public.installment_payments (
 		amortization_movement_id,
 		extra_debt
 	)
-values (
+	overriding system value
+	values (
 		1,
 		3,
 		3,
@@ -845,7 +878,6 @@ values (
 
 insert into public.tickets (
 		id,
-		date,
 		priority,
 		status,
 		title,
@@ -853,9 +885,9 @@ insert into public.tickets (
 		property_id,
 		rank
 	)
-values (
+	overriding system value
+	values (
 		1,
-		'2026-03-18 09:30:00+00',
 		'high',
 		'resolved',
 		'Fuga de água na cozinha',
@@ -865,7 +897,6 @@ values (
 	),
 	(
 		2,
-		'2026-04-08 14:15:00+00',
 		'medium',
 		'in_progress',
 		'Falha no quadro elétrico',
@@ -875,7 +906,6 @@ values (
 	),
 	(
 		3,
-		'2026-04-20 10:00:00+00',
 		'low',
 		'open',
 		'Limpeza de terreno',
@@ -895,12 +925,13 @@ insert into public.interventions (
 		ticket_id,
 		rank
 	)
-values (
+	overriding system value
+	values (
 		1,
 		'maintenance',
 		'completed',
-		'2026-03-20 08:00:00+00',
-		'2026-03-20 12:00:00+00',
+		'2026-03-20',
+		'2026-03-20',
 		'Substituição de sifão e vedação de tubagem.',
 		5,
 		1,
@@ -910,8 +941,8 @@ values (
 		2,
 		'renovation',
 		'completed',
-		'2026-02-10 08:00:00+00',
-		'2026-02-13 18:00:00+00',
+		'2026-02-10',
+		'2026-02-13',
 		'Pintura geral após saída de inquilino.',
 		8,
 		NULL,
@@ -921,7 +952,7 @@ values (
 		3,
 		'maintenance',
 		'in_progress',
-		'2026-04-09 09:00:00+00',
+		'2026-04-09',
 		NULL,
 		'Diagnóstico e substituição de quadro elétrico.',
 		8,
@@ -929,12 +960,13 @@ values (
 		'a0'
 	);
 
-insert into public.intervention_payments (
+insert into public.intervention_expenses (
 		id,
 		intervention_id,
 		movement_id
 	)
-values (
+	overriding system value
+	values (
 		1,
 		1,
 		5
@@ -977,4 +1009,4 @@ select setval(pg_get_serial_sequence('public.tickets', 'id'), (select max(id) fr
 
 select setval(pg_get_serial_sequence('public.interventions', 'id'), (select max(id) from public.interventions));
 
-select setval(pg_get_serial_sequence('public.intervention_payments', 'id'), (select max(id) from public.intervention_payments));
+select setval(pg_get_serial_sequence('public.intervention_expenses', 'id'), (select max(id) from public.intervention_expenses));

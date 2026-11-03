@@ -47,12 +47,13 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 	} = getRequestEvent();
 
 	const { address: addressData, ...tenantData } = data;
+	const { id: existingAddressId, ...addressFields } = addressData;
 
-	let addressId = addressData.id;
+	let addressId = existingAddressId;
 	if (addressId) {
 		const { error: addressError } = await supabase
 			.from('addresses')
-			.update(addressData)
+			.update(addressFields)
 			.eq('id', addressId);
 
 		if (addressError) {
@@ -62,7 +63,7 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 	} else {
 		const { data: address, error: addressError } = await supabase
 			.from('addresses')
-			.insert(addressData)
+			.insert(addressFields)
 			.select('id')
 			.single();
 
@@ -75,10 +76,11 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 	}
 
 	if (tenantData.id) {
+		const { id, ...fields } = tenantData;
 		const { error: tenantError } = await supabase
 			.from('tenants')
-			.update({ ...tenantData, address_id: addressId })
-			.eq('id', tenantData.id);
+			.update({ ...fields, address_id: addressId })
+			.eq('id', id);
 
 		if (tenantError) {
 			setFlash({ type: 'error', message: tenantError.message }, cookies);
@@ -87,11 +89,12 @@ export const upsertTenant = form(tenantSchema, async (data) => {
 
 		setFlash({ type: 'success', message: 'Tenant updated successfully' }, cookies);
 		getTenants().refresh();
-		getTenant(tenantData.id).refresh();
+		getTenant(id).refresh();
 	} else {
+		const { id: _id, ...insertFields } = tenantData;
 		const { error: tenantError } = await supabase
 			.from('tenants')
-			.insert({ ...tenantData, address_id: addressId });
+			.insert({ ...insertFields, address_id: addressId });
 
 		if (tenantError) {
 			setFlash({ type: 'error', message: tenantError.message }, cookies);

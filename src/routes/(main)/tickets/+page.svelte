@@ -8,7 +8,7 @@
 	import { CirclePlus } from 'lucide-svelte';
 	import KanbanBoard from '@/shared/components/kanban-board';
 	import { ticketKanbanColumns } from '@/ticket/components/ticket-kanban-columns';
-	import type { TicketStatus } from '@/ticket/types';
+	import { canTransitionTicketStatus, type TicketStatus } from '@/ticket/types';
 	import { getTickets, updateStatus } from '@/ticket/ticket.remote.js';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { generateRankBetween } from '@/shared/utils';
@@ -34,6 +34,10 @@
 		openTicketForm(status as TicketStatus);
 	}
 
+	function canMoveToColumn(fromColumnId: string, toColumnId: string) {
+		return canTransitionTicketStatus(fromColumnId as TicketStatus, toColumnId as TicketStatus);
+	}
+
 	async function onMoveCard(
 		id: number,
 		columnId: string,
@@ -49,8 +53,10 @@
 					tickets.map((ticket) => (ticket.id === id ? { ...ticket, status, rank } : ticket))
 				)
 			);
-		} catch {
-			toast.error('Failed to move ticket. Please try again.');
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : 'Failed to move ticket. Please try again.'
+			);
 		}
 	}
 </script>
@@ -82,7 +88,7 @@
 			<Spinner class="size-6" />
 		</div>
 	{:else}
-		<KanbanBoard columns={ticketKanbanColumns} {cards} {onAddCard} {onMoveCard}>
+		<KanbanBoard columns={ticketKanbanColumns} {cards} {onAddCard} {onMoveCard} {canMoveToColumn}>
 			{#snippet card(ticket)}
 				<TicketKanbanCard {ticket} />
 			{/snippet}

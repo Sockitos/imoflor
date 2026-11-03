@@ -54,7 +54,7 @@ export const createDueNoteSchema = z.object({
 
 export const createRentPaymentSchema = z.object({
 	contract_id: z.number(),
-	date: z.string().min(1, 'Date is required'),
+	occurred_at: z.string().min(1, 'Date is required'),
 	value: z.number().min(1, 'Value is required'),
 	description: z.string().optional(),
 });
@@ -62,7 +62,7 @@ export const createRentPaymentSchema = z.object({
 export const createInstallmentPaymentSchema = z
 	.object({
 		contract_id: z.number(),
-		date: z.string().min(1, 'Date is required'),
+		occurred_at: z.string().min(1, 'Date is required'),
 		value: z.number().min(0, 'Value is required'),
 		amortization: z.number(),
 		interest: z.number().min(0, 'Interest is required'),
@@ -75,9 +75,12 @@ export const createInstallmentPaymentSchema = z
 
 export const contractAccountItemSchema = z.object({
 	id: idSchema,
-	date: z.string().min(1, 'Date is required'),
+	occurred_at: z.string().min(1, 'Date is required'),
 	value: z.number(),
 	type: contractAccountTypeSchema,
+	description: z.string().nullable(),
+	is_scheduled: z.boolean(),
+	balance: z.number(),
 });
 
 export type ContractSchema = typeof contractSchema;

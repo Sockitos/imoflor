@@ -1,12 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { RouteId as AppRouteId } from '$app/types';
 import type { ActionFailure, RequestEvent } from '@sveltejs/kit';
+import { CalendarDate, parseDate } from '@internationalized/date';
 import { type ClassValue, clsx } from 'clsx';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
-import { BASE_62_DIGITS, generateKeyBetween } from 'fractional-indexing';
+import { generateKeyBetween } from 'fractional-indexing';
+
+/** Format a calendar value as Postgres `date` (YYYY-MM-DD). */
+export function toPlainDateString(
+	value: { year: number; month: number; day: number } | null | undefined
+): string | undefined {
+	if (!value) return undefined;
+	return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`;
+}
+
+/** Parse a Postgres `date` or ISO timestamp into a CalendarDate. */
+export function parsePlainDate(value: string | null | undefined): CalendarDate | undefined {
+	if (!value) return undefined;
+	return parseDate(value.slice(0, 10));
+}
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -102,5 +117,5 @@ export function generateRankBetween(
 	upperRank: string | undefined = undefined,
 	bottomRank: string | undefined = undefined
 ): string {
-	return generateKeyBetween(upperRank, bottomRank, BASE_62_DIGITS);
+	return generateKeyBetween(upperRank, bottomRank);
 }

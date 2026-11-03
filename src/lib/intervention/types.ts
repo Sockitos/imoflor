@@ -14,6 +14,24 @@ export const interventionStatusOptions = {
 };
 export type InterventionStatus = (typeof interventionStatusValues)[number];
 
+/** Mirrors public.intervention_status_transitions */
+export const interventionStatusTransitions: Record<
+	InterventionStatus,
+	readonly InterventionStatus[]
+> = {
+	not_started: ['in_progress', 'cancelled'],
+	in_progress: ['not_started', 'completed', 'cancelled'],
+	completed: [],
+	cancelled: ['not_started'],
+};
+
+export function canTransitionInterventionStatus(
+	from: InterventionStatus,
+	to: InterventionStatus
+): boolean {
+	return from === to || interventionStatusTransitions[from].includes(to);
+}
+
 export const interventionTypeValues = ['new', 'renovation', 'maintenance'] as const;
 export const interventionTypeOptions = {
 	new: 'New',
@@ -34,7 +52,7 @@ export type Intervention = {
 	rank: string;
 };
 
-export type InterventionPayment = {
+export type InterventionExpense = {
 	id: Id;
 	intervention_id: Id;
 	movement_id: Id;
