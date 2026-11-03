@@ -6,7 +6,8 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -39,9 +40,14 @@
 		</Dialog.Header>
 		<form
 			{...form.preflight(createDueNoteSchema).enhance(async (f) => {
-				if (await submitWithToast(() => f.submit(), 'Due note created successfully')) {
-					open = false;
-					f.element.reset();
+				try {
+					if (await f.submit()) {
+						toast.success('Due note created successfully');
+						open = false;
+						f.element.reset();
+					}
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

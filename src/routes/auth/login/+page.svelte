@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { signIn } from '@/auth/auth.remote';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
 	import * as Card from '@/shared/components/ui/card';
 	import * as Field from '@/shared/components/ui/field';
 	import { Input } from '@/shared/components/ui/input';
@@ -22,7 +22,11 @@
 		<Card.Content>
 			<form
 				{...signIn.preflight(signInSchema).enhance(async (f) => {
-					await submitWithToast(() => f.submit());
+					try {
+						await f.submit();
+					} catch (error) {
+						toastError(error);
+					}
 				})}
 				onfocusout={() => signIn.validate()}
 				class="flex flex-col gap-4"

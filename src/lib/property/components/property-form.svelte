@@ -7,7 +7,8 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 	import { upsertProperty } from '../property.remote';
 	import { propertySchema } from '../schemas';
 	import type { Property } from '../types';
@@ -46,14 +47,16 @@
 		<Separator />
 		<form
 			{...form.preflight(propertySchema).enhance(async (f) => {
-				if (
-					await submitWithToast(
-						() => f.submit(),
-						isEdit ? 'Property updated successfully' : 'Property created successfully'
-					)
-				) {
-					open = false;
-					if (!isEdit) f.element.reset();
+				try {
+					if (await f.submit()) {
+						toast.success(
+							isEdit ? 'Property updated successfully' : 'Property created successfully'
+						);
+						open = false;
+						if (!isEdit) f.element.reset();
+					}
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

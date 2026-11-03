@@ -8,22 +8,6 @@ export function toastError(error: unknown, fallback = fallbackMessage) {
 	toast.error(messageFrom(error, fallback));
 }
 
-export async function submitWithToast(
-	submit: () => Promise<boolean | void>,
-	successMessage?: string
-) {
-	try {
-		const ok = await submit();
-		if (!ok) return false;
-		if (successMessage) toast.success(successMessage);
-		return true;
-	} catch (error) {
-		if (isRedirect(error)) throw error;
-		toastError(error);
-		return false;
-	}
-}
-
 function messageFrom(error: unknown, fallback: string) {
 	if (isHttpError(error)) {
 		const body = error.body;

@@ -11,7 +11,8 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { ticketSchema } from '../schemas';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 	import { upsertTicket } from '../ticket.remote';
 	import type { Ticket } from '../types';
 	import {
@@ -64,14 +65,14 @@
 		<Separator />
 		<form
 			{...form.preflight(ticketSchema).enhance(async (f) => {
-				if (
-					await submitWithToast(
-						() => f.submit(),
-						isEdit ? 'Ticket updated successfully' : 'Ticket created successfully'
-					)
-				) {
-					open = false;
-					if (!isEdit) f.element.reset();
+				try {
+					if (await f.submit()) {
+						toast.success(isEdit ? 'Ticket updated successfully' : 'Ticket created successfully');
+						open = false;
+						if (!isEdit) f.element.reset();
+					}
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

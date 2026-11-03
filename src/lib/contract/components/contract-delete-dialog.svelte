@@ -2,7 +2,8 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteContract } from '../contract.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 
 	interface Props {
 		open?: boolean;
@@ -20,8 +21,13 @@
 	<form
 		bind:this={formElement}
 		{...deleteForm.enhance(async (f) => {
-			if (await submitWithToast(() => f.submit(), 'Contract deleted successfully')) {
-				open = false;
+			try {
+				if (await f.submit()) {
+					toast.success('Contract deleted successfully');
+					open = false;
+				}
+			} catch (error) {
+				toastError(error);
 			}
 		})}
 	>

@@ -8,7 +8,8 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -42,9 +43,14 @@
 		<Separator />
 		<form
 			{...form.preflight(createInstallmentUpdateSchema).enhance(async (f) => {
-				if (await submitWithToast(() => f.submit(), 'Installment update created successfully')) {
-					open = false;
-					f.element.reset();
+				try {
+					if (await f.submit()) {
+						toast.success('Installment update created successfully');
+						open = false;
+						f.element.reset();
+					}
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}

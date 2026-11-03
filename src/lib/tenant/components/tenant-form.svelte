@@ -14,7 +14,8 @@
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { tenantSchema } from '../schemas';
-	import { submitWithToast } from '@/shared/toast';
+	import { toastError } from '@/shared/toast';
+	import { toast } from 'svelte-sonner';
 	import { upsertTenant } from '../tenant.remote';
 	import type { Tenant } from '../types';
 
@@ -48,14 +49,14 @@
 		<Separator />
 		<form
 			{...form.preflight(tenantSchema).enhance(async (f) => {
-				if (
-					await submitWithToast(
-						() => f.submit(),
-						isEdit ? 'Tenant updated successfully' : 'Tenant created successfully'
-					)
-				) {
-					open = false;
-					if (!isEdit) f.element.reset();
+				try {
+					if (await f.submit()) {
+						toast.success(isEdit ? 'Tenant updated successfully' : 'Tenant created successfully');
+						open = false;
+						if (!isEdit) f.element.reset();
+					}
+				} catch (error) {
+					toastError(error);
 				}
 			})}
 			onfocusout={() => form.validate()}
