@@ -2,8 +2,7 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteTenants } from '../tenant.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 
 	interface Props {
 		open?: boolean;
@@ -24,7 +23,7 @@
 		{...deleteForm.enhance(async (f) => {
 			try {
 				if (await f.submit()) {
-					toast.success('Tenants deleted successfully');
+					toastSuccess('Tenants deleted successfully');
 					open = false;
 					onSuccess();
 				}

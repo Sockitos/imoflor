@@ -7,8 +7,7 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { upsertProperty } from '../property.remote';
 	import { propertySchema } from '../schemas';
 	import type { Property } from '../types';
@@ -49,7 +48,7 @@
 			{...form.preflight(propertySchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
-						toast.success(
+						toastSuccess(
 							isEdit ? 'Property updated successfully' : 'Property created successfully'
 						);
 						open = false;

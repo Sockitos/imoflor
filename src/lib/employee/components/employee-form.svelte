@@ -10,8 +10,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import type { Gender, MaritalStatus } from '@/shared/types';
 	import { genderOptions, maritalStatusOptions } from '@/shared/types';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
@@ -54,7 +53,7 @@
 			{...form.preflight(employeeSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
-						toast.success(
+						toastSuccess(
 							isEdit ? 'Employee updated successfully' : 'Employee created successfully'
 						);
 						open = false;

@@ -8,8 +8,7 @@
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { vendorSchema } from '../schemas';
 	import type { Vendor } from '../types';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { upsertVendor } from '../vendor.remote';
 
 	interface Props {
@@ -40,7 +39,7 @@
 			{...form.preflight(vendorSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
-						toast.success(isEdit ? 'Vendor updated successfully' : 'Vendor created successfully');
+						toastSuccess(isEdit ? 'Vendor updated successfully' : 'Vendor created successfully');
 						open = false;
 						if (!isEdit) f.element.reset();
 					}

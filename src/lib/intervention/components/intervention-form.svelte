@@ -16,8 +16,7 @@
 	import { getTicketOptions } from '@/ticket/ticket.remote';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { upsertIntervention } from '../intervention.remote';
 	import { interventionSchema } from '../schemas';
 	import type { Intervention } from '../types';
@@ -82,7 +81,7 @@
 			{...form.preflight(interventionSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
-						toast.success(
+						toastSuccess(
 							isEdit ? 'Intervention updated successfully' : 'Intervention created successfully'
 						);
 						open = false;

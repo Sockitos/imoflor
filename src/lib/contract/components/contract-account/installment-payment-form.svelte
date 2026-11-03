@@ -6,8 +6,7 @@
 	import { Input } from '@/shared/components/ui/input';
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
@@ -57,7 +56,7 @@
 			{...form.preflight(createInstallmentPaymentSchema).enhance(async (f) => {
 				try {
 					if (await f.submit()) {
-						toast.success('Installment payment created successfully');
+						toastSuccess('Installment payment created successfully');
 						open = false;
 						f.element.reset();
 					}

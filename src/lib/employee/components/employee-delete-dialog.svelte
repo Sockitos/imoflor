@@ -2,8 +2,7 @@
 	import * as AlertDialog from '@/shared/components/ui/alert-dialog';
 	import { deleteEmployee } from '../employee.remote';
 	import { Spinner } from '@/shared/components/ui/spinner';
-	import { toastError } from '@/shared/toast';
-	import { toast } from 'svelte-sonner';
+	import { toastError, toastSuccess } from '@/shared/toast';
 
 	interface Props {
 		open?: boolean;
@@ -22,7 +21,7 @@
 		{...deleteForm.enhance(async (f) => {
 			try {
 				if (await f.submit()) {
-					toast.success('Employee deleted successfully');
+					toastSuccess('Employee deleted successfully');
 					open = false;
 				}
 			} catch (error) {
