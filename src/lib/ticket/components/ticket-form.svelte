@@ -12,6 +12,7 @@
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { ticketSchema } from '../schemas';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { untrack } from 'svelte';
 	import { upsertTicket } from '../ticket.remote';
 	import type { Ticket } from '../types';
 	import {
@@ -34,19 +35,31 @@
 	const form = $derived(ticket != null ? upsertTicket.for(ticket.id) : upsertTicket);
 	const isEdit = $derived(ticket != null);
 
-	let propertyId = $state<number | undefined>();
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (ticket) {
+					form.fields.set({
+						id: ticket.id,
+						title: ticket.title,
+						description: ticket.description,
+						priority: ticket.priority,
+						status: ticket.status,
+						property_id: ticket.property.id,
+					});
+				}
+			});
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
 
 	const availableStatuses = $derived(
 		ticketStatusValues.filter(
 			(status) => ticket == null || canTransitionTicketStatus(ticket.status, status)
 		)
 	);
-
-	$effect(() => {
-		if (open) {
-			propertyId = ticket?.property.id;
-		}
-	});
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -68,7 +81,6 @@
 					if (await f.submit()) {
 						toastSuccess(isEdit ? 'Ticket updated successfully' : 'Ticket created successfully');
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -77,8 +89,8 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
-			{#if ticket?.id != null}
-				<input hidden {...form.fields.id.as('number', ticket.id)} />
+			{#if ticket}
+				<input hidden {...form.fields.id.as('number')} />
 			{/if}
 
 			<Field.FieldSet>
@@ -87,11 +99,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.title.issues())}>
 						<Field.FieldLabel>Title</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...ticket?.title != null
-									? form.fields.title.as('text', ticket.title)
-									: form.fields.title.as('text')}
-							/>
+							<Input {...form.fields.title.as('text')} />
 							<Field.FieldError errors={form.fields.title.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -99,11 +107,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
 						<Field.FieldLabel>Description</Field.FieldLabel>
 						<Field.FieldContent>
-							<Textarea
-								{...ticket?.description != null
-									? form.fields.description.as('text', ticket.description)
-									: form.fields.description.as('text')}
-							/>
+							<Textarea {...form.fields.description.as('text')} />
 							<Field.FieldError errors={form.fields.description.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -114,7 +118,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.priority.value() ?? ticket?.priority}
+									value={form.fields.priority.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.priority.set(v as TicketPriority);
 									}}
@@ -122,9 +126,7 @@
 									<Select.Trigger>
 										{form.fields.priority.value()
 											? ticketPriorityOptions[form.fields.priority.value()!]
-											: ticket?.priority
-												? ticketPriorityOptions[ticket.priority]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(ticketPriorityOptions) as [value, label] (value)}
@@ -132,12 +134,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...ticket != null
-										? form.fields.priority.as('text', ticket.priority)
-										: form.fields.priority.as('text')}
-								/>
+								<input hidden {...form.fields.priority.as('text')} />
 								<Field.FieldError errors={form.fields.priority.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -147,17 +144,15 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.status.value() ?? ticket?.status ?? defaultStatus}
+									value={form.fields.status.value() ?? defaultStatus}
 									onValueChange={(v) => {
 										if (v) form.fields.status.set(v as TicketStatus);
 									}}
 								>
 									<Select.Trigger>
-										{form.fields.status.value()
-											? ticketStatusOptions[form.fields.status.value()!]
-											: (ticket?.status ?? defaultStatus)
-												? ticketStatusOptions[(ticket?.status ?? defaultStatus)!]
-												: 'Select'}
+										{(form.fields.status.value() ?? defaultStatus)
+											? ticketStatusOptions[(form.fields.status.value() ?? defaultStatus)!]
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each availableStatuses as value (value)}
@@ -167,11 +162,9 @@
 								</Select.Root>
 								<input
 									hidden
-									{...ticket != null
-										? form.fields.status.as('text', ticket.status)
-										: defaultStatus != null
-											? form.fields.status.as('text', defaultStatus)
-											: form.fields.status.as('text')}
+									{...!ticket && defaultStatus != null
+										? form.fields.status.as('text', defaultStatus)
+										: form.fields.status.as('text')}
 								/>
 								<Field.FieldError errors={form.fields.status.issues()} />
 							</Field.FieldContent>
@@ -188,7 +181,12 @@
 									...(option.children ?? []),
 								])}
 
-								<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
+								<EntitySelector
+									bind:entityId={
+										() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
+									}
+									options={spreadOptions}
+								>
 									{#snippet displayOption(option)}
 										<PropertyOptionItem {option} />
 									{/snippet}
@@ -209,8 +207,8 @@
 									</div>
 								{/snippet}
 							</svelte:boundary>
-							{#if propertyId != null}
-								<input hidden {...form.fields.property_id.as('number', propertyId)} />
+							{#if form.fields.property_id.value() != null}
+								<input hidden {...form.fields.property_id.as('number')} />
 							{/if}
 							<Field.FieldError errors={form.fields.property_id.issues()} />
 						</Field.FieldContent>
