@@ -11,6 +11,7 @@
 	import { cn } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { createInstallmentPayment } from '../../contract.remote';
 	import { createInstallmentPaymentSchema } from '../../schemas';
 	import type { LendingContract } from '../../types';
@@ -25,24 +26,42 @@
 	let { open = $bindable(false), contractId, contract }: Props = $props();
 
 	const form = $derived(createInstallmentPayment.for(contractId));
+	const defaultOccurredAt = new Date().toISOString();
 
-	let paymentDateStr = $state<string | undefined>(new Date().toISOString());
 	let paymentValue = $derived(contract.data.installment);
-	let interest = $derived(calculateInterest(contract, paymentDateStr));
-	let amortization = $derived(paymentValue - calculateInterest(contract, paymentDateStr));
-
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const paymentDate = $derived(
-		paymentDateStr ? parseAbsolute(paymentDateStr, getLocalTimeZone()) : undefined
+	let interest = $derived(calculateInterest(contract, form.fields.occurred_at.value()));
+	let amortization = $derived(
+		paymentValue - calculateInterest(contract, form.fields.occurred_at.value())
 	);
 
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				form.fields.occurred_at.set(defaultOccurredAt);
+				paymentValue = contract.data.installment;
+				interest = calculateInterest(contract, form.fields.occurred_at.value());
+				amortization = paymentValue - interest;
+			});
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
+
+	const df = new DateFormatter('en-US', { dateStyle: 'long' });
+
 	function recalculate() {
-		interest = calculateInterest(contract, paymentDateStr);
+		interest = calculateInterest(contract, form.fields.occurred_at.value());
 		amortization = paymentValue - interest;
 	}
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
+	}
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parseAbsolute(value, getLocalTimeZone()) : undefined;
+		return date ? df.format(date.toDate()) : 'Pick a date';
 	}
 </script>
 
@@ -58,7 +77,6 @@
 					if (await f.submit()) {
 						toastSuccess('Installment payment created successfully');
 						open = false;
-						f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -108,29 +126,27 @@
 								class={cn(
 									buttonVariants({ variant: 'outline' }),
 									'w-full justify-start pl-4 text-left font-normal',
-									!paymentDate && 'text-muted-foreground'
+									!form.fields.occurred_at.value() && 'text-muted-foreground'
 								)}
 							>
-								{paymentDate ? df.format(paymentDate.toDate()) : 'Pick a date'}
+								{dateLabel(form.fields.occurred_at.value())}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
 								<Calendar
 									type="single"
-									value={paymentDate}
+									value={parseAbsolute(
+										String(form.fields.occurred_at.as('text', defaultOccurredAt).value),
+										getLocalTimeZone()
+									)}
 									onValueChange={(v) => {
-										paymentDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										form.fields.occurred_at.set(v?.toDate(getLocalTimeZone()).toISOString());
 										recalculate();
 									}}
 								/>
 							</Popover.Content>
 						</Popover.Root>
-						<input
-							hidden
-							{...paymentDateStr
-								? form.fields.occurred_at.as('text', paymentDateStr)
-								: form.fields.occurred_at.as('text')}
-						/>
+						<input hidden {...form.fields.occurred_at.as('text', defaultOccurredAt)} />
 						<Field.FieldError errors={form.fields.occurred_at.issues()} />
 					</Field.FieldContent>
 				</Field.Field>

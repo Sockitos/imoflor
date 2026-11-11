@@ -17,6 +17,8 @@
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { untrack } from 'svelte';
+	import type { z } from 'zod';
 	import { upsertContract } from '../contract.remote';
 	import { contractSchema } from '../schemas';
 	import { contractTypeValues, type Contract, type ContractType } from '../types';
@@ -31,49 +33,64 @@
 	const form = $derived(contract != null ? upsertContract.for(contract.id) : upsertContract);
 	const isEdit = $derived(contract != null);
 
-	const rentingContract = $derived(contract?.type === 'renting' ? contract : undefined);
-	const lendingContract = $derived(contract?.type === 'lending' ? contract : undefined);
-
 	type FormFields = typeof form.fields;
 	const rentingFields = $derived(form.fields as Extract<FormFields, { rent: unknown }>);
 	const lendingFields = $derived(form.fields as Extract<FormFields, { sale_value: unknown }>);
 
-	let contractType = $state<ContractType>('renting');
+	type ContractInput = z.infer<typeof contractSchema>;
+	type TypeField = {
+		as: (type: 'text', value?: 'renting') => Record<string, unknown>;
+		set: (value: ContractType) => void;
+		value: () => ContractType | undefined;
+	};
 
-	let propertyId = $state<number | undefined>();
-	let tenantId = $state<number | undefined>();
+	const typeField = $derived(form.fields.type as unknown as TypeField);
+	const contractType = $derived(typeField.value() ?? 'renting');
 
-	let startDateStr = $state<string | undefined>();
-	let endDateStr = $state<string | undefined>();
-
-	const startDate = $derived(parsePlainDate(startDateStr));
-	const endDate = $derived(parsePlainDate(endDateStr));
-
-	$effect(() => {
-		if (contract?.type) {
-			contractType = contract.type;
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (contract?.type === 'renting') {
+					(form.fields.set as (value: ContractInput) => void)({
+						id: contract.id,
+						type: 'renting',
+						property_id: contract.property.id,
+						tenant_id: contract.tenants[0].id,
+						start_date: contract.start_date,
+						end_date: contract.end_date ?? undefined,
+						rent: contract.data.rent,
+					});
+				} else if (contract?.type === 'lending') {
+					(form.fields.set as (value: ContractInput) => void)({
+						id: contract.id,
+						type: 'lending',
+						property_id: contract.property.id,
+						tenant_id: contract.tenants[0].id,
+						start_date: contract.start_date,
+						end_date: contract.end_date ?? undefined,
+						sale_value: contract.data.sale_value,
+						down_payment: contract.data.down_payment,
+						yearly_raise: contract.data.yearly_raise,
+						installment: contract.data.installment,
+						interest: contract.data.interest,
+					});
+				}
+			});
+			return;
 		}
 
-		if (contract?.property?.id) {
-			propertyId = contract.property.id;
-		}
-
-		if (contract?.tenants?.[0]?.id) {
-			tenantId = contract.tenants[0].id;
-		}
-
-		if (contract?.start_date) {
-			startDateStr = contract.start_date;
-		}
-
-		if (contract?.end_date) {
-			endDateStr = contract.end_date;
-		}
+		untrack(() => form.element?.reset());
 	});
 
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
+
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
+	}
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parsePlainDate(value) : undefined;
+		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
 	}
 </script>
 
@@ -88,7 +105,10 @@
 			</Sheet.Description>
 		</Sheet.Header>
 		<Separator />
-		<Tabs.Root bind:value={contractType} class="mb-5">
+		<Tabs.Root
+			bind:value={() => contractType, (value) => typeField.set(value as ContractType)}
+			class="mb-5"
+		>
 			<Tabs.List class="grid w-full grid-cols-2">
 				{#each contractTypeValues as type (type)}
 					<Tabs.Trigger value={type} class="capitalize">{type}</Tabs.Trigger>
@@ -103,7 +123,6 @@
 							isEdit ? 'Contract updated successfully' : 'Contract created successfully'
 						);
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -112,10 +131,10 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-6 px-4 pb-4"
 		>
-			{#if contract?.id != null}
-				<input hidden {...form.fields.id.as('number', contract.id)} />
+			{#if contract}
+				<input hidden {...form.fields.id.as('number')} />
 			{/if}
-			<input hidden name="type" value={contractType} />
+			<input hidden {...contract ? typeField.as('text') : typeField.as('text', 'renting')} />
 
 			<Field.FieldGroup>
 				<Field.Field data-invalid={isInvalid(form.fields.property_id.issues())}>
@@ -128,7 +147,12 @@
 								...(option.children ?? []),
 							])}
 
-							<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
+							<EntitySelector
+								bind:entityId={
+									() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
+								}
+								options={spreadOptions}
+							>
 								{#snippet displayOption(option)}
 									<PropertyOptionItem {option} />
 								{/snippet}
@@ -150,12 +174,9 @@
 								</div>
 							{/snippet}
 						</svelte:boundary>
-						<input
-							hidden
-							{...propertyId != null
-								? form.fields.property_id.as('number', propertyId)
-								: form.fields.property_id.as('number')}
-						/>
+						{#if form.fields.property_id.value() != null}
+							<input hidden {...form.fields.property_id.as('number')} />
+						{/if}
 						<Field.FieldError errors={form.fields.property_id.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -166,7 +187,12 @@
 						<svelte:boundary>
 							{@const tenantOptions = await getTenantOptions()}
 
-							<EntitySelector bind:entityId={tenantId} options={tenantOptions}>
+							<EntitySelector
+								bind:entityId={
+									() => form.fields.tenant_id.value(), (id) => form.fields.tenant_id.set(id)
+								}
+								options={tenantOptions}
+							>
 								{#snippet displayOption(option)}
 									<TenantOptionItem {option} />
 								{/snippet}
@@ -188,12 +214,9 @@
 								</div>
 							{/snippet}
 						</svelte:boundary>
-						<input
-							hidden
-							{...tenantId != null
-								? form.fields.tenant_id.as('number', tenantId)
-								: form.fields.tenant_id.as('number')}
-						/>
+						{#if form.fields.tenant_id.value() != null}
+							<input hidden {...form.fields.tenant_id.as('number')} />
+						{/if}
 						<Field.FieldError errors={form.fields.tenant_id.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -207,28 +230,23 @@
 									class={cn(
 										buttonVariants({ variant: 'outline' }),
 										'w-full justify-start pl-4 text-left font-normal',
-										!startDate && 'text-muted-foreground'
+										!form.fields.start_date.value() && 'text-muted-foreground'
 									)}
 								>
-									{startDate ? df.format(startDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{dateLabel(form.fields.start_date.value())}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
 									<Calendar
 										type="single"
-										value={startDate}
+										value={parsePlainDate(form.fields.start_date.value())}
 										onValueChange={(v) => {
-											startDateStr = toPlainDateString(v);
+											form.fields.start_date.set(toPlainDateString(v));
 										}}
 									/>
 								</Popover.Content>
 							</Popover.Root>
-							<input
-								hidden
-								{...startDateStr
-									? form.fields.start_date.as('text', startDateStr)
-									: form.fields.start_date.as('text')}
-							/>
+							<input hidden {...form.fields.start_date.as('text')} />
 							<Field.FieldError errors={form.fields.start_date.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -241,23 +259,23 @@
 									class={cn(
 										buttonVariants({ variant: 'outline' }),
 										'w-full justify-start pl-4 text-left font-normal',
-										!endDate && 'text-muted-foreground'
+										!form.fields.end_date.value() && 'text-muted-foreground'
 									)}
 								>
-									{endDate ? df.format(endDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+									{dateLabel(form.fields.end_date.value())}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
 									<Calendar
 										type="single"
-										value={endDate}
+										value={parsePlainDate(form.fields.end_date.value())}
 										onValueChange={(v) => {
-											endDateStr = toPlainDateString(v);
+											form.fields.end_date.set(toPlainDateString(v));
 										}}
 									/>
 								</Popover.Content>
 							</Popover.Root>
-							<input hidden name="end_date" value={endDateStr} />
+							<input hidden {...form.fields.end_date.as('text')} />
 						</Field.FieldContent>
 					</Field.Field>
 				</div>
@@ -266,11 +284,7 @@
 					<Field.Field data-invalid={isInvalid(rentingFields.rent.issues())}>
 						<Field.FieldLabel>Rent</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...rentingContract?.data.rent !== undefined
-									? rentingFields.rent.as('number', rentingContract?.data.rent)
-									: rentingFields.rent.as('number')}
-							/>
+							<Input {...rentingFields.rent.as('number')} />
 							<Field.FieldError errors={rentingFields.rent.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -279,22 +293,14 @@
 						<Field.Field data-invalid={isInvalid(lendingFields.sale_value.issues())}>
 							<Field.FieldLabel>Sale Value</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.sale_value !== undefined
-										? lendingFields.sale_value.as('number', lendingContract?.data.sale_value)
-										: lendingFields.sale_value.as('number')}
-								/>
+								<Input {...lendingFields.sale_value.as('number')} />
 								<Field.FieldError errors={lendingFields.sale_value.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
 						<Field.Field data-invalid={isInvalid(lendingFields.down_payment.issues())}>
 							<Field.FieldLabel>Down Payment</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.down_payment !== undefined
-										? lendingFields.down_payment.as('number', lendingContract?.data.down_payment)
-										: lendingFields.down_payment.as('number')}
-								/>
+								<Input {...lendingFields.down_payment.as('number')} />
 								<Field.FieldError errors={lendingFields.down_payment.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -302,11 +308,7 @@
 					<Field.Field data-invalid={isInvalid(lendingFields.installment.issues())}>
 						<Field.FieldLabel>Installment</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...lendingContract?.data.installment !== undefined
-									? lendingFields.installment.as('number', lendingContract?.data.installment)
-									: lendingFields.installment.as('number')}
-							/>
+							<Input {...lendingFields.installment.as('number')} />
 							<Field.FieldError errors={lendingFields.installment.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -314,22 +316,14 @@
 						<Field.Field data-invalid={isInvalid(lendingFields.yearly_raise.issues())}>
 							<Field.FieldLabel>Yearly Raise</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.yearly_raise !== undefined
-										? lendingFields.yearly_raise.as('number', lendingContract?.data.yearly_raise)
-										: lendingFields.yearly_raise.as('number')}
-								/>
+								<Input {...lendingFields.yearly_raise.as('number')} />
 								<Field.FieldError errors={lendingFields.yearly_raise.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
 						<Field.Field data-invalid={isInvalid(lendingFields.interest.issues())}>
 							<Field.FieldLabel>Interest</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...lendingContract?.data.interest !== undefined
-										? lendingFields.interest.as('number', lendingContract?.data.interest)
-										: lendingFields.interest.as('number')}
-								/>
+								<Input {...lendingFields.interest.as('number')} />
 								<Field.FieldError errors={lendingFields.interest.issues()} />
 							</Field.FieldContent>
 						</Field.Field>

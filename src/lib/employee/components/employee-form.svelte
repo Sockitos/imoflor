@@ -14,6 +14,7 @@
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { upsertEmployee } from '../employee.remote';
 	import { employeeSchema } from '../schemas';
 	import type { Employee, SalaryType } from '../types';
@@ -36,6 +37,43 @@
 
 	const form = $derived(employee != null ? upsertEmployee.for(employee.id) : upsertEmployee);
 	const isEdit = $derived(employee != null);
+
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (employee) {
+					form.fields.set({
+						id: employee.id,
+						name: employee.name,
+						gender: employee.gender,
+						marital_status: employee.marital_status,
+						nationality: employee.nationality,
+						birth_date: employee.birth_date ?? undefined,
+						id_type: employee.id_type,
+						id_expiration_date: employee.id_expiration_date ?? undefined,
+						id_number: employee.id_number,
+						tax_id_number: employee.tax_id_number,
+						ss_number: employee.ss_number,
+						address: employee.address,
+						email: employee.email ?? undefined,
+						phone: employee.phone ?? undefined,
+						mobile: employee.mobile ?? undefined,
+						position: employee.position,
+						salary_type: employee.salary_type,
+						salary: employee.salary,
+					});
+				}
+			});
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parsePlainDate(value) : undefined;
+		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
+	}
 </script>
 
 <Sheet.Root bind:open>
@@ -57,7 +95,6 @@
 							isEdit ? 'Employee updated successfully' : 'Employee created successfully'
 						);
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -66,8 +103,8 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
-			{#if employee?.id != null}
-				<input hidden {...form.fields.id.as('number', employee.id)} />
+			{#if employee}
+				<input hidden {...form.fields.id.as('number')} />
 			{/if}
 
 			<Field.FieldSet>
@@ -76,11 +113,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.position.issues())}>
 						<Field.FieldLabel>Job Title</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...employee?.position != null
-									? form.fields.position.as('text', employee.position)
-									: form.fields.position.as('text')}
-							/>
+							<Input {...form.fields.position.as('text')} />
 							<Field.FieldError errors={form.fields.position.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -91,7 +124,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.salary_type.value() ?? employee?.salary_type}
+									value={form.fields.salary_type.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.salary_type.set(v as SalaryType);
 									}}
@@ -99,9 +132,7 @@
 									<Select.Trigger>
 										{form.fields.salary_type.value()
 											? salaryTypeOptions[form.fields.salary_type.value()!]
-											: employee?.salary_type
-												? salaryTypeOptions[employee.salary_type]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(salaryTypeOptions) as [value, label] (value)}
@@ -109,12 +140,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...employee != null
-										? form.fields.salary_type.as('text', employee.salary_type)
-										: form.fields.salary_type.as('text')}
-								/>
+								<input hidden {...form.fields.salary_type.as('text')} />
 								<Field.FieldError errors={form.fields.salary_type.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -122,11 +148,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.salary.issues())}>
 							<Field.FieldLabel>Salary</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.salary != null
-										? form.fields.salary.as('number', String(employee.salary))
-										: form.fields.salary.as('number')}
-								/>
+								<Input {...form.fields.salary.as('number')} />
 								<Field.FieldError errors={form.fields.salary.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -140,11 +162,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.name.issues())}>
 						<Field.FieldLabel>Name</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...employee?.name != null
-									? form.fields.name.as('text', employee.name)
-									: form.fields.name.as('text')}
-							/>
+							<Input {...form.fields.name.as('text')} />
 							<Field.FieldError errors={form.fields.name.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -155,7 +173,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.gender.value() ?? employee?.gender}
+									value={form.fields.gender.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.gender.set(v as Gender);
 									}}
@@ -163,9 +181,7 @@
 									<Select.Trigger>
 										{form.fields.gender.value()
 											? genderOptions[form.fields.gender.value()!]
-											: employee?.gender
-												? genderOptions[employee.gender]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(genderOptions) as [value, label] (value)}
@@ -173,12 +189,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...employee != null
-										? form.fields.gender.as('text', employee.gender)
-										: form.fields.gender.as('text')}
-								/>
+								<input hidden {...form.fields.gender.as('text')} />
 								<Field.FieldError errors={form.fields.gender.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -188,7 +199,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.marital_status.value() ?? employee?.marital_status}
+									value={form.fields.marital_status.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.marital_status.set(v as MaritalStatus);
 									}}
@@ -196,9 +207,7 @@
 									<Select.Trigger>
 										{form.fields.marital_status.value()
 											? maritalStatusOptions[form.fields.marital_status.value()!]
-											: employee?.marital_status
-												? maritalStatusOptions[employee.marital_status]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(maritalStatusOptions) as [value, label] (value)}
@@ -206,12 +215,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...employee != null
-										? form.fields.marital_status.as('text', employee.marital_status)
-										: form.fields.marital_status.as('text')}
-								/>
+								<input hidden {...form.fields.marital_status.as('text')} />
 								<Field.FieldError errors={form.fields.marital_status.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -221,11 +225,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.nationality.issues())}>
 							<Field.FieldLabel>Nationality</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.nationality != null
-										? form.fields.nationality.as('text', employee.nationality)
-										: form.fields.nationality.as('text')}
-								/>
+								<Input {...form.fields.nationality.as('text')} />
 								<Field.FieldError errors={form.fields.nationality.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -239,42 +239,23 @@
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!form.fields.birth_date.value() &&
-												!employee?.birth_date &&
-												'text-muted-foreground'
+											!form.fields.birth_date.value() && 'text-muted-foreground'
 										)}
 									>
-										{form.fields.birth_date.value()
-											? df.format(
-													parsePlainDate(form.fields.birth_date.value()!)!.toDate(
-														getLocalTimeZone()
-													)
-												)
-											: employee?.birth_date
-												? df.format(parsePlainDate(employee.birth_date)!.toDate(getLocalTimeZone()))
-												: 'Pick a date'}
+										{dateLabel(form.fields.birth_date.value())}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={form.fields.birth_date.value()
-												? parsePlainDate(form.fields.birth_date.value()!)
-												: employee?.birth_date
-													? parsePlainDate(employee.birth_date)
-													: undefined}
+											value={parsePlainDate(form.fields.birth_date.value())}
 											onValueChange={(v) => {
 												form.fields.birth_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<input
-									hidden
-									{...employee?.birth_date != null
-										? form.fields.birth_date.as('text', employee.birth_date)
-										: form.fields.birth_date.as('text')}
-								/>
+								<input hidden {...form.fields.birth_date.as('text')} />
 								<Field.FieldError errors={form.fields.birth_date.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -284,11 +265,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.id_type.issues())}>
 							<Field.FieldLabel>ID Type</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.id_type != null
-										? form.fields.id_type.as('text', employee.id_type)
-										: form.fields.id_type.as('text')}
-								/>
+								<Input {...form.fields.id_type.as('text')} />
 								<Field.FieldError errors={form.fields.id_type.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -302,44 +279,23 @@
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!employee?.id_expiration_date &&
-												!form.fields.id_expiration_date.value() &&
-												'text-muted-foreground'
+											!form.fields.id_expiration_date.value() && 'text-muted-foreground'
 										)}
 									>
-										{employee?.id_expiration_date
-											? df.format(
-													parsePlainDate(employee.id_expiration_date)!.toDate(getLocalTimeZone())
-												)
-											: form.fields.id_expiration_date.value()
-												? df.format(
-														parsePlainDate(form.fields.id_expiration_date.value()!)!.toDate(
-															getLocalTimeZone()
-														)
-													)
-												: 'Pick a date'}
+										{dateLabel(form.fields.id_expiration_date.value())}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={employee?.id_expiration_date
-												? parsePlainDate(employee.id_expiration_date)
-												: form.fields.id_expiration_date.value()
-													? parsePlainDate(form.fields.id_expiration_date.value()!)
-													: undefined}
+											value={parsePlainDate(form.fields.id_expiration_date.value())}
 											onValueChange={(v) => {
 												form.fields.id_expiration_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<input
-									hidden
-									{...employee?.id_expiration_date != null
-										? form.fields.id_expiration_date.as('text', employee.id_expiration_date)
-										: form.fields.id_expiration_date.as('text')}
-								/>
+								<input hidden {...form.fields.id_expiration_date.as('text')} />
 								<Field.FieldError errors={form.fields.id_expiration_date.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -349,11 +305,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.id_number.issues())}>
 							<Field.FieldLabel>ID Number</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.id_number != null
-										? form.fields.id_number.as('text', employee.id_number)
-										: form.fields.id_number.as('text')}
-								/>
+								<Input {...form.fields.id_number.as('text')} />
 								<Field.FieldError errors={form.fields.id_number.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -361,11 +313,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.tax_id_number.issues())}>
 							<Field.FieldLabel>Tax ID Number</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.tax_id_number != null
-										? form.fields.tax_id_number.as('text', employee.tax_id_number)
-										: form.fields.tax_id_number.as('text')}
-								/>
+								<Input {...form.fields.tax_id_number.as('text')} />
 								<Field.FieldError errors={form.fields.tax_id_number.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -373,11 +321,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.ss_number.issues())}>
 							<Field.FieldLabel>SS Number</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.ss_number != null
-										? form.fields.ss_number.as('text', employee.ss_number)
-										: form.fields.ss_number.as('text')}
-								/>
+								<Input {...form.fields.ss_number.as('text')} />
 								<Field.FieldError errors={form.fields.ss_number.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -388,19 +332,15 @@
 			<Field.FieldSet>
 				<Field.FieldLegend>Address</Field.FieldLegend>
 				<Field.FieldGroup>
-					{#if employee?.address?.id != null}
-						<input hidden {...form.fields.address.id.as('number', employee.address.id)} />
+					{#if employee}
+						<input hidden {...form.fields.address.id.as('number')} />
 					{/if}
 
 					<div class="grid grid-cols-2 items-start gap-x-4">
 						<Field.Field data-invalid={isInvalid(form.fields.address.country.issues())}>
 							<Field.FieldLabel>Country</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.address?.country != null
-										? form.fields.address.country.as('text', employee.address.country)
-										: form.fields.address.country.as('text')}
-								/>
+								<Input {...form.fields.address.country.as('text')} />
 								<Field.FieldError errors={form.fields.address.country.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -408,11 +348,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.region.issues())}>
 							<Field.FieldLabel>Region</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.address?.region != null
-										? form.fields.address.region.as('text', employee.address.region)
-										: form.fields.address.region.as('text')}
-								/>
+								<Input {...form.fields.address.region.as('text')} />
 								<Field.FieldError errors={form.fields.address.region.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -421,11 +357,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.address.address.issues())}>
 						<Field.FieldLabel>Address</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...employee?.address?.address != null
-									? form.fields.address.address.as('text', employee.address.address)
-									: form.fields.address.address.as('text')}
-							/>
+							<Input {...form.fields.address.address.as('text')} />
 							<Field.FieldError errors={form.fields.address.address.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -434,11 +366,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.postal_code.issues())}>
 							<Field.FieldLabel>Postal Code</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.address?.postal_code != null
-										? form.fields.address.postal_code.as('text', employee.address.postal_code)
-										: form.fields.address.postal_code.as('text')}
-								/>
+								<Input {...form.fields.address.postal_code.as('text')} />
 								<Field.FieldError errors={form.fields.address.postal_code.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -446,11 +374,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.city.issues())}>
 							<Field.FieldLabel>City</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.address?.city != null
-										? form.fields.address.city.as('text', employee.address.city)
-										: form.fields.address.city.as('text')}
-								/>
+								<Input {...form.fields.address.city.as('text')} />
 								<Field.FieldError errors={form.fields.address.city.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -464,11 +388,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.email.issues())}>
 						<Field.FieldLabel>Email</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...employee?.email != null
-									? form.fields.email.as('text', employee.email)
-									: form.fields.email.as('text')}
-							/>
+							<Input {...form.fields.email.as('text')} />
 							<Field.FieldError errors={form.fields.email.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -477,11 +397,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.mobile.issues())}>
 							<Field.FieldLabel>Mobile</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.mobile != null
-										? form.fields.mobile.as('text', employee.mobile)
-										: form.fields.mobile.as('text')}
-								/>
+								<Input {...form.fields.mobile.as('text')} />
 								<Field.FieldError errors={form.fields.mobile.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -489,11 +405,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.phone.issues())}>
 							<Field.FieldLabel>Phone</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...employee?.phone != null
-										? form.fields.phone.as('text', employee.phone)
-										: form.fields.phone.as('text')}
-								/>
+								<Input {...form.fields.phone.as('text')} />
 								<Field.FieldError errors={form.fields.phone.issues()} />
 							</Field.FieldContent>
 						</Field.Field>

@@ -17,6 +17,7 @@
 	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { untrack } from 'svelte';
 	import { upsertIntervention } from '../intervention.remote';
 	import { interventionSchema } from '../schemas';
 	import type { Intervention } from '../types';
@@ -42,27 +43,43 @@
 	);
 	const isEdit = $derived(intervention != null);
 
-	let propertyId = $state<number | undefined>();
-	let ticketId = $state<number | undefined>();
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (intervention) {
+					form.fields.set({
+						id: intervention.id,
+						type: intervention.type,
+						status: intervention.status,
+						start_date: intervention.start_date ?? undefined,
+						end_date: intervention.end_date ?? undefined,
+						description: intervention.description,
+						property_id: intervention.property.id,
+						ticket_id: intervention.ticket?.id,
+					});
+				}
+			});
+			return;
+		}
 
-	const status = $derived(intervention?.status ?? defaultStatus);
+		untrack(() => form.element?.reset());
+	});
+
 	const availableStatuses = $derived(
 		interventionStatusValues.filter(
 			(value) => intervention == null || canTransitionInterventionStatus(intervention.status, value)
 		)
 	);
 
-	$effect(() => {
-		if (open) {
-			propertyId = intervention?.property.id;
-			ticketId = intervention?.ticket?.id ?? undefined;
-		}
-	});
-
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
+	}
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parsePlainDate(value) : undefined;
+		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
 	}
 </script>
 
@@ -85,7 +102,6 @@
 							isEdit ? 'Intervention updated successfully' : 'Intervention created successfully'
 						);
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -94,8 +110,8 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
-			{#if intervention?.id != null}
-				<input hidden {...form.fields.id.as('number', intervention.id)} />
+			{#if intervention}
+				<input hidden {...form.fields.id.as('number')} />
 			{/if}
 
 			<Field.FieldSet>
@@ -107,7 +123,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.type.value() ?? intervention?.type}
+									value={form.fields.type.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.type.set(v as InterventionType);
 									}}
@@ -115,9 +131,7 @@
 									<Select.Trigger>
 										{form.fields.type.value()
 											? interventionTypeOptions[form.fields.type.value()!]
-											: intervention?.type
-												? interventionTypeOptions[intervention.type]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(interventionTypeOptions) as [value, label] (value)}
@@ -125,12 +139,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...intervention != null
-										? form.fields.type.as('text', intervention.type)
-										: form.fields.type.as('text')}
-								/>
+								<input hidden {...form.fields.type.as('text')} />
 								<Field.FieldError errors={form.fields.type.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -140,17 +149,15 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.status.value() ?? status}
+									value={form.fields.status.value() ?? defaultStatus}
 									onValueChange={(v) => {
 										if (v) form.fields.status.set(v as InterventionStatus);
 									}}
 								>
 									<Select.Trigger>
-										{form.fields.status.value()
-											? interventionStatusOptions[form.fields.status.value()!]
-											: status
-												? interventionStatusOptions[status!]
-												: 'Select'}
+										{(form.fields.status.value() ?? defaultStatus)
+											? interventionStatusOptions[(form.fields.status.value() ?? defaultStatus)!]
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each availableStatuses as value (value)}
@@ -160,11 +167,9 @@
 								</Select.Root>
 								<input
 									hidden
-									{...intervention != null
-										? form.fields.status.as('text', intervention.status)
-										: defaultStatus != null
-											? form.fields.status.as('text', defaultStatus)
-											: form.fields.status.as('text')}
+									{...!intervention && defaultStatus != null
+										? form.fields.status.as('text', defaultStatus)
+										: form.fields.status.as('text')}
 								/>
 								<Field.FieldError errors={form.fields.status.issues()} />
 							</Field.FieldContent>
@@ -181,44 +186,23 @@
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!form.fields.start_date.value() &&
-												!intervention?.start_date &&
-												'text-muted-foreground'
+											!form.fields.start_date.value() && 'text-muted-foreground'
 										)}
 									>
-										{form.fields.start_date.value()
-											? df.format(
-													parsePlainDate(form.fields.start_date.value()!)!.toDate(
-														getLocalTimeZone()
-													)
-												)
-											: intervention?.start_date
-												? df.format(
-														parsePlainDate(intervention.start_date)!.toDate(getLocalTimeZone())
-													)
-												: 'Pick a date'}
+										{dateLabel(form.fields.start_date.value())}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={form.fields.start_date.value()
-												? parsePlainDate(form.fields.start_date.value()!)
-												: intervention?.start_date
-													? parsePlainDate(intervention.start_date)
-													: undefined}
+											value={parsePlainDate(form.fields.start_date.value())}
 											onValueChange={(v) => {
 												form.fields.start_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<input
-									hidden
-									{...intervention?.start_date != null
-										? form.fields.start_date.as('text', intervention.start_date)
-										: form.fields.start_date.as('text')}
-								/>
+								<input hidden {...form.fields.start_date.as('text')} />
 								<Field.FieldError errors={form.fields.start_date.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -232,42 +216,23 @@
 										class={cn(
 											buttonVariants({ variant: 'outline' }),
 											'w-full justify-start pl-4 text-left font-normal',
-											!form.fields.end_date.value() &&
-												!intervention?.end_date &&
-												'text-muted-foreground'
+											!form.fields.end_date.value() && 'text-muted-foreground'
 										)}
 									>
-										{form.fields.end_date.value()
-											? df.format(
-													parsePlainDate(form.fields.end_date.value()!)!.toDate(getLocalTimeZone())
-												)
-											: intervention?.end_date
-												? df.format(
-														parsePlainDate(intervention.end_date)!.toDate(getLocalTimeZone())
-													)
-												: 'Pick a date'}
+										{dateLabel(form.fields.end_date.value())}
 										<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 									</Popover.Trigger>
 									<Popover.Content class="w-auto p-0" side="top">
 										<Calendar
 											type="single"
-											value={form.fields.end_date.value()
-												? parsePlainDate(form.fields.end_date.value()!)
-												: intervention?.end_date
-													? parsePlainDate(intervention.end_date)
-													: undefined}
+											value={parsePlainDate(form.fields.end_date.value())}
 											onValueChange={(v) => {
 												form.fields.end_date.set(toPlainDateString(v));
 											}}
 										/>
 									</Popover.Content>
 								</Popover.Root>
-								<input
-									hidden
-									{...intervention?.end_date != null
-										? form.fields.end_date.as('text', intervention.end_date)
-										: form.fields.end_date.as('text')}
-								/>
+								<input hidden {...form.fields.end_date.as('text')} />
 								<Field.FieldError errors={form.fields.end_date.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -276,11 +241,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
 						<Field.FieldLabel>Description</Field.FieldLabel>
 						<Field.FieldContent>
-							<Textarea
-								{...intervention?.description != null
-									? form.fields.description.as('text', intervention.description)
-									: form.fields.description.as('text')}
-							/>
+							<Textarea {...form.fields.description.as('text')} />
 							<Field.FieldError errors={form.fields.description.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -295,7 +256,12 @@
 									...(option.children ?? []),
 								])}
 
-								<EntitySelector bind:entityId={propertyId} options={spreadOptions}>
+								<EntitySelector
+									bind:entityId={
+										() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
+									}
+									options={spreadOptions}
+								>
 									{#snippet displayOption(option)}
 										<PropertyOptionItem {option} />
 									{/snippet}
@@ -317,8 +283,8 @@
 									</div>
 								{/snippet}
 							</svelte:boundary>
-							{#if propertyId != null}
-								<input hidden {...form.fields.property_id.as('number', propertyId)} />
+							{#if form.fields.property_id.value() != null}
+								<input hidden {...form.fields.property_id.as('number')} />
 							{/if}
 							<Field.FieldError errors={form.fields.property_id.issues()} />
 						</Field.FieldContent>
@@ -329,7 +295,12 @@
 						<Field.FieldContent>
 							<svelte:boundary>
 								{@const options = await getTicketOptions()}
-								<EntitySelector bind:entityId={ticketId} {options}>
+								<EntitySelector
+									bind:entityId={
+										() => form.fields.ticket_id.value(), (id) => form.fields.ticket_id.set(id)
+									}
+									{options}
+								>
 									{#snippet displayOption(option)}
 										<TicketOptionItem {option} />
 									{/snippet}
@@ -352,8 +323,8 @@
 								{/snippet}
 							</svelte:boundary>
 
-							{#if ticketId != null}
-								<input hidden {...form.fields.ticket_id.as('number', ticketId)} />
+							{#if form.fields.ticket_id.value() != null}
+								<input hidden {...form.fields.ticket_id.as('number')} />
 							{/if}
 							<Field.FieldError errors={form.fields.ticket_id.issues()} />
 						</Field.FieldContent>

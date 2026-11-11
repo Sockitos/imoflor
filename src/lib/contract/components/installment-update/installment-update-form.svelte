@@ -12,6 +12,7 @@
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { createInstallmentUpdate, getInstallmentUpdates } from '../../contract.remote';
 	import { createInstallmentUpdateSchema } from '../../schemas';
 
@@ -23,13 +24,25 @@
 	let { open = $bindable(false), contractId }: Props = $props();
 
 	const form = $derived(createInstallmentUpdate.for(contractId));
-
-	let updateDateStr = $state<string | undefined>(today(getLocalTimeZone()).toString());
+	const defaultUpdateDate = today(getLocalTimeZone()).toString();
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const updateDate = $derived(parsePlainDate(updateDateStr));
+
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => form.fields.update_date.set(defaultUpdateDate));
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
+	}
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parsePlainDate(value) : undefined;
+		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
 	}
 </script>
 
@@ -46,7 +59,6 @@
 					if (await f.submit()) {
 						toastSuccess('Installment update created successfully');
 						open = false;
-						f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -74,28 +86,23 @@
 								class={cn(
 									buttonVariants({ variant: 'outline' }),
 									'w-full justify-start pl-4 text-left font-normal',
-									!updateDate && 'text-muted-foreground'
+									!form.fields.update_date.value() && 'text-muted-foreground'
 								)}
 							>
-								{updateDate ? df.format(updateDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+								{dateLabel(form.fields.update_date.value())}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
 								<Calendar
 									type="single"
-									value={updateDate}
+									value={parsePlainDate(form.fields.update_date.value())}
 									onValueChange={(v) => {
-										updateDateStr = toPlainDateString(v);
+										form.fields.update_date.set(toPlainDateString(v));
 									}}
 								/>
 							</Popover.Content>
 						</Popover.Root>
-						<input
-							hidden
-							{...updateDateStr
-								? form.fields.update_date.as('text', updateDateStr)
-								: form.fields.update_date.as('text')}
-						/>
+						<input hidden {...form.fields.update_date.as('text', defaultUpdateDate)} />
 						<Field.FieldError errors={form.fields.update_date.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
