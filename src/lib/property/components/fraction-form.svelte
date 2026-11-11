@@ -8,6 +8,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { untrack } from 'svelte';
 	import { upsertFraction } from '../property.remote';
 	import { fractionSchema } from '../schemas';
 	import type { Fraction, Property } from '../types';
@@ -32,12 +33,38 @@
 
 	let { open = $bindable(false), ...propertyOrFraction }: Props = $props();
 
-	const form = $derived(
-		propertyOrFraction.fraction != null
-			? upsertFraction.for(propertyOrFraction.fraction.id)
-			: upsertFraction
-	);
-	const isEdit = $derived(propertyOrFraction.fraction != null);
+	const fraction = $derived(propertyOrFraction.fraction);
+	const parent = $derived(propertyOrFraction.property);
+
+	const form = $derived(fraction != null ? upsertFraction.for(fraction.id) : upsertFraction);
+	const isEdit = $derived(fraction != null);
+
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (fraction) {
+					form.fields.set({
+						id: fraction.id,
+						class: fraction.class,
+						type: fraction.type,
+						matrix: fraction.matrix,
+						conservatory: fraction.conservatory,
+						area: fraction.area ?? undefined,
+						tipology: fraction.tipology ?? undefined,
+						description: fraction.description ?? undefined,
+						patrimonial_value: fraction.patrimonial_value ?? undefined,
+						market_value: fraction.market_value ?? undefined,
+						address: fraction.address,
+						fraction: fraction.fraction,
+						parent_id: fraction.parent_id,
+					});
+				}
+			});
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -63,7 +90,6 @@
 							isEdit ? 'Fraction updated successfully' : 'Fraction created successfully'
 						);
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -72,16 +98,14 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
-			{#if propertyOrFraction.fraction?.id != null}
-				<input hidden {...form.fields.id.as('number', propertyOrFraction.fraction.id)} />
+			{#if fraction}
+				<input hidden {...form.fields.id.as('number')} />
+				<input hidden {...form.fields.parent_id.as('number')} />
+				<input hidden {...form.fields.address.id.as('number')} />
+			{:else if parent}
+				<input hidden {...form.fields.parent_id.as('number', parent.id)} />
+				<input hidden {...form.fields.address.id.as('number', parent.address.id)} />
 			{/if}
-			<input
-				hidden
-				{...form.fields.parent_id.as(
-					'number',
-					propertyOrFraction.fraction?.parent_id ?? propertyOrFraction.property!.id
-				)}
-			/>
 
 			<Field.FieldSet>
 				<Field.FieldLegend>Information</Field.FieldLegend>
@@ -92,9 +116,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.class.value() ??
-										propertyOrFraction.fraction?.class ??
-										propertyOrFraction.property!.class}
+									value={form.fields.class.value() ?? parent?.class}
 									onValueChange={(v) => {
 										if (v) form.fields.class.set(v as PropertyClass);
 									}}
@@ -102,9 +124,9 @@
 									<Select.Trigger>
 										{form.fields.class.value()
 											? propertyClassOptions[form.fields.class.value()!]
-											: propertyClassOptions[
-													propertyOrFraction.fraction?.class ?? propertyOrFraction.property!.class
-												]}
+											: parent
+												? propertyClassOptions[parent.class]
+												: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(propertyClassOptions) as [value, label] (value)}
@@ -114,10 +136,9 @@
 								</Select.Root>
 								<input
 									hidden
-									{...form.fields.class.as(
-										'text',
-										propertyOrFraction.fraction?.class ?? propertyOrFraction.property!.class
-									)}
+									{...parent
+										? form.fields.class.as('text', parent.class)
+										: form.fields.class.as('text')}
 								/>
 								<Field.FieldError errors={form.fields.class.issues()} />
 							</Field.FieldContent>
@@ -128,7 +149,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.type.value() ?? propertyOrFraction.fraction?.type}
+									value={form.fields.type.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.type.set(v as FractionType);
 									}}
@@ -136,9 +157,7 @@
 									<Select.Trigger>
 										{form.fields.type.value()
 											? fractionTypeOptions[form.fields.type.value()!]
-											: propertyOrFraction.fraction?.type
-												? fractionTypeOptions[propertyOrFraction.fraction.type]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(fractionTypeOptions) as [value, label] (value)}
@@ -146,12 +165,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...propertyOrFraction.fraction != null
-										? form.fields.type.as('text', propertyOrFraction.fraction.type)
-										: form.fields.type.as('text')}
-								/>
+								<input hidden {...form.fields.type.as('text')} />
 								<Field.FieldError errors={form.fields.type.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -162,10 +176,9 @@
 							<Field.FieldLabel>Matrix</Field.FieldLabel>
 							<Field.FieldContent>
 								<Input
-									{...form.fields.matrix.as(
-										'text',
-										propertyOrFraction.fraction?.matrix ?? propertyOrFraction.property!.matrix
-									)}
+									{...parent
+										? form.fields.matrix.as('text', parent.matrix)
+										: form.fields.matrix.as('text')}
 								/>
 								<Field.FieldError errors={form.fields.matrix.issues()} />
 							</Field.FieldContent>
@@ -175,11 +188,9 @@
 							<Field.FieldLabel>Conservatory</Field.FieldLabel>
 							<Field.FieldContent>
 								<Input
-									{...form.fields.conservatory.as(
-										'text',
-										propertyOrFraction.fraction?.conservatory ??
-											propertyOrFraction.property!.conservatory
-									)}
+									{...parent
+										? form.fields.conservatory.as('text', parent.conservatory)
+										: form.fields.conservatory.as('text')}
 								/>
 								<Field.FieldError errors={form.fields.conservatory.issues()} />
 							</Field.FieldContent>
@@ -190,11 +201,8 @@
 						<Field.FieldLabel>Area</Field.FieldLabel>
 						<Field.FieldContent>
 							<Input
-								{...(propertyOrFraction.fraction?.area ?? propertyOrFraction.property!.area) != null
-									? form.fields.area.as(
-											'number',
-											(propertyOrFraction.fraction?.area ?? propertyOrFraction.property!.area)!
-										)
+								{...parent?.area != null
+									? form.fields.area.as('number', parent.area)
 									: form.fields.area.as('number')}
 							/>
 							<Field.FieldError errors={form.fields.area.issues()} />
@@ -205,13 +213,8 @@
 						<Field.FieldLabel>Tipology</Field.FieldLabel>
 						<Field.FieldContent>
 							<Input
-								{...(propertyOrFraction.fraction?.tipology ??
-									propertyOrFraction.property!.tipology) != null
-									? form.fields.tipology.as(
-											'text',
-											(propertyOrFraction.fraction?.tipology ??
-												propertyOrFraction.property!.tipology)!
-										)
+								{...parent?.tipology != null
+									? form.fields.tipology.as('text', parent.tipology)
 									: form.fields.tipology.as('text')}
 							/>
 							<Field.FieldError errors={form.fields.tipology.issues()} />
@@ -222,13 +225,8 @@
 						<Field.FieldLabel>Description</Field.FieldLabel>
 						<Field.FieldContent>
 							<Textarea
-								{...(propertyOrFraction.fraction?.description ??
-									propertyOrFraction.property!.description) != null
-									? form.fields.description.as(
-											'text',
-											(propertyOrFraction.fraction?.description ??
-												propertyOrFraction.property!.description)!
-										)
+								{...parent?.description != null
+									? form.fields.description.as('text', parent.description)
 									: form.fields.description.as('text')}
 							/>
 							<Field.FieldError errors={form.fields.description.issues()} />
@@ -241,13 +239,8 @@
 							<Field.FieldContent>
 								<Input
 									step="any"
-									{...(propertyOrFraction.fraction?.patrimonial_value ??
-										propertyOrFraction.property!.patrimonial_value) != null
-										? form.fields.patrimonial_value.as(
-												'number',
-												(propertyOrFraction.fraction?.patrimonial_value ??
-													propertyOrFraction.property!.patrimonial_value)!
-											)
+									{...parent?.patrimonial_value != null
+										? form.fields.patrimonial_value.as('number', parent.patrimonial_value)
 										: form.fields.patrimonial_value.as('number')}
 								/>
 								<Field.FieldError errors={form.fields.patrimonial_value.issues()} />
@@ -259,13 +252,8 @@
 							<Field.FieldContent>
 								<Input
 									step="any"
-									{...(propertyOrFraction.fraction?.market_value ??
-										propertyOrFraction.property!.market_value) != null
-										? form.fields.market_value.as(
-												'number',
-												(propertyOrFraction.fraction?.market_value ??
-													propertyOrFraction.property!.market_value)!
-											)
+									{...parent?.market_value != null
+										? form.fields.market_value.as('number', parent.market_value)
 										: form.fields.market_value.as('number')}
 								/>
 								<Field.FieldError errors={form.fields.market_value.issues()} />
@@ -278,14 +266,6 @@
 			<Field.FieldSet>
 				<Field.FieldLegend>Address</Field.FieldLegend>
 				<Field.FieldGroup>
-					<input
-						hidden
-						{...form.fields.address.id.as(
-							'number',
-							(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address).id
-						)}
-					/>
-
 					<div class="grid grid-cols-2 items-start gap-x-4">
 						<Field.Field>
 							<Field.FieldLabel>Country</Field.FieldLabel>
@@ -293,11 +273,9 @@
 								<Input
 									readonly
 									class="cursor-default bg-muted/40 text-muted-foreground"
-									{...form.fields.address.country.as(
-										'text',
-										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
-											.country
-									)}
+									{...parent
+										? form.fields.address.country.as('text', parent.address.country)
+										: form.fields.address.country.as('text')}
 								/>
 							</Field.FieldContent>
 						</Field.Field>
@@ -308,11 +286,9 @@
 								<Input
 									readonly
 									class="cursor-default bg-muted/40 text-muted-foreground"
-									{...form.fields.address.region.as(
-										'text',
-										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
-											.region
-									)}
+									{...parent
+										? form.fields.address.region.as('text', parent.address.region)
+										: form.fields.address.region.as('text')}
 								/>
 							</Field.FieldContent>
 						</Field.Field>
@@ -325,11 +301,9 @@
 								<Input
 									readonly
 									class="cursor-default bg-muted/40 text-muted-foreground"
-									{...form.fields.address.address.as(
-										'text',
-										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
-											.address
-									)}
+									{...parent
+										? form.fields.address.address.as('text', parent.address.address)
+										: form.fields.address.address.as('text')}
 								/>
 							</Field.FieldContent>
 						</Field.Field>
@@ -337,11 +311,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.fraction.issues())}>
 							<Field.FieldLabel>Fraction</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...propertyOrFraction.fraction?.fraction != null
-										? form.fields.fraction.as('text', propertyOrFraction.fraction!.fraction)
-										: form.fields.fraction.as('text')}
-								/>
+								<Input {...form.fields.fraction.as('text')} />
 								<Field.FieldError errors={form.fields.fraction.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -354,11 +324,9 @@
 								<Input
 									readonly
 									class="cursor-default bg-muted/40 text-muted-foreground"
-									{...form.fields.address.postal_code.as(
-										'text',
-										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
-											.postal_code
-									)}
+									{...parent
+										? form.fields.address.postal_code.as('text', parent.address.postal_code)
+										: form.fields.address.postal_code.as('text')}
 								/>
 							</Field.FieldContent>
 						</Field.Field>
@@ -369,11 +337,9 @@
 								<Input
 									readonly
 									class="cursor-default bg-muted/40 text-muted-foreground"
-									{...form.fields.address.city.as(
-										'text',
-										(propertyOrFraction.fraction?.address ?? propertyOrFraction.property!.address)
-											.city
-									)}
+									{...parent
+										? form.fields.address.city.as('text', parent.address.city)
+										: form.fields.address.city.as('text')}
 								/>
 							</Field.FieldContent>
 						</Field.Field>

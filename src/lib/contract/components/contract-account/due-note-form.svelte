@@ -10,6 +10,7 @@
 	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { createDueNote } from '../../contract.remote';
 	import { createDueNoteSchema } from '../../schemas';
 
@@ -21,13 +22,25 @@
 	let { open = $bindable(false), contractId }: Props = $props();
 
 	const form = $derived(createDueNote.for(contractId));
-
-	let dueDateStr = $state<string | undefined>(today(getLocalTimeZone()).toString());
+	const defaultDueDate = today(getLocalTimeZone()).toString();
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const dueDate = $derived(parsePlainDate(dueDateStr));
+
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => form.fields.due_date.set(defaultDueDate));
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
+	}
+
+	function dateLabel(value: string | undefined) {
+		const date = value ? parsePlainDate(value) : undefined;
+		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
 	}
 </script>
 
@@ -43,7 +56,6 @@
 					if (await f.submit()) {
 						toastSuccess('Due note created successfully');
 						open = false;
-						f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -69,28 +81,23 @@
 								class={cn(
 									buttonVariants({ variant: 'outline' }),
 									'w-full justify-start pl-4 text-left font-normal',
-									!dueDate && 'text-muted-foreground'
+									!form.fields.due_date.value() && 'text-muted-foreground'
 								)}
 							>
-								{dueDate ? df.format(dueDate.toDate(getLocalTimeZone())) : 'Pick a date'}
+								{dateLabel(form.fields.due_date.value())}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
 								<Calendar
 									type="single"
-									value={dueDate}
+									value={parsePlainDate(form.fields.due_date.value())}
 									onValueChange={(v) => {
-										dueDateStr = toPlainDateString(v);
+										form.fields.due_date.set(toPlainDateString(v));
 									}}
 								/>
 							</Popover.Content>
 						</Popover.Root>
-						<input
-							hidden
-							{...dueDateStr
-								? form.fields.due_date.as('text', dueDateStr)
-								: form.fields.due_date.as('text')}
-						/>
+						<input hidden {...form.fields.due_date.as('text', defaultDueDate)} />
 						<Field.FieldError errors={form.fields.due_date.issues()} />
 					</Field.FieldContent>
 				</Field.Field>

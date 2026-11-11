@@ -8,6 +8,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { untrack } from 'svelte';
 	import { upsertProperty } from '../property.remote';
 	import { propertySchema } from '../schemas';
 	import type { Property } from '../types';
@@ -27,6 +28,31 @@
 
 	const form = $derived(property != null ? upsertProperty.for(property.id) : upsertProperty);
 	const isEdit = $derived(property != null);
+
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				if (property) {
+					form.fields.set({
+						id: property.id,
+						class: property.class,
+						type: property.type,
+						matrix: property.matrix,
+						conservatory: property.conservatory,
+						area: property.area ?? undefined,
+						tipology: property.tipology ?? undefined,
+						description: property.description ?? undefined,
+						patrimonial_value: property.patrimonial_value ?? undefined,
+						market_value: property.market_value ?? undefined,
+						address: property.address,
+					});
+				}
+			});
+			return;
+		}
+
+		untrack(() => form.element?.reset());
+	});
 
 	function isInvalid(issues?: { message?: string }[]) {
 		return (issues?.length ?? 0) > 0;
@@ -52,7 +78,6 @@
 							isEdit ? 'Property updated successfully' : 'Property created successfully'
 						);
 						open = false;
-						if (!isEdit) f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -61,8 +86,8 @@
 			onfocusout={() => form.validate()}
 			class="flex flex-col gap-8 px-4"
 		>
-			{#if property?.id != null}
-				<input hidden {...form.fields.id.as('number', property.id)} />
+			{#if property}
+				<input hidden {...form.fields.id.as('number')} />
 			{/if}
 
 			<Field.FieldSet>
@@ -74,7 +99,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.class.value() ?? property?.class}
+									value={form.fields.class.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.class.set(v as PropertyClass);
 									}}
@@ -82,9 +107,7 @@
 									<Select.Trigger>
 										{form.fields.class.value()
 											? propertyClassOptions[form.fields.class.value()!]
-											: property?.class
-												? propertyClassOptions[property.class]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(propertyClassOptions) as [value, label] (value)}
@@ -92,12 +115,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...property != null
-										? form.fields.class.as('text', property.class)
-										: form.fields.class.as('text')}
-								/>
+								<input hidden {...form.fields.class.as('text')} />
 								<Field.FieldError errors={form.fields.class.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -107,7 +125,7 @@
 							<Field.FieldContent>
 								<Select.Root
 									type="single"
-									value={form.fields.type.value() ?? property?.type}
+									value={form.fields.type.value()}
 									onValueChange={(v) => {
 										if (v) form.fields.type.set(v as PropertyType);
 									}}
@@ -115,9 +133,7 @@
 									<Select.Trigger>
 										{form.fields.type.value()
 											? propertyTypeOptions[form.fields.type.value()!]
-											: property?.type
-												? propertyTypeOptions[property.type]
-												: 'Select'}
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(propertyTypeOptions) as [value, label] (value)}
@@ -125,12 +141,7 @@
 										{/each}
 									</Select.Content>
 								</Select.Root>
-								<input
-									hidden
-									{...property != null
-										? form.fields.type.as('text', property.type)
-										: form.fields.type.as('text')}
-								/>
+								<input hidden {...form.fields.type.as('text')} />
 								<Field.FieldError errors={form.fields.type.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -140,11 +151,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.matrix.issues())}>
 							<Field.FieldLabel>Matrix</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.matrix != null
-										? form.fields.matrix.as('text', property.matrix)
-										: form.fields.matrix.as('text')}
-								/>
+								<Input {...form.fields.matrix.as('text')} />
 								<Field.FieldError errors={form.fields.matrix.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -152,11 +159,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.conservatory.issues())}>
 							<Field.FieldLabel>Conservatory</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.conservatory != null
-										? form.fields.conservatory.as('text', property.conservatory)
-										: form.fields.conservatory.as('text')}
-								/>
+								<Input {...form.fields.conservatory.as('text')} />
 								<Field.FieldError errors={form.fields.conservatory.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -166,11 +169,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.area.issues())}>
 							<Field.FieldLabel>Area</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.area != null
-										? form.fields.area.as('number', property.area)
-										: form.fields.area.as('number')}
-								/>
+								<Input {...form.fields.area.as('number')} />
 								<Field.FieldError errors={form.fields.area.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -178,11 +177,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.tipology.issues())}>
 							<Field.FieldLabel>Tipology</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.tipology != null
-										? form.fields.tipology.as('text', property.tipology)
-										: form.fields.tipology.as('text')}
-								/>
+								<Input {...form.fields.tipology.as('text')} />
 								<Field.FieldError errors={form.fields.tipology.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -191,11 +186,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
 						<Field.FieldLabel>Description</Field.FieldLabel>
 						<Field.FieldContent>
-							<Textarea
-								{...property?.description != null
-									? form.fields.description.as('text', property.description)
-									: form.fields.description.as('text')}
-							/>
+							<Textarea {...form.fields.description.as('text')} />
 							<Field.FieldError errors={form.fields.description.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -204,12 +195,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.patrimonial_value.issues())}>
 							<Field.FieldLabel>Patrimonial Value</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									step="any"
-									{...property?.patrimonial_value != null
-										? form.fields.patrimonial_value.as('number', property.patrimonial_value)
-										: form.fields.patrimonial_value.as('number')}
-								/>
+								<Input step="any" {...form.fields.patrimonial_value.as('number')} />
 								<Field.FieldError errors={form.fields.patrimonial_value.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -217,12 +203,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.market_value.issues())}>
 							<Field.FieldLabel>Market Value</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									step="any"
-									{...property?.market_value != null
-										? form.fields.market_value.as('number', property.market_value)
-										: form.fields.market_value.as('number')}
-								/>
+								<Input step="any" {...form.fields.market_value.as('number')} />
 								<Field.FieldError errors={form.fields.market_value.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -233,19 +214,15 @@
 			<Field.FieldSet>
 				<Field.FieldLegend>Address</Field.FieldLegend>
 				<Field.FieldGroup>
-					{#if property?.address.id != null}
-						<input hidden {...form.fields.address.id.as('number', property.address.id)} />
+					{#if property}
+						<input hidden {...form.fields.address.id.as('number')} />
 					{/if}
 
 					<div class="grid grid-cols-2 items-start gap-x-4">
 						<Field.Field data-invalid={isInvalid(form.fields.address.country.issues())}>
 							<Field.FieldLabel>Country</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.address.country != null
-										? form.fields.address.country.as('text', property.address.country)
-										: form.fields.address.country.as('text')}
-								/>
+								<Input {...form.fields.address.country.as('text')} />
 								<Field.FieldError errors={form.fields.address.country.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -253,11 +230,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.region.issues())}>
 							<Field.FieldLabel>Region</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.address.region != null
-										? form.fields.address.region.as('text', property.address.region)
-										: form.fields.address.region.as('text')}
-								/>
+								<Input {...form.fields.address.region.as('text')} />
 								<Field.FieldError errors={form.fields.address.region.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -266,11 +239,7 @@
 					<Field.Field data-invalid={isInvalid(form.fields.address.address.issues())}>
 						<Field.FieldLabel>Address</Field.FieldLabel>
 						<Field.FieldContent>
-							<Input
-								{...property?.address.address != null
-									? form.fields.address.address.as('text', property.address.address)
-									: form.fields.address.address.as('text')}
-							/>
+							<Input {...form.fields.address.address.as('text')} />
 							<Field.FieldError errors={form.fields.address.address.issues()} />
 						</Field.FieldContent>
 					</Field.Field>
@@ -279,11 +248,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.postal_code.issues())}>
 							<Field.FieldLabel>Postal Code</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.address.postal_code != null
-										? form.fields.address.postal_code.as('text', property.address.postal_code)
-										: form.fields.address.postal_code.as('text')}
-								/>
+								<Input {...form.fields.address.postal_code.as('text')} />
 								<Field.FieldError errors={form.fields.address.postal_code.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
@@ -291,11 +256,7 @@
 						<Field.Field data-invalid={isInvalid(form.fields.address.city.issues())}>
 							<Field.FieldLabel>City</Field.FieldLabel>
 							<Field.FieldContent>
-								<Input
-									{...property?.address.city != null
-										? form.fields.address.city.as('text', property.address.city)
-										: form.fields.address.city.as('text')}
-								/>
+								<Input {...form.fields.address.city.as('text')} />
 								<Field.FieldError errors={form.fields.address.city.issues()} />
 							</Field.FieldContent>
 						</Field.Field>
