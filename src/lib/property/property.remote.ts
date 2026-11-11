@@ -231,7 +231,7 @@ export const getPropertyOptions = query<PropertyOption[]>(async () => {
 	const { data: properties, error: propertiesError } = await supabase
 		.from('properties')
 		.select(
-			'id, matrix, type, ...addresses(address), children:properties!parent_id(id, matrix, type, ...addresses(address))'
+			'id, matrix, type, ...addresses(address), children:properties!parent_id(id, matrix, type, fraction, ...addresses(address))'
 		)
 		.is('parent_id', null);
 
@@ -239,5 +239,7 @@ export const getPropertyOptions = query<PropertyOption[]>(async () => {
 		error(500, 'Error fetching properties, please try again later.');
 	}
 
-	return properties as unknown as PropertyOption[];
+	const propertyOptions = properties as unknown as PropertyOption[];
+
+	return propertyOptions.flatMap((property) => [property, ...(property.children ?? [])]);
 });
