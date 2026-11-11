@@ -29,11 +29,11 @@
 <div
 	role="region"
 	aria-label={`${column.label} column`}
-	class="flex w-72 shrink-0 flex-col gap-4 rounded-lg border bg-muted/40 px-2 py-4"
+	class="flex w-78 shrink-0 flex-col gap-4 rounded-lg border bg-muted/40"
 	ondragover={onColumnDragOver}
 	ondrop={onColumnDrop}
 >
-	<div class="flex flex-row">
+	<div class="flex flex-row px-2 pt-4">
 		<div class="flex flex-1 flex-row items-center gap-2">
 			<span class="text-sm font-semibold">{column.label}</span>
 			<Badge variant="secondary" class="rounded-full px-2 py-0 text-xs">
@@ -51,7 +51,7 @@
 		</Button>
 	</div>
 
-	<div class="flex flex-1 flex-col gap-3">
+	<div class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-2 pb-4">
 		{@render children()}
 
 		{#if cardCount === 0}
@@ -59,14 +59,5 @@
 				<p class="text-xs text-muted-foreground">No tasks here.</p>
 			</div>
 		{/if}
-
-		<Button
-			variant="ghost"
-			class="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-			onclick={handleAddCard}
-		>
-			<Plus />
-			Add Task
-		</Button>
 	</div>
 </div>

@@ -19,7 +19,7 @@
 <svelte:boundary>
 	{@const ticket = await getTicket(Number(page.params.id))}
 
-	<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
+	<div class="flex flex-col gap-y-6 overflow-y-auto px-4 py-6 lg:px-8">
 		<div class="flex flex-row items-start justify-between">
 			<div>
 				<PageTitle>Ticket #{ticket.id}</PageTitle>
