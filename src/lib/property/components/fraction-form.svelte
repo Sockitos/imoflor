@@ -119,11 +119,9 @@
 									}}
 								>
 									<Select.Trigger>
-										{form.fields.class.value()
-											? propertyClassOptions[form.fields.class.value()!]
-											: parent
-												? propertyClassOptions[parent.class]
-												: 'Select'}
+										{(form.fields.class.value() ?? parent?.class)
+											? propertyClassOptions[(form.fields.class.value() ?? parent?.class)!]
+											: 'Select'}
 									</Select.Trigger>
 									<Select.Content>
 										{#each Object.entries(propertyClassOptions) as [value, label] (value)}
@@ -194,29 +192,31 @@
 						</Field.Field>
 					</div>
 
-					<Field.Field data-invalid={isInvalid(form.fields.area.issues())}>
-						<Field.FieldLabel>Area</Field.FieldLabel>
-						<Field.FieldContent>
-							<Input
-								{...parent?.area != null
-									? form.fields.area.as('number', parent.area)
-									: form.fields.area.as('number')}
-							/>
-							<Field.FieldError errors={form.fields.area.issues()} />
-						</Field.FieldContent>
-					</Field.Field>
+					<div class="grid grid-cols-2 items-start gap-x-4">
+						<Field.Field data-invalid={isInvalid(form.fields.area.issues())}>
+							<Field.FieldLabel>Area</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...parent?.area != null
+										? form.fields.area.as('number', parent.area)
+										: form.fields.area.as('number')}
+								/>
+								<Field.FieldError errors={form.fields.area.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
 
-					<Field.Field data-invalid={isInvalid(form.fields.tipology.issues())}>
-						<Field.FieldLabel>Tipology</Field.FieldLabel>
-						<Field.FieldContent>
-							<Input
-								{...parent?.tipology != null
-									? form.fields.tipology.as('text', parent.tipology)
-									: form.fields.tipology.as('text')}
-							/>
-							<Field.FieldError errors={form.fields.tipology.issues()} />
-						</Field.FieldContent>
-					</Field.Field>
+						<Field.Field data-invalid={isInvalid(form.fields.tipology.issues())}>
+							<Field.FieldLabel>Tipology</Field.FieldLabel>
+							<Field.FieldContent>
+								<Input
+									{...parent?.tipology != null
+										? form.fields.tipology.as('text', parent.tipology)
+										: form.fields.tipology.as('text')}
+								/>
+								<Field.FieldError errors={form.fields.tipology.issues()} />
+							</Field.FieldContent>
+						</Field.Field>
+					</div>
 
 					<Field.Field data-invalid={isInvalid(form.fields.description.issues())}>
 						<Field.FieldLabel>Description</Field.FieldLabel>
