@@ -10,12 +10,18 @@
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { cn, dateLabel, isInvalid, parseTimestamp } from '@/shared/utils';
 	import { getLocalTimeZone } from '@internationalized/date';
+	import dayjs from 'dayjs';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { untrack } from 'svelte';
 	import { createInstallmentPayment } from '../../contract.remote';
 	import { createInstallmentPaymentSchema } from '../../schemas';
 	import type { LendingContract } from '../../types';
-	import { calculateInterest } from '../../utils';
+
+	function calculateInterest(contract: LendingContract, date: string | undefined): number {
+		const { debt, extra_debt, last_paid_at, interest } = contract.data;
+		const daysSinceLastPayment = dayjs(date).diff(last_paid_at ?? contract.start_date, 'day');
+		return debt * (interest / 365) * daysSinceLastPayment + extra_debt;
+	}
 
 	interface Props {
 		open?: boolean;

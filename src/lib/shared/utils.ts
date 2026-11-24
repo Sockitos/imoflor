@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { RouteId as AppRouteId } from '$app/types';
-import type { ActionFailure, RequestEvent } from '@sveltejs/kit';
 import {
 	CalendarDate,
 	DateFormatter,
@@ -10,8 +8,6 @@ import {
 	type DateValue,
 } from '@internationalized/date';
 import { type ClassValue, clsx } from 'clsx';
-import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
-import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
 import { twMerge } from 'tailwind-merge';
 import { generateKeyBetween } from 'fractional-indexing';
 
@@ -65,73 +61,6 @@ export function handleLoginRedirect(event: { url: URL }) {
 	}
 
 	return `/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`;
-}
-
-type MaybePromise<T> = T | Promise<T>;
-
-export type FormAction<
-	T extends Record<string, any>,
-	Params extends Partial<Record<string, string>> = Partial<Record<string, string>>,
-	OutputData extends Record<string, any> | void = Record<string, any> | void,
-	RouteId extends AppRouteId = AppRouteId,
-	RequireAuth extends boolean = true,
-> = (
-	event: RequestEvent<Params, RouteId>,
-	userId: RequireAuth extends true ? string : undefined,
-	form: SuperValidated<T>
-) => MaybePromise<OutputData>;
-
-interface HandleFormActionOptions<RequireAuth extends boolean> {
-	requireAuth?: RequireAuth;
-}
-
-export async function handleFormAction<
-	Schema extends ZodValidationSchema,
-	Params extends Partial<Record<string, string>> = Partial<Record<string, string>>,
-	OutputData extends Record<string, any> | void = Record<string, any> | void,
-	RouteId extends AppRouteId = AppRouteId,
-	RequireAuth extends boolean = true,
->(
-	event: RequestEvent<Params, RouteId>,
-	schema: Schema,
-	formId: string,
-	action: FormAction<Infer<Schema, 'zod4'>, Params, OutputData, RouteId, RequireAuth>,
-	options?: HandleFormActionOptions<RequireAuth>
-): Promise<
-	OutputData | ActionFailure<{ message: string; form: SuperValidated<Infer<Schema, 'zod4'>> }>
-> {
-	const { requireAuth = true as RequireAuth } = options ?? {};
-
-	const form = await superValidate(event.request, zod4(schema), {
-		id: formId,
-	});
-
-	if (!form.valid) {
-		const errorMessage = 'Invalid form.';
-		return fail(400, { message: errorMessage, form });
-	}
-
-	if (requireAuth) {
-		const { data: claimsData, error: claimsError } = await event.locals.supabase.auth.getClaims();
-		const claims = claimsError ? null : claimsData?.claims;
-		if (!claims) {
-			return fail(401, { message: 'Unauthorized', form });
-		}
-
-		const result = await action(
-			event,
-			claims.sub as RequireAuth extends true ? string : undefined,
-			form
-		);
-		return result;
-	} else {
-		const result = await action(
-			event,
-			undefined as RequireAuth extends true ? string : undefined,
-			form
-		);
-		return result;
-	}
 }
 
 export function generateRankBetween(
