@@ -137,9 +137,8 @@
 							])}
 
 							<EntitySelector
-								bind:entityId={
-									() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
-								}
+								selectedId={form.fields.property_id.value()}
+								onSelect={(id) => form.fields.property_id.set(id)}
 								options={spreadOptions}
 							>
 								{#snippet displayOption(option)}
@@ -177,9 +176,8 @@
 							{@const tenantOptions = await getTenantOptions()}
 
 							<EntitySelector
-								bind:entityId={
-									() => form.fields.tenant_id.value(), (id) => form.fields.tenant_id.set(id)
-								}
+								selectedId={form.fields.tenant_id.value()}
+								onSelect={(id) => form.fields.tenant_id.set(id)}
 								options={tenantOptions}
 							>
 								{#snippet displayOption(option)}

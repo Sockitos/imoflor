@@ -179,9 +179,8 @@
 								])}
 
 								<EntitySelector
-									bind:entityId={
-										() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
-									}
+									selectedId={form.fields.property_id.value()}
+									onSelect={(id) => form.fields.property_id.set(id)}
 									options={spreadOptions}
 								>
 									{#snippet displayOption(option)}

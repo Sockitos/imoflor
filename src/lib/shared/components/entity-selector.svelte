@@ -9,17 +9,18 @@
 	import type { Id } from '../types';
 
 	interface Props {
-		entityId?: Id;
+		selectedId?: Id;
+		onSelect: (id: Id) => void;
 		options: TEntity[];
 		displayOption: Snippet<[TEntity]>;
 		children: Snippet<[TEntity]>;
 	}
 
-	let { entityId = $bindable(), options, displayOption, children }: Props = $props();
+	let { selectedId, onSelect: select, options, displayOption, children }: Props = $props();
 
 	let open = $state(false);
 
-	let selectedValue = $derived(options.find((p) => p.id === entityId));
+	let selectedValue = $derived(options.find((p) => p.id === selectedId));
 
 	let triggerId = useId();
 
@@ -62,9 +63,9 @@
 				{#each options as option (option.id)}
 					<Command.Item
 						class="aria-selected:bg-primary aria-selected:text-primary-foreground"
-						data-checked={entityId === option.id}
+						data-checked={selectedId === option.id}
 						onSelect={() => {
-							entityId = option.id;
+							select(option.id);
 							closeAndFocusTrigger(triggerId);
 						}}
 					>

@@ -246,9 +246,8 @@
 								])}
 
 								<EntitySelector
-									bind:entityId={
-										() => form.fields.property_id.value(), (id) => form.fields.property_id.set(id)
-									}
+									selectedId={form.fields.property_id.value()}
+									onSelect={(id) => form.fields.property_id.set(id)}
 									options={spreadOptions}
 								>
 									{#snippet displayOption(option)}
@@ -285,9 +284,8 @@
 							<svelte:boundary>
 								{@const options = await getTicketOptions()}
 								<EntitySelector
-									bind:entityId={
-										() => form.fields.ticket_id.value(), (id) => form.fields.ticket_id.set(id)
-									}
+									selectedId={form.fields.ticket_id.value()}
+									onSelect={(id) => form.fields.ticket_id.set(id)}
 									{options}
 								>
 									{#snippet displayOption(option)}
