@@ -70,7 +70,6 @@
 			(value) => intervention == null || canTransitionInterventionStatus(intervention.status, value)
 		)
 	);
-
 </script>
 
 <Sheet.Root bind:open>
