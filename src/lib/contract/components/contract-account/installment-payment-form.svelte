@@ -36,28 +36,19 @@
 
 	let paymentValue = $derived(contract.data.installment);
 	let interest = $derived(calculateInterest(contract, form.fields.occurred_at.value()));
-	let amortization = $derived(
-		paymentValue - calculateInterest(contract, form.fields.occurred_at.value())
-	);
+	let amortization = $derived(paymentValue - interest);
 
 	$effect.pre(() => {
 		if (open) {
 			untrack(() => {
 				form.fields.occurred_at.set(defaultOccurredAt);
 				paymentValue = contract.data.installment;
-				interest = calculateInterest(contract, form.fields.occurred_at.value());
-				amortization = paymentValue - interest;
 			});
 			return;
 		}
 
 		untrack(() => form.element?.reset());
 	});
-
-	function recalculate() {
-		interest = calculateInterest(contract, form.fields.occurred_at.value());
-		amortization = paymentValue - interest;
-	}
 
 </script>
 
@@ -85,11 +76,7 @@
 				<Field.Field data-invalid={isInvalid(form.fields.value.issues())}>
 					<Field.FieldLabel>Value</Field.FieldLabel>
 					<Field.FieldContent>
-						<Input
-							{...form.fields.value.as('number')}
-							bind:value={paymentValue}
-							oninput={recalculate}
-						/>
+						<Input {...form.fields.value.as('number')} bind:value={paymentValue} />
 						<Field.FieldError errors={form.fields.value.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -97,11 +84,7 @@
 				<Field.Field data-invalid={isInvalid(form.fields.interest.issues())}>
 					<Field.FieldLabel>Interest</Field.FieldLabel>
 					<Field.FieldContent>
-						<Input
-							{...form.fields.interest.as('number')}
-							bind:value={interest}
-							oninput={() => (amortization = paymentValue - interest)}
-						/>
+						<Input {...form.fields.interest.as('number')} bind:value={interest} />
 						<Field.FieldError errors={form.fields.interest.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -134,10 +117,8 @@
 									value={parseTimestamp(
 										String(form.fields.occurred_at.as('text', defaultOccurredAt).value)
 									)}
-									onValueChange={(v) => {
-										form.fields.occurred_at.set(v?.toDate(getLocalTimeZone()).toISOString());
-										recalculate();
-									}}
+									onValueChange={(v) =>
+										form.fields.occurred_at.set(v?.toDate(getLocalTimeZone()).toISOString())}
 								/>
 							</Popover.Content>
 						</Popover.Root>
