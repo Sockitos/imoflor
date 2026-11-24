@@ -32,10 +32,11 @@
 	interface Props {
 		open?: boolean;
 		intervention?: Intervention;
-		defaultStatus?: InterventionStatus;
 	}
 
-	let { open = $bindable(false), intervention, defaultStatus }: Props = $props();
+	let { open = $bindable(false), intervention }: Props = $props();
+
+	const defaultStatus: InterventionStatus = 'not_started';
 
 	const form = $derived(
 		intervention != null ? upsertIntervention.for(intervention.id) : upsertIntervention
@@ -156,9 +157,9 @@
 								</Select.Root>
 								<input
 									hidden
-									{...!intervention && defaultStatus != null
-										? form.fields.status.as('text', defaultStatus)
-										: form.fields.status.as('text')}
+									{...intervention
+										? form.fields.status.as('text')
+										: form.fields.status.as('text', defaultStatus)}
 								/>
 								<Field.FieldError errors={form.fields.status.issues()} />
 							</Field.FieldContent>

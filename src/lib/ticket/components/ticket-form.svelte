@@ -28,10 +28,11 @@
 	interface Props {
 		open?: boolean;
 		ticket?: Ticket;
-		defaultStatus?: TicketStatus;
 	}
 
-	let { open = $bindable(false), ticket, defaultStatus }: Props = $props();
+	let { open = $bindable(false), ticket }: Props = $props();
+
+	const defaultStatus: TicketStatus = 'open';
 
 	const form = $derived(ticket != null ? upsertTicket.for(ticket.id) : upsertTicket);
 	const isEdit = $derived(ticket != null);
@@ -159,9 +160,9 @@
 								</Select.Root>
 								<input
 									hidden
-									{...!ticket && defaultStatus != null
-										? form.fields.status.as('text', defaultStatus)
-										: form.fields.status.as('text')}
+									{...ticket
+										? form.fields.status.as('text')
+										: form.fields.status.as('text', defaultStatus)}
 								/>
 								<Field.FieldError errors={form.fields.status.issues()} />
 							</Field.FieldContent>
