@@ -8,8 +8,8 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { currencyFormatter, dateFormatter } from '@/shared/formatters';
-	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
+	import { cn, dateLabel, isInvalid, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { untrack } from 'svelte';
 	import { toastError, toastSuccess } from '@/shared/toast';
@@ -25,7 +25,6 @@
 
 	const form = $derived(createRentUpdate.for(contractId));
 	const defaultUpdateDate = today(getLocalTimeZone()).toString();
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
 	$effect.pre(() => {
 		if (open) {
@@ -35,15 +34,6 @@
 
 		untrack(() => form.element?.reset());
 	});
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
-
-	function dateLabel(value: string | undefined) {
-		const date = value ? parsePlainDate(value) : undefined;
-		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
-	}
 </script>
 
 <Sheet.Root bind:open>
@@ -89,7 +79,7 @@
 									!form.fields.update_date.value() && 'text-muted-foreground'
 								)}
 							>
-								{dateLabel(form.fields.update_date.value())}
+								{dateLabel(parsePlainDate(form.fields.update_date.value()))}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">

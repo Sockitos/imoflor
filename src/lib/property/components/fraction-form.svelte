@@ -8,6 +8,7 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { isInvalid } from '@/shared/utils';
 	import { untrack } from 'svelte';
 	import { upsertFraction } from '../property.remote';
 	import { fractionSchema } from '../schemas';
@@ -65,10 +66,6 @@
 
 		untrack(() => form.element?.reset());
 	});
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
 </script>
 
 <Sheet.Root bind:open>

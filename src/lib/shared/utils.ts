@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { RouteId as AppRouteId } from '$app/types';
 import type { ActionFailure, RequestEvent } from '@sveltejs/kit';
-import { CalendarDate, parseDate } from '@internationalized/date';
+import {
+	CalendarDate,
+	DateFormatter,
+	getLocalTimeZone,
+	parseAbsolute,
+	parseDate,
+	type DateValue,
+} from '@internationalized/date';
 import { type ClassValue, clsx } from 'clsx';
 import { fail, type Infer, superValidate, type SuperValidated } from 'sveltekit-superforms';
 import { zod4, type ZodValidationSchema } from 'sveltekit-superforms/adapters';
@@ -20,6 +27,23 @@ export function toPlainDateString(
 export function parsePlainDate(value: string | null | undefined): CalendarDate | undefined {
 	if (!value) return undefined;
 	return parseDate(value.slice(0, 10));
+}
+
+/** Parse an ISO timestamp into a zoned date in the local timezone. */
+export function parseTimestamp(value: string | null | undefined) {
+	if (!value) return undefined;
+	return parseAbsolute(value, getLocalTimeZone());
+}
+
+const longDate = new DateFormatter('en-US', { dateStyle: 'long' });
+
+/** Format a calendar date or zoned timestamp for a date-picker button. */
+export function dateLabel(value: DateValue | null | undefined) {
+	return value ? longDate.format(value.toDate(getLocalTimeZone())) : 'Pick a date';
+}
+
+export function isInvalid(issues?: readonly { message?: string }[] | null) {
+	return (issues?.length ?? 0) > 0;
 }
 
 export function cn(...inputs: ClassValue[]) {

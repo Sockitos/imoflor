@@ -9,6 +9,7 @@
 	import { vendorSchema } from '../schemas';
 	import type { Vendor } from '../types';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { isInvalid } from '@/shared/utils';
 	import { untrack } from 'svelte';
 	import { upsertVendor } from '../vendor.remote';
 
@@ -44,10 +45,6 @@
 
 		untrack(() => form.element?.reset());
 	});
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
 </script>
 
 <Sheet.Root bind:open>

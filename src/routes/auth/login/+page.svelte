@@ -7,10 +7,7 @@
 	import { Button } from '@/shared/components/ui/button';
 	import { signInSchema } from '@/auth/schemas';
 	import { Spinner } from '@/shared/components/ui/spinner';
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
+	import { isInvalid } from '@/shared/utils';
 </script>
 
 <div class="container mx-auto flex h-screen flex-col items-center justify-center">

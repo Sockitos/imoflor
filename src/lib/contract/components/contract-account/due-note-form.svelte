@@ -7,8 +7,8 @@
 	import * as Popover from '@/shared/components/ui/popover';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { toastError, toastSuccess } from '@/shared/toast';
-	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date';
+	import { cn, dateLabel, isInvalid, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { getLocalTimeZone, today } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { untrack } from 'svelte';
 	import { createDueNote } from '../../contract.remote';
@@ -23,7 +23,6 @@
 
 	const form = $derived(createDueNote.for(contractId));
 	const defaultDueDate = today(getLocalTimeZone()).toString();
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
 	$effect.pre(() => {
 		if (open) {
@@ -33,15 +32,6 @@
 
 		untrack(() => form.element?.reset());
 	});
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
-
-	function dateLabel(value: string | undefined) {
-		const date = value ? parsePlainDate(value) : undefined;
-		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
-	}
 </script>
 
 <Dialog.Root bind:open>
@@ -84,7 +74,7 @@
 									!form.fields.due_date.value() && 'text-muted-foreground'
 								)}
 							>
-								{dateLabel(form.fields.due_date.value())}
+								{dateLabel(parsePlainDate(form.fields.due_date.value()))}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">

@@ -12,6 +12,7 @@
 	import { Textarea } from '@/shared/components/ui/textarea';
 	import { ticketSchema } from '../schemas';
 	import { toastError, toastSuccess } from '@/shared/toast';
+	import { isInvalid } from '@/shared/utils';
 	import { untrack } from 'svelte';
 	import { upsertTicket } from '../ticket.remote';
 	import type { Ticket } from '../types';
@@ -60,10 +61,6 @@
 			(status) => ticket == null || canTransitionTicketStatus(ticket.status, status)
 		)
 	);
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
 </script>
 
 <Sheet.Root bind:open>

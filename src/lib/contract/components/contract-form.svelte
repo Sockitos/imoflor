@@ -11,10 +11,9 @@
 	import * as Sheet from '@/shared/components/ui/sheet';
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import * as Tabs from '@/shared/components/ui/tabs';
-	import { cn, parsePlainDate, toPlainDateString } from '@/shared/utils';
+	import { cn, dateLabel, isInvalid, parsePlainDate, toPlainDateString } from '@/shared/utils';
 	import TenantOptionItem from '@/tenant/components/tenant-option-item.svelte';
 	import { getTenantOptions } from '@/tenant/tenant.remote';
-	import { DateFormatter, getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
 	import { toastError, toastSuccess } from '@/shared/toast';
 	import { untrack } from 'svelte';
@@ -82,16 +81,6 @@
 		untrack(() => form.element?.reset());
 	});
 
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
-
-	function dateLabel(value: string | undefined) {
-		const date = value ? parsePlainDate(value) : undefined;
-		return date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date';
-	}
 </script>
 
 <Sheet.Root bind:open>
@@ -233,7 +222,7 @@
 										!form.fields.start_date.value() && 'text-muted-foreground'
 									)}
 								>
-									{dateLabel(form.fields.start_date.value())}
+									{dateLabel(parsePlainDate(form.fields.start_date.value()))}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
@@ -262,7 +251,7 @@
 										!form.fields.end_date.value() && 'text-muted-foreground'
 									)}
 								>
-									{dateLabel(form.fields.end_date.value())}
+									{dateLabel(parsePlainDate(form.fields.end_date.value()))}
 									<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 								</Popover.Trigger>
 								<Popover.Content class="w-auto p-0" side="top">
