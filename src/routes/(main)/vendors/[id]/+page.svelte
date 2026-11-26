@@ -20,7 +20,7 @@
 <svelte:boundary>
 	{@const vendor = await getVendor(Number(page.params.id))}
 
-	<div class="flex flex-col gap-y-6 px-4 py-6 lg:px-8">
+	<div class="flex flex-col gap-y-6 overflow-y-auto px-4 py-6 lg:px-8">
 		<div class="flex flex-row items-start justify-between">
 			<div>
 				<PageTitle>Vendor #{vendor.id}</PageTitle>
