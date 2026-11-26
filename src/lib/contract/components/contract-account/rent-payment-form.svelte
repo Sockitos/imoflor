@@ -8,9 +8,10 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { toastError, toastSuccess } from '@/shared/toast';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { cn, dateLabel, isInvalid, parseTimestamp } from '@/shared/utils';
+	import { getLocalTimeZone } from '@internationalized/date';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { createRentPayment } from '../../contract.remote';
 	import { createRentPaymentSchema } from '../../schemas';
 
@@ -22,16 +23,16 @@
 	let { open = $bindable(false), contractId }: Props = $props();
 
 	const form = $derived(createRentPayment.for(contractId));
+	const defaultOccurredAt = new Date().toISOString();
 
-	let paymentDateStr = $state<string | undefined>(new Date().toISOString());
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const paymentDate = $derived(
-		paymentDateStr ? parseAbsolute(paymentDateStr, getLocalTimeZone()) : undefined
-	);
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => form.fields.occurred_at.set(defaultOccurredAt));
+			return;
+		}
 
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
+		untrack(() => form.element?.reset());
+	});
 </script>
 
 <Dialog.Root bind:open>
@@ -46,7 +47,6 @@
 					if (await f.submit()) {
 						toastSuccess('Rent payment created successfully');
 						open = false;
-						f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -72,28 +72,25 @@
 								class={cn(
 									buttonVariants({ variant: 'outline' }),
 									'w-full justify-start pl-4 text-left font-normal',
-									!paymentDate && 'text-muted-foreground'
+									!form.fields.occurred_at.value() && 'text-muted-foreground'
 								)}
 							>
-								{paymentDate ? df.format(paymentDate.toDate()) : 'Pick a date'}
+								{dateLabel(parseTimestamp(form.fields.occurred_at.value()))}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
 								<Calendar
 									type="single"
-									value={paymentDate}
+									value={parseTimestamp(
+										String(form.fields.occurred_at.as('text', defaultOccurredAt).value)
+									)}
 									onValueChange={(v) => {
-										paymentDateStr = v?.toDate(getLocalTimeZone()).toISOString();
+										form.fields.occurred_at.set(v?.toDate(getLocalTimeZone()).toISOString());
 									}}
 								/>
 							</Popover.Content>
 						</Popover.Root>
-						<input
-							hidden
-							{...paymentDateStr
-								? form.fields.occurred_at.as('text', paymentDateStr)
-								: form.fields.occurred_at.as('text')}
-						/>
+						<input hidden {...form.fields.occurred_at.as('text', defaultOccurredAt)} />
 						<Field.FieldError errors={form.fields.occurred_at.issues()} />
 					</Field.FieldContent>
 				</Field.Field>

@@ -8,13 +8,20 @@
 	import { Spinner } from '@/shared/components/ui/spinner';
 	import { toastError, toastSuccess } from '@/shared/toast';
 	import { Textarea } from '@/shared/components/ui/textarea';
-	import { cn } from '@/shared/utils';
-	import { DateFormatter, getLocalTimeZone, parseAbsolute } from '@internationalized/date';
+	import { cn, dateLabel, isInvalid, parseTimestamp } from '@/shared/utils';
+	import { getLocalTimeZone } from '@internationalized/date';
+	import dayjs from 'dayjs';
 	import { CalendarIcon } from 'lucide-svelte';
+	import { untrack } from 'svelte';
 	import { createInstallmentPayment } from '../../contract.remote';
 	import { createInstallmentPaymentSchema } from '../../schemas';
 	import type { LendingContract } from '../../types';
-	import { calculateInterest } from '../../utils';
+
+	function calculateInterest(contract: LendingContract, date: string | undefined): number {
+		const { debt, extra_debt, last_paid_at, interest } = contract.data;
+		const daysSinceLastPayment = dayjs(date).diff(last_paid_at ?? contract.start_date, 'day');
+		return debt * (interest / 365) * daysSinceLastPayment + extra_debt;
+	}
 
 	interface Props {
 		open?: boolean;
@@ -25,25 +32,23 @@
 	let { open = $bindable(false), contractId, contract }: Props = $props();
 
 	const form = $derived(createInstallmentPayment.for(contractId));
+	const defaultOccurredAt = new Date().toISOString();
 
-	let paymentDateStr = $state<string | undefined>(new Date().toISOString());
 	let paymentValue = $derived(contract.data.installment);
-	let interest = $derived(calculateInterest(contract, paymentDateStr));
-	let amortization = $derived(paymentValue - calculateInterest(contract, paymentDateStr));
+	let interest = $derived(calculateInterest(contract, form.fields.occurred_at.value()));
+	let amortization = $derived(paymentValue - interest);
 
-	const df = new DateFormatter('en-US', { dateStyle: 'long' });
-	const paymentDate = $derived(
-		paymentDateStr ? parseAbsolute(paymentDateStr, getLocalTimeZone()) : undefined
-	);
+	$effect.pre(() => {
+		if (open) {
+			untrack(() => {
+				form.fields.occurred_at.set(defaultOccurredAt);
+				paymentValue = contract.data.installment;
+			});
+			return;
+		}
 
-	function recalculate() {
-		interest = calculateInterest(contract, paymentDateStr);
-		amortization = paymentValue - interest;
-	}
-
-	function isInvalid(issues?: { message?: string }[]) {
-		return (issues?.length ?? 0) > 0;
-	}
+		untrack(() => form.element?.reset());
+	});
 </script>
 
 <Dialog.Root bind:open>
@@ -58,7 +63,6 @@
 					if (await f.submit()) {
 						toastSuccess('Installment payment created successfully');
 						open = false;
-						f.element.reset();
 					}
 				} catch (error) {
 					toastError(error);
@@ -71,11 +75,7 @@
 				<Field.Field data-invalid={isInvalid(form.fields.value.issues())}>
 					<Field.FieldLabel>Value</Field.FieldLabel>
 					<Field.FieldContent>
-						<Input
-							{...form.fields.value.as('number')}
-							bind:value={paymentValue}
-							oninput={recalculate}
-						/>
+						<Input {...form.fields.value.as('number')} bind:value={paymentValue} />
 						<Field.FieldError errors={form.fields.value.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -83,11 +83,7 @@
 				<Field.Field data-invalid={isInvalid(form.fields.interest.issues())}>
 					<Field.FieldLabel>Interest</Field.FieldLabel>
 					<Field.FieldContent>
-						<Input
-							{...form.fields.interest.as('number')}
-							bind:value={interest}
-							oninput={() => (amortization = paymentValue - interest)}
-						/>
+						<Input {...form.fields.interest.as('number')} bind:value={interest} />
 						<Field.FieldError errors={form.fields.interest.issues()} />
 					</Field.FieldContent>
 				</Field.Field>
@@ -108,29 +104,24 @@
 								class={cn(
 									buttonVariants({ variant: 'outline' }),
 									'w-full justify-start pl-4 text-left font-normal',
-									!paymentDate && 'text-muted-foreground'
+									!form.fields.occurred_at.value() && 'text-muted-foreground'
 								)}
 							>
-								{paymentDate ? df.format(paymentDate.toDate()) : 'Pick a date'}
+								{dateLabel(parseTimestamp(form.fields.occurred_at.value()))}
 								<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
 							</Popover.Trigger>
 							<Popover.Content class="w-auto p-0" side="top">
 								<Calendar
 									type="single"
-									value={paymentDate}
-									onValueChange={(v) => {
-										paymentDateStr = v?.toDate(getLocalTimeZone()).toISOString();
-										recalculate();
-									}}
+									value={parseTimestamp(
+										String(form.fields.occurred_at.as('text', defaultOccurredAt).value)
+									)}
+									onValueChange={(v) =>
+										form.fields.occurred_at.set(v?.toDate(getLocalTimeZone()).toISOString())}
 								/>
 							</Popover.Content>
 						</Popover.Root>
-						<input
-							hidden
-							{...paymentDateStr
-								? form.fields.occurred_at.as('text', paymentDateStr)
-								: form.fields.occurred_at.as('text')}
-						/>
+						<input hidden {...form.fields.occurred_at.as('text', defaultOccurredAt)} />
 						<Field.FieldError errors={form.fields.occurred_at.issues()} />
 					</Field.FieldContent>
 				</Field.Field>

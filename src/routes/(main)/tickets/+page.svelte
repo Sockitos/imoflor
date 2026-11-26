@@ -15,23 +15,17 @@
 	import { toastError } from '@/shared/toast';
 
 	let openForm = $state(false);
-	let defaultStatus = $state<TicketStatus | undefined>(undefined);
 
 	let tickets = $derived(getTickets());
 
 	let cards = $derived(tickets.current?.map((t) => ({ ...t, columnId: t.status })) ?? []);
 
-	function openTicketForm(status?: TicketStatus) {
-		defaultStatus = status;
+	function onAddTicket() {
 		openForm = true;
 	}
 
-	function onAddTicket() {
-		openTicketForm();
-	}
-
-	function onAddCard(status: string) {
-		openTicketForm(status as TicketStatus);
+	function onAddCard() {
+		openForm = true;
 	}
 
 	function canMoveToColumn(fromColumnId: string, toColumnId: string) {
@@ -94,4 +88,4 @@
 	{/if}
 </div>
 
-<TicketForm bind:open={openForm} {defaultStatus} />
+<TicketForm bind:open={openForm} />

@@ -15,23 +15,17 @@
 	import { toastError } from '@/shared/toast';
 
 	let openForm = $state(false);
-	let defaultStatus = $state<InterventionStatus | undefined>(undefined);
 
 	let interventions = $derived(getInterventions());
 
 	let cards = $derived(interventions.current?.map((i) => ({ ...i, columnId: i.status })) ?? []);
 
-	function openInterventionForm(status?: InterventionStatus) {
-		defaultStatus = status;
+	function onAddIntervention() {
 		openForm = true;
 	}
 
-	function onAddIntervention() {
-		openInterventionForm();
-	}
-
-	function onAddCard(status: string) {
-		openInterventionForm(status as InterventionStatus);
+	function onAddCard() {
+		openForm = true;
 	}
 
 	function canMoveToColumn(fromColumnId: string, toColumnId: string) {
@@ -105,4 +99,4 @@
 	{/if}
 </div>
 
-<InterventionForm bind:open={openForm} {defaultStatus} />
+<InterventionForm bind:open={openForm} />
