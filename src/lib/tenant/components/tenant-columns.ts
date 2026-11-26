@@ -3,12 +3,14 @@ import DataTableCheckbox from '@/shared/components/ui/data-table/data-table-chec
 import type { ColumnDef } from '@tanstack/table-core';
 import type { Tenant } from '../types';
 import TenantActions from './tenant-actions.svelte';
+import TenantColumnHeader from './tenant-column-header.svelte';
 import TenantEmailCell from './tenant-email-cell.svelte';
 import TenantPhoneCell from './tenant-phone-cell.svelte';
 
 export const columns: ColumnDef<Tenant>[] = [
 	{
 		id: 'select',
+		size: 48,
 		header: ({ table }) =>
 			renderComponent(DataTableCheckbox, {
 				checked: table.getIsAllPageRowsSelected(),
@@ -27,11 +29,11 @@ export const columns: ColumnDef<Tenant>[] = [
 	},
 	{
 		accessorKey: 'name',
-		header: 'Name',
+		header: ({ column }) => renderComponent(TenantColumnHeader, { label: 'Name', column }),
 	},
 	{
 		accessorKey: 'email',
-		header: 'Email',
+		header: ({ column }) => renderComponent(TenantColumnHeader, { label: 'Email', column }),
 		cell: ({ row }) => {
 			return renderComponent(TenantEmailCell, {
 				email: row.original.email,
@@ -40,7 +42,7 @@ export const columns: ColumnDef<Tenant>[] = [
 	},
 	{
 		accessorKey: 'phone',
-		header: 'Phone',
+		header: ({ column }) => renderComponent(TenantColumnHeader, { label: 'Phone', column }),
 		cell: ({ row }) => {
 			return renderComponent(TenantPhoneCell, {
 				phone: row.original.phone,
@@ -49,6 +51,7 @@ export const columns: ColumnDef<Tenant>[] = [
 	},
 	{
 		accessorKey: 'actions',
+		size: 48,
 		header: '',
 		cell: ({ row }) => {
 			return renderComponent(TenantActions, {
